@@ -564,7 +564,7 @@ export default function CalendarPage() {
                       return aT - bT;
                     })
                     .map((p) => {
-                      const Icon = mediaTypeIcon(p.mediaType);
+                      const Icon = mediaTypeIcon[p.mediaType] ?? ImageIcon;
                       const variant = statusVariant[p.status] ?? "secondary";
                       return (
                         <div
