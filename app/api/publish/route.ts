@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 
 import { getDb, schema } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -10,6 +11,7 @@ import { MediaHostError, uploadBuffer } from "@/lib/providers/cloudinary";
 import { getDashboardContext } from "@/lib/context";
 import { listAccounts } from "@/lib/workspace";
 import { formatDateTime } from "@/lib/utils";
+import { enqueuePostPublish } from "@/lib/inngest";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,8 @@ export async function POST(req: NextRequest) {
   const mediaType = (formData.get("mediaType") as string) ?? "image";
   const caption = (formData.get("caption") as string) ?? "";
   const scheduledAtRaw = (formData.get("scheduledAt") as string) ?? "";
+  const thumbnailUrl = (formData.get("thumbnailUrl") as string) ?? "";
+  const durationSec = (formData.get("durationSec") as string) ?? "";
   const files = formData.getAll("images").filter((f): f is File => f instanceof File);
 
   if (mediaType !== "image" && mediaType !== "carousel" && mediaType !== "reel") {
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   const scheduledAt = scheduledAtRaw ? new Date(scheduledAtRaw) : null;
-  const isScheduled = scheduledAt instanceof Date && scheduledAt.getTime() > Date.now();
+  const isScheduled = scheduledAt instanceof Date && !Number.isNaN(scheduledAt.getTime()) && scheduledAt.getTime() > Date.now();
 
   const ctx = await getDashboardContext();
   const { workspace } = ctx;
@@ -55,23 +59,43 @@ export async function POST(req: NextRequest) {
 
   if (!account) return jsonError("Connect an Instagram account first.");
 
+  // Mock mode: produce a fake result, but still save the post row so the
+  // calendar / dashboard have something to render.
   if (env.mockMode) {
     const urls = files.map((f, i) =>
       `https://res.cloudinary.com/mock/image/upload/social-copilot/mock-${i + 1}-${f.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`,
     );
-    const result = mockPublishResult(mediaType, urls);
+    const result = mockPublishResult(mediaType as "image" | "carousel" | "reel", urls);
+    const status = isScheduled ? "scheduled" : "published";
+
+    const db = getDb();
+    if (db) {
+      await db.insert(schema.posts).values({
+        workspaceId: workspace.id,
+        accountId: account.id,
+        platform: "instagram",
+        mediaType: mediaType as "image" | "carousel" | "reel",
+        caption,
+        mediaUrls: urls,
+        status,
+        scheduledAt: scheduledAt ?? null,
+        publishedAt: status === "published" ? new Date() : null,
+        containerId: (result.containerId as string) ?? null,
+        mediaId: (result.mediaId as string) ?? null,
+        permalink: (result.permalink as string) ?? null,
+        thumbnailUrl: thumbnailUrl || null,
+        durationSec: durationSec || null,
+      });
+    }
+
     return NextResponse.json({
       ok: true,
       mock: true,
+      scheduled: isScheduled,
+      message: isScheduled
+        ? `Scheduled (mock) for ${formatDateTime(scheduledAt!.toISOString())}`
+        : "Published (mock) to Instagram",
       result,
-      post: {
-        mediaType,
-        caption,
-        mediaUrls: urls,
-        status: isScheduled ? "scheduled" : "published",
-        scheduledAt: scheduledAt?.toISOString() ?? null,
-        accountUsername: account.username,
-      },
     });
   }
 
@@ -86,7 +110,8 @@ export async function POST(req: NextRequest) {
     const uploaded = [];
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      uploaded.push(await uploadBuffer(buffer, file.name));
+      const resourceType = mediaType === "reel" ? "video" : "image";
+      uploaded.push(await uploadBuffer(buffer, file.name, "social-copilot", resourceType));
     }
     mediaUrls = uploaded.map((u) => u.url);
   } catch (err) {
@@ -101,11 +126,11 @@ export async function POST(req: NextRequest) {
   if (!isScheduled) {
     try {
       if (mediaType === "reel") {
-        publishResult = await provider.publishReel(mediaUrls[0], caption);
+        publishResult = (await provider.publishReel(mediaUrls[0], caption)) as unknown as Record<string, unknown>;
       } else if (mediaType === "image") {
-        publishResult = await provider.publishImage(mediaUrls[0], caption);
+        publishResult = (await provider.publishImage(mediaUrls[0], caption)) as unknown as Record<string, unknown>;
       } else {
-        publishResult = await provider.publishCarousel(mediaUrls, caption);
+        publishResult = (await provider.publishCarousel(mediaUrls, caption)) as unknown as Record<string, unknown>;
       }
     } catch (err) {
       status = "failed";
@@ -117,7 +142,7 @@ export async function POST(req: NextRequest) {
     workspaceId: workspace.id,
     accountId: account.id,
     platform: "instagram",
-    mediaType,
+    mediaType: mediaType as "image" | "carousel" | "reel",
     caption,
     mediaUrls,
     status,
@@ -126,9 +151,26 @@ export async function POST(req: NextRequest) {
     containerId: (publishResult?.containerId as string) ?? null,
     mediaId: (publishResult?.mediaId as string) ?? null,
     permalink: (publishResult?.permalink as string) ?? null,
+    thumbnailUrl: thumbnailUrl || null,
+    durationSec: durationSec || null,
     error,
   };
   const inserted = await db.insert(schema.posts).values(values).returning();
+  const postId = inserted[0]?.id;
+
+  // Schedule the post for publish via Inngest — the function will sleep until
+  // scheduledAt, then publish. The cron sweep is a safety net.
+  if (isScheduled && postId) {
+    try {
+      await enqueuePostPublish(postId, scheduledAt!);
+    } catch (err) {
+      // If Inngest is misconfigured, mark the post so the user knows.
+      await db
+        .update(schema.posts)
+        .set({ error: `Inngest queue failed: ${err instanceof Error ? err.message : String(err)}` })
+        .where(eq(schema.posts.id, postId));
+    }
+  }
 
   const message = error
     ? `Publish failed: ${error}`

@@ -118,18 +118,21 @@ export function mockPublishResult(
 
 export function mockPosts(limit = 10) {
   const statuses = ["published", "scheduled", "draft", "failed"] as const;
+  const types = ["image", "carousel", "reel", "image", "carousel"] as const;
   return Array.from({ length: limit }, (_, i) => ({
     id: `mock_post_${i + 1}`,
     accountId: "mock-account-1",
     accountUsername: "jay_gurudeventerprises",
     platform: "instagram",
-    mediaType: i % 3 === 0 ? "carousel" : "image",
+    mediaType: types[i % types.length],
     caption: `Mock post ${i + 1} — sample caption with #hashtags`,
     mediaUrls: [],
     status: statuses[i % statuses.length],
     scheduledAt: new Date(Date.now() + (i + 1) * 86400000),
     publishedAt: i % 2 ? null : new Date(Date.now() - i * 86400000),
     permalink: `https://www.instagram.com/p/MOCK-${i + 1}/`,
+    thumbnailUrl: null,
+    durationSec: types[i % types.length] === "reel" ? "30" : null,
     createdAt: new Date(Date.now() - i * 86400000),
   }));
 }

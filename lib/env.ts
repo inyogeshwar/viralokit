@@ -19,6 +19,10 @@ export const env = {
     apiKey: process.env.GEMINI_API_KEY ?? "",
     model: process.env.GEMINI_MODEL ?? "gemini-3.5-flash",
   },
+  inngest: {
+    eventKey: process.env.INNGEST_EVENT_KEY ?? "",
+    signingKey: process.env.INNGEST_SIGNING_KEY ?? "",
+  },
   instagramScopes: [
     "instagram_business_basic",
     "instagram_business_content_publish",
@@ -36,5 +40,6 @@ export function isFullyConfigured() {
     cloudinary: Boolean(env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret),
     meta: Boolean(env.meta.clientId && env.meta.clientSecret),
     gemini: Boolean(env.gemini.apiKey),
+    inngest: Boolean(env.inngest.eventKey),
   };
 }

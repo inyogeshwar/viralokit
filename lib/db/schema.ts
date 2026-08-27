@@ -21,6 +21,13 @@ export const postStatusEnum = pgEnum("post_status", [
   "failed",
 ]);
 
+export const mediaTypeEnum = pgEnum("media_type", [
+  "image",
+  "carousel",
+  "reel",
+  "story",
+]);
+
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email"),
@@ -93,7 +100,7 @@ export const posts = pgTable(
       .references(() => socialAccounts.id, { onDelete: "cascade" })
       .notNull(),
     platform: text("platform").default("instagram").notNull(),
-    mediaType: text("media_type").notNull(),
+    mediaType: mediaTypeEnum("media_type").notNull(),
     caption: text("caption"),
     mediaUrls: jsonb("media_urls").$type<string[]>(),
     status: postStatusEnum("status").default("draft").notNull(),
@@ -102,6 +109,8 @@ export const posts = pgTable(
     containerId: text("container_id"),
     mediaId: text("media_id"),
     permalink: text("permalink"),
+    thumbnailUrl: text("thumbnail_url"),
+    durationSec: text("duration_sec"),
     error: text("error"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -109,6 +118,8 @@ export const posts = pgTable(
   (table) => [
     index("posts_workspace_idx").on(table.workspaceId),
     index("posts_status_idx").on(table.status),
+    index("posts_scheduled_idx").on(table.scheduledAt),
+    index("posts_account_idx").on(table.accountId),
   ],
 );
 
@@ -230,4 +241,5 @@ export const autoReplyRules = pgTable(
 );
 
 export type PostStatus = (typeof postStatusEnum.enumValues)[number];
+export type MediaType = (typeof mediaTypeEnum.enumValues)[number];
 export type Role = (typeof roleEnum.enumValues)[number];

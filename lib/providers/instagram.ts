@@ -158,8 +158,36 @@ export class InstagramProvider {
   }
 
   async publishContainer(containerId: string) {
+    // Containers created from a video URL (Reels) and child containers of a
+    // carousel are processed asynchronously by Instagram. Calling media_publish
+    // before the container is FINISHED returns IN_PROGRESS. Wait for it.
+    if (!env.mockMode) {
+      await this.waitForContainerReady(containerId);
+    }
     const data = await this.post("media_publish", { creation_id: containerId });
     return (data["id"] as string) ?? null;
+  }
+
+  private async waitForContainerReady(
+    containerId: string,
+    maxWaitMs = 60_000,
+    pollIntervalMs = 2_000,
+  ): Promise<void> {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < maxWaitMs) {
+      const data = await this.getNode(containerId, { fields: "status_code,status" });
+      const code = (data["status_code"] as string | undefined) ?? "";
+      if (code === "FINISHED") return;
+      if (code === "ERROR") {
+        const message = (data["status"] as string | undefined) ?? "Unknown IG error";
+        throw new InstagramError("CONTAINER_ERROR", message);
+      }
+      await new Promise((r) => setTimeout(r, pollIntervalMs));
+    }
+    throw new InstagramError(
+      "CONTAINER_TIMEOUT",
+      `Container ${containerId} did not reach FINISHED within ${maxWaitMs}ms`,
+    );
   }
 
   async publishImage(imageUrl: string, caption = "") {

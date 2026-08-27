@@ -22,6 +22,7 @@ export async function uploadBuffer(
   buffer: Buffer,
   filename: string,
   folder = "social-copilot",
+  resourceType: "image" | "video" = "image",
 ) {
   if (!env.cloudinary.cloudName || !env.cloudinary.apiKey || !env.cloudinary.apiSecret) {
     throw new MediaHostError(
@@ -30,9 +31,21 @@ export async function uploadBuffer(
   }
   configure();
   const publicId = `${folder}/${Date.now()}-${filename.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 40)}`;
+  const uploadOptions: Record<string, unknown> = {
+    public_id: publicId,
+    folder: undefined,
+    resource_type: resourceType,
+  };
+  if (resourceType === "video") {
+    // Cloudinary recommends 6 MB chunks for streamed uploads; eager_async lets
+    // the server-side transcoding happen out-of-band so the upload call returns
+    // a playable MP4 URL as soon as the bytes are received.
+    uploadOptions.chunk_size = 6_000_000;
+    uploadOptions.eager_async = true;
+  }
   return new Promise<{ url: string; publicId: string }>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { public_id: publicId, folder: undefined, resource_type: "image" },
+      uploadOptions,
       (error, result) => {
         if (error) {
           reject(new MediaHostError(`Cloudinary upload failed: ${error.message}`));

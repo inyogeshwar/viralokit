@@ -199,13 +199,22 @@ export default function ComposePage() {
                 id="images"
                 ref={inputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,video/mp4"
+                accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
                 multiple
                 onChange={(e) => onFiles(e.target.files)}
               />
               <p className="text-xs text-muted-foreground">
-                {mediaType === "image" ? "Pick one image." : mediaType === "reel" ? "Pick a video or cover image." : "Pick 2 to 10 images."}
+                {mediaType === "image"
+                  ? "Pick one image."
+                  : mediaType === "reel"
+                    ? "Pick a single MP4 or MOV (max ~100 MB)."
+                    : "Pick 2 to 10 images."}
               </p>
+              {mediaType === "reel" && files[0] && files[0].size > 100 * 1024 * 1024 ? (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  Video is {Math.round(files[0].size / (1024 * 1024))} MB — Cloudinary free tier caps uploads at 100 MB.
+                </p>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -351,12 +360,21 @@ export default function ComposePage() {
                   Select images to preview
                 </div>
               ) : mediaType === "reel" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={previews[0]}
-                  alt="Preview"
-                  className="aspect-[9/16] w-full max-w-[240px] rounded-lg object-cover mx-auto"
-                />
+                files[0]?.type.startsWith("video/") ? (
+                  <video
+                    src={previews[0]}
+                    controls
+                    playsInline
+                    className="aspect-[9/16] w-full max-w-[240px] rounded-lg object-cover mx-auto"
+                  />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previews[0]}
+                    alt="Preview"
+                    className="aspect-[9/16] w-full max-w-[240px] rounded-lg object-cover mx-auto"
+                  />
+                )
               ) : (
                 <div className="grid grid-cols-3 gap-2">
                   {previews.map((src, i) => (
