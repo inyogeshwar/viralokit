@@ -14,6 +14,14 @@ export async function GET() {
   const auth = await requireUserId();
   if (auth.response) return auth.response;
 
+  const { env } = await import("@/lib/env");
+  if (env.mockMode) {
+    return NextResponse.json(
+      { ok: false, error: "Data export is disabled in mock mode." },
+      { status: 409 },
+    );
+  }
+
   const workspace = await ensureWorkspace(auth.userId, {});
   const data = await exportWorkspaceData(workspace.id);
   if (!data) {
