@@ -138,6 +138,63 @@ export async function setActiveAccount(workspaceId: string, accountId: string) {
   return result.length > 0;
 }
 
+/**
+ * Permanently delete a workspace and all of its data. Cascade is handled by
+ * the foreign keys defined in lib/db/schema.ts:
+ *   workspace_members, social_accounts, posts, media_assets, webhook_events,
+ *   comments, messages, auto_reply_rules → workspaces.id (cascade)
+ *
+ * Caller MUST verify that `userId` is the workspace owner before calling.
+ */
+export async function deleteWorkspace(workspaceId: string, userId: string): Promise<boolean> {
+  const db = getDb();
+  if (!db) return false;
+
+  const ws = await db.query.workspaces.findFirst({
+    where: eq(schema.workspaces.id, workspaceId),
+  });
+  if (!ws) return false;
+  if (ws.ownerId !== userId) return false;
+
+  await db.delete(schema.workspaces).where(eq(schema.workspaces.id, workspaceId));
+  return true;
+}
+
+/**
+ * Build a JSON export of everything this workspace owns. Used by the
+ * "Download my data" action on the Settings page.
+ */
+export async function exportWorkspaceData(workspaceId: string) {
+  const db = getDb();
+  if (!db) {
+    return {
+      exportedAt: new Date().toISOString(),
+      workspaceId,
+      note: "Mock mode — no data persisted. This is a placeholder export.",
+    };
+  }
+
+  const [accounts, posts, media, comments, messages, rules] = await Promise.all([
+    db.select().from(schema.socialAccounts).where(eq(schema.socialAccounts.workspaceId, workspaceId)),
+    db.select().from(schema.posts).where(eq(schema.posts.workspaceId, workspaceId)),
+    db.select().from(schema.mediaAssets).where(eq(schema.mediaAssets.workspaceId, workspaceId)),
+    db.select().from(schema.comments).where(eq(schema.comments.workspaceId, workspaceId)),
+    db.select().from(schema.messages).where(eq(schema.messages.workspaceId, workspaceId)),
+    db.select().from(schema.autoReplyRules).where(eq(schema.autoReplyRules.workspaceId, workspaceId)),
+  ]);
+
+  return {
+    exportedAt: new Date().toISOString(),
+    workspaceId,
+    accounts: accounts.map(({ accessToken: _at, ...rest }) => rest),
+    posts: posts.map((p) => ({ ...p })),
+    media: media.map((m) => ({ ...m })),
+    comments,
+    messages,
+    automationRules: rules,
+  };
+}
+
 export { env };
 
 /**

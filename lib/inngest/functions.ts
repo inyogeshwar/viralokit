@@ -1,11 +1,13 @@
-import { and, eq, lte, or } from "drizzle-orm";
-
 import { inngest } from "@/lib/inngest/client";
 import { getDb, schema } from "@/lib/db";
 import { decryptToken } from "@/lib/crypto";
 import { InstagramProvider } from "@/lib/providers/instagram";
 import { env } from "@/lib/env";
 
+/**
+ * Step-based publish. Uses `step.sleepUntil` to wait until the scheduled
+ * time, then publishes via the Instagram provider (or a mock).
+ */
 export const publishScheduledPost = inngest.createFunction(
   {
     id: "publish-scheduled-post",
@@ -29,11 +31,17 @@ export const publishScheduledPost = inngest.createFunction(
       return { postId, status: "published", mock: true };
     }
 
-    const db = getDb();
-    if (!db) throw new Error("Database not configured");
-
-    const post = await db.query.posts.findFirst({
-      where: and(eq(schema.posts.id, postId), eq(schema.posts.status, "scheduled")),
+    const post = await step.run("load-post", async () => {
+      const { getDb, schema } = await import("@/lib/db");
+      const { eq } = await import("drizzle-orm");
+      const db = getDb();
+      if (!db) return null;
+      const rows = await db
+        .select()
+        .from(schema.posts)
+        .where(eq(schema.posts.id, postId))
+        .limit(1);
+      return rows[0] ?? null;
     });
 
     if (!post) return { skipped: true, reason: "Post not found or not scheduled" };
@@ -90,6 +98,11 @@ export const publishScheduledPost = inngest.createFunction(
   },
 );
 
+/**
+ * Every-minute sweep. Picks up any post that is still "scheduled" but
+ * whose `scheduledAt` is in the past, and re-enqueues it. Acts as a
+ * safety net for missed jobs.
+ */
 export const checkScheduledPosts = inngest.createFunction(
   {
     id: "check-scheduled-posts",

@@ -15,14 +15,16 @@ export default function RefundPolicyPage() {
 
       <h2>1. Overview</h2>
       <p>
-        We want you to be satisfied with ViraloKit. If you&apos;re not happy with your purchase,
-        we&apos;re here to help with refunds as described below.
+        ViraloKit is currently offered free of charge. This page is kept in place so that,
+        if a paid plan is introduced in the future, the same refund terms continue to apply.
+        Where a paid plan is added, the terms below will describe the refund rights that
+        come with it. Until then, no payment is taken and no refund is applicable.
       </p>
 
-      <h2>2. Free Tier</h2>
+      <h2>2. Free Tier (current state)</h2>
       <p>
-        ViraloKit offers a free tier with limited features. No payment is required to use the free tier,
-        and no refund is applicable.
+        ViraloKit is offered free of charge to all users. No payment is required to use the
+        free tier, and no refund is applicable.
       </p>
 
       <h2>3. Paid Subscriptions</h2>
@@ -43,7 +45,7 @@ export default function RefundPolicyPage() {
 
       <h2>4. How to Request a Refund</h2>
       <ul>
-        <li>Email us at <a href="mailto:billing@viraloKit.app">billing@viraloKit.app</a></li>
+        <li>Email us at <a href={`mailto:${LEGAL_CONTACTS.billing}`}>{LEGAL_CONTACTS.billing}</a></li>
         <li>Include your account email and reason for refund</li>
         <li>Refunds are processed within 5-10 business days</li>
         <li>Refunds are issued to the original payment method</li>
@@ -66,7 +68,7 @@ export default function RefundPolicyPage() {
       <h2>7. Contact</h2>
       <p>
         For refund requests or billing questions, email{" "}
-        <a href="mailto:billing@viraloKit.app">billing@viraloKit.app</a>.
+        <a href={`mailto:${LEGAL_CONTACTS.billing}`}>{LEGAL_CONTACTS.billing}</a>.
       </p>
     </article>
   );

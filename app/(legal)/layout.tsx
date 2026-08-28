@@ -7,6 +7,7 @@ import { PRODUCT_NAME } from "@/lib/legal";
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <LegalAuditBanner />
       <header className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">

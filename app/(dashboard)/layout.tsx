@@ -1,5 +1,7 @@
 import { MobileBottomNav, Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { OfflineBanner } from "@/components/offline-banner";
+import { SessionExpiredHandler } from "@/components/session-expired-handler";
 import { getDashboardContext } from "@/lib/context";
 import { SessionExpiredHandler } from "@/components/session-expired-handler";
 import { OfflineBanner } from "@/components/offline-banner";
@@ -16,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Sidebar />
       <div className="flex flex-1 flex-col">
         <Topbar workspaceName={workspace.name} />
+        <OfflineBanner />
         <main className="flex-1 p-4 pb-20 md:p-6 md:pb-6">{children}</main>
       </div>
       <MobileBottomNav />

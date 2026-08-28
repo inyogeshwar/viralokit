@@ -513,6 +513,7 @@ export default async function LandingPage() {
               <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How it Works</a></li>
               <li><a href="#compare" className="hover:text-foreground transition-colors">Compare</a></li>
               <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
+              <li><Link href="/help" className="hover:text-foreground transition-colors">Help Center</Link></li>
             </ul>
           </div>
           <div>
@@ -520,6 +521,7 @@ export default async function LandingPage() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
+              <li><Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable Use</Link></li>
               <li><Link href="/refund-policy" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
               <li><Link href="/cookie-policy" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
               <li><Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable use</Link></li>

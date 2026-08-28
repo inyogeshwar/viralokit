@@ -72,6 +72,9 @@ export default function AboutPage() {
         <p className="mt-2">
           &copy; {new Date().getFullYear()} ViraloKit. All rights reserved.
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          This page was last reviewed on {LAST_UPDATED}.
+        </p>
       </div>
     </div>
   );
