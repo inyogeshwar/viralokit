@@ -522,11 +522,16 @@ export default async function LandingPage() {
               <li><Link href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
               <li><Link href="/refund-policy" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
               <li><Link href="/cookie-policy" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
+              <li><Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable use</Link></li>
+              <li><Link href="/security" className="hover:text-foreground transition-colors">Security</Link></li>
+              <li><Link href="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link></li>
+              <li><Link href="/accessibility" className="hover:text-foreground transition-colors">Accessibility</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Connect</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link href="/help" className="hover:text-foreground transition-colors">Help center</Link></li>
               <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact Us</Link></li>
               <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
               <li><a href="https://github.com/inyogeshwar/viralo-kit" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">GitHub</a></li>

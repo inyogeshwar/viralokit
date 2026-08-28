@@ -5,6 +5,7 @@ export const env = {
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   databaseUrl: process.env.DATABASE_URL ?? "",
   encryptionKey: process.env.ENCRYPTION_KEY ?? "",
+  maintenanceMode: process.env.MAINTENANCE_MODE === "true",
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
     apiKey: process.env.CLOUDINARY_API_KEY ?? "",
@@ -33,7 +34,9 @@ export function isFullyConfigured() {
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,
     ),
     database: Boolean(env.databaseUrl),
-    cloudinary: Boolean(env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret),
+    cloudinary: Boolean(
+      env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret,
+    ),
     meta: Boolean(env.meta.clientId && env.meta.clientSecret),
     gemini: Boolean(env.gemini.apiKey),
   };

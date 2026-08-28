@@ -75,9 +75,13 @@ export function Sidebar() {
       <NavLinks />
       <div className="mt-auto space-y-4 pt-4">
         <nav className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <Link href="/help" className="hover:text-foreground transition-colors px-3 py-1">Help center</Link>
+          <Link href="/onboarding" className="hover:text-foreground transition-colors px-3 py-1">Onboarding</Link>
           <Link href="/about" className="hover:text-foreground transition-colors px-3 py-1">About</Link>
           <Link href="/privacy-policy" className="hover:text-foreground transition-colors px-3 py-1">Privacy Policy</Link>
           <Link href="/terms-of-service" className="hover:text-foreground transition-colors px-3 py-1">Terms of Service</Link>
+          <Link href="/acceptable-use" className="hover:text-foreground transition-colors px-3 py-1">Acceptable use</Link>
+          <Link href="/security" className="hover:text-foreground transition-colors px-3 py-1">Security</Link>
           <Link href="/contact" className="hover:text-foreground transition-colors px-3 py-1">Contact</Link>
         </nav>
         <ThemeToggle />

@@ -1,9 +1,11 @@
 ﻿import type { Metadata } from "next";
 import { Zap, Heart, Globe, Shield } from "lucide-react";
 
+import { PRODUCT_NAME } from "@/lib/legal";
+
 export const metadata: Metadata = {
-  title: "About — ViraloKit",
-  description: "Learn about ViraloKit — the AI-powered social media management platform.",
+  title: `About · ${PRODUCT_NAME}`,
+  description: `Learn about ${PRODUCT_NAME} — the AI-powered social media management platform.`,
 };
 
 export default function AboutPage() {

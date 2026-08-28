@@ -128,9 +128,89 @@ export async function setActiveAccount(workspaceId: string, accountId: string) {
   const result = await db
     .update(schema.socialAccounts)
     .set({ isActive: true })
-    .where(and(eq(schema.socialAccounts.id, accountId), eq(schema.socialAccounts.workspaceId, workspaceId)))
+    .where(
+      and(
+        eq(schema.socialAccounts.id, accountId),
+        eq(schema.socialAccounts.workspaceId, workspaceId),
+      ),
+    )
     .returning();
   return result.length > 0;
 }
 
 export { env };
+
+/**
+ * Permanently delete a workspace and all of its related data via the
+ * foreign-key cascade declared in the schema. Requires the caller to be
+ * the owner.
+ */
+export async function deleteWorkspace(workspaceId: string, ownerUserId: string): Promise<boolean> {
+  const db = getDb();
+  if (!db) return false;
+
+  const ws = await db.query.workspaces.findFirst({
+    where: eq(schema.workspaces.id, workspaceId),
+  });
+  if (!ws) return false;
+  if (ws.ownerId !== ownerUserId) {
+    throw new Error("Not the workspace owner");
+  }
+
+  await db.delete(schema.workspaces).where(eq(schema.workspaces.id, workspaceId));
+  return true;
+}
+
+/**
+ * Build a JSON export of everything the workspace owns. Tokens are
+ * redacted before being returned.
+ */
+export async function exportWorkspaceData(workspaceId: string): Promise<Record<string, unknown> | null> {
+  const db = getDb();
+  if (!db) return null;
+
+  const ws = await db.query.workspaces.findFirst({
+    where: eq(schema.workspaces.id, workspaceId),
+  });
+  if (!ws) return null;
+
+  const accts = await db
+    .select()
+    .from(schema.socialAccounts)
+    .where(eq(schema.socialAccounts.workspaceId, workspaceId));
+  const ps = await db
+    .select()
+    .from(schema.posts)
+    .where(eq(schema.posts.workspaceId, workspaceId));
+  const media = await db
+    .select()
+    .from(schema.mediaAssets)
+    .where(eq(schema.mediaAssets.workspaceId, workspaceId));
+  const cmt = await db
+    .select()
+    .from(schema.comments)
+    .where(eq(schema.comments.workspaceId, workspaceId));
+  const msgs = await db
+    .select()
+    .from(schema.messages)
+    .where(eq(schema.messages.workspaceId, workspaceId));
+  const rules = await db
+    .select()
+    .from(schema.autoReplyRules)
+    .where(eq(schema.autoReplyRules.workspaceId, workspaceId));
+
+  return {
+    exportedAt: new Date().toISOString(),
+    workspace: { id: ws.id, name: ws.name, slug: ws.slug, plan: ws.plan, createdAt: ws.createdAt },
+    accounts: accts.map((a) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { accessToken, ...rest } = a;
+      return { ...rest, accessToken: "[redacted]" };
+    }),
+    posts: ps,
+    media,
+    comments: cmt,
+    messages: msgs,
+    automationRules: rules,
+  };
+}

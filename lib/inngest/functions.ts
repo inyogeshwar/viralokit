@@ -4,14 +4,30 @@ import { inngest } from "@/lib/inngest/client";
 import { getDb, schema } from "@/lib/db";
 import { decryptToken } from "@/lib/crypto";
 import { InstagramProvider } from "@/lib/providers/instagram";
+import { env } from "@/lib/env";
 
 export const publishScheduledPost = inngest.createFunction(
   {
     id: "publish-scheduled-post",
-    triggers: [{ event: "post/schedule" }],
+    triggers: [{ event: "post/scheduled.publish" }],
+    concurrency: {
+      limit: 5,
+    },
   },
   async ({ event, step }) => {
-    const { postId } = event.data;
+    const { postId } = event.data as { postId: string };
+
+    if (env.mockMode) {
+      await step.run("mark-published-mock", async () => {
+        const db = getDb();
+        if (!db) return;
+        await db
+          .update(schema.posts)
+          .set({ status: "published", publishedAt: new Date(), updatedAt: new Date() })
+          .where(eq(schema.posts.id, postId));
+      });
+      return { postId, status: "published", mock: true };
+    }
 
     const db = getDb();
     if (!db) throw new Error("Database not configured");
@@ -29,10 +45,13 @@ export const publishScheduledPost = inngest.createFunction(
     if (!account) throw new Error("Account not found");
 
     const token = decryptToken(account.accessToken);
-    const provider = new InstagramProvider({ igUserId: account.igUserId, accessToken: token });
+    const provider = new InstagramProvider({
+      igUserId: account.igUserId,
+      accessToken: token,
+    });
 
     await step.run("mark-processing", async () => {
-      await db!
+      await db
         .update(schema.posts)
         .set({ status: "processing", updatedAt: new Date() })
         .where(eq(schema.posts.id, postId));
@@ -54,46 +73,45 @@ export const publishScheduledPost = inngest.createFunction(
     }
 
     await step.run("update-post-status", async () => {
-      await db!.update(schema.posts).set({
-        status: error ? "failed" : "published",
-        publishedAt: error ? null : new Date(),
-        mediaId: (result?.mediaId as string) ?? null,
-        permalink: (result?.permalink as string) ?? null,
-        error,
-        updatedAt: new Date(),
-      }).where(eq(schema.posts.id, postId));
+      await db
+        .update(schema.posts)
+        .set({
+          status: error ? "failed" : "published",
+          publishedAt: error ? null : new Date(),
+          mediaId: (result?.["mediaId"] as string) ?? null,
+          permalink: (result?.["permalink"] as string) ?? null,
+          error,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.posts.id, postId));
     });
 
     return { postId, status: error ? "failed" : "published", error };
-  }
+  },
 );
 
 export const checkScheduledPosts = inngest.createFunction(
   {
     id: "check-scheduled-posts",
-    triggers: [{ event: "cron/check-scheduled" }],
+    triggers: [{ cron: "*/1 * * * *" }],
   },
   async ({ step }) => {
+    if (env.mockMode) return { skipped: true, reason: "mock mode" };
     const db = getDb();
     if (!db) return;
 
     const now = new Date();
     const scheduledPosts = await db.query.posts.findMany({
-      where: and(
-        eq(schema.posts.status, "scheduled"),
-        or(
-          lte(schema.posts.scheduledAt, now),
-        )
-      ),
+      where: and(eq(schema.posts.status, "scheduled"), or(lte(schema.posts.scheduledAt, now))),
     });
 
     for (const post of scheduledPosts) {
       await step.sendEvent("trigger-publish", {
-        name: "post/schedule",
-        data: { postId: post.id },
+        name: "post/scheduled.publish",
+        data: { postId: post.id, force: false },
       });
     }
 
     return { triggered: scheduledPosts.length };
-  }
+  },
 );

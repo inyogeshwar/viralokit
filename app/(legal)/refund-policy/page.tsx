@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 
+import { LAST_UPDATED, PRODUCT_NAME } from "@/lib/legal";
+
 export const metadata: Metadata = {
-  title: "Refund Policy — ViraloKit",
-  description: "ViraloKit Refund Policy — information about refunds and cancellations.",
+  title: `Refund Policy · ${PRODUCT_NAME}`,
+  description: `${PRODUCT_NAME} Refund Policy — information about refunds and cancellations.`,
 };
 
 export default function RefundPolicyPage() {
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 prose prose-neutral dark:prose-invert">
       <h1>Refund Policy</h1>
-      <p className="text-muted-foreground">Last updated: August 18, 2026</p>
+      <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
       <h2>1. Overview</h2>
       <p>

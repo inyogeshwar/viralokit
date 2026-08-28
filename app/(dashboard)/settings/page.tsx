@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Download } from "lucide-react";
 
 import {
   Card,
@@ -11,6 +11,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getDashboardContext } from "@/lib/context";
 import { isFullyConfigured } from "@/lib/env";
+import { DeleteAccountDialog } from "@/components/delete-account-dialog";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,11 @@ export default async function SettingsPage() {
     { label: "Meta app (Instagram OAuth)", ok: config.meta },
     { label: "Gemini (AI)", ok: config.gemini },
   ];
+
+  const ownerEmail =
+    user?.primaryEmailAddress?.emailAddress ??
+    user?.emailAddresses?.[0]?.emailAddress ??
+    "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,9 +54,7 @@ export default async function SettingsPage() {
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="text-muted-foreground">Email</span>
-              <span className="font-medium">
-                {user?.primaryEmailAddress?.emailAddress ?? "—"}
-              </span>
+              <span className="font-medium">{ownerEmail || "—"}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="text-muted-foreground">Role</span>
@@ -83,6 +88,32 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your data</CardTitle>
+          <CardDescription>
+            Export everything we hold about your workspace, or delete it permanently.
+            Deletion is irreversible and removes all connected accounts, posts, comments,
+            messages, and automations.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <a
+            href="/api/account/export"
+            className="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            <Download className="size-4" />
+            Download my data (JSON)
+          </a>
+          <DeleteAccountDialog ownerEmail={ownerEmail} disabled={env.mockMode} />
+          {env.mockMode ? (
+            <p className="text-xs text-muted-foreground">
+              Data export and deletion are disabled in mock mode.
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

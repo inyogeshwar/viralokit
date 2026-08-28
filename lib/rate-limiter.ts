@@ -55,3 +55,30 @@ export function getRateLimitStatus(
   const bucket = getBucket(`${accountId}:${type}`, cfg.max, cfg.refillMs);
   return { remaining: bucket.tokens, max: cfg.max };
 }
+
+export type RateLimitResult = { allowed: boolean; remaining: number; resetMs: number };
+
+/**
+ * Generic fixed-window-style rate limit keyed on an arbitrary string.
+ * Used by non-Instagram API routes (contact form, etc.).
+ */
+export function rateLimit(opts: {
+  key: string;
+  limit: number;
+  windowMs: number;
+}): RateLimitResult {
+  const bucket = getBucket(`generic:${opts.key}`, opts.limit, opts.windowMs);
+  if (bucket.tokens > 0) {
+    bucket.tokens--;
+    return {
+      allowed: true,
+      remaining: bucket.tokens,
+      resetMs: opts.windowMs,
+    };
+  }
+  return {
+    allowed: false,
+    remaining: 0,
+    resetMs: opts.windowMs,
+  };
+}

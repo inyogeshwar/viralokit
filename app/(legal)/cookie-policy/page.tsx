@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 
+import { LAST_UPDATED, PRODUCT_NAME } from "@/lib/legal";
+
 export const metadata: Metadata = {
-  title: "Cookie Policy — ViraloKit",
-  description: "ViraloKit Cookie Policy — how we use cookies and tracking technologies.",
+  title: `Cookie Policy · ${PRODUCT_NAME}`,
+  description: `${PRODUCT_NAME} Cookie Policy — how we use cookies and tracking technologies.`,
 };
 
 export default function CookiePolicyPage() {
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 prose prose-neutral dark:prose-invert">
       <h1>Cookie Policy</h1>
-      <p className="text-muted-foreground">Last updated: August 18, 2026</p>
+      <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
       <h2>1. What Are Cookies</h2>
       <p>

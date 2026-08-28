@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 
+import { LAST_UPDATED, PRODUCT_NAME } from "@/lib/legal";
+
 export const metadata: Metadata = {
-  title: "Terms of Service — ViraloKit",
-  description: "ViraloKit Terms of Service — rules and guidelines for using our platform.",
+  title: `Terms of Service · ${PRODUCT_NAME}`,
+  description: `${PRODUCT_NAME} Terms of Service — rules and guidelines for using our platform.`,
 };
 
 export default function TermsOfServicePage() {
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 prose prose-neutral dark:prose-invert">
       <h1>Terms of Service</h1>
-      <p className="text-muted-foreground">Last updated: August 18, 2026</p>
+      <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
       <h2>1. Acceptance of Terms</h2>
       <p>
