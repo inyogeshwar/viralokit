@@ -19,6 +19,14 @@ export const env = {
     apiKey: process.env.GEMINI_API_KEY ?? "",
     model: process.env.GEMINI_MODEL ?? "gemini-3.5-flash",
   },
+  /**
+   * Maintenance mode. When true the public surface (and dashboard) will
+   * render a maintenance page. This is a single, simple flag — the
+   * `/api/status` endpoint reflects it for any monitoring agent.
+   *
+   * Set `MAINTENANCE_MODE=true` in the environment to enable.
+   */
+  maintenanceMode: process.env.MAINTENANCE_MODE === "true",
   instagramScopes: [
     "instagram_business_basic",
     "instagram_business_content_publish",

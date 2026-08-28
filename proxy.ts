@@ -9,7 +9,9 @@ const isProtectedRoute = createRouteMatcher([
   "/inbox(.*)",
   "/media(.*)",
   "/settings(.*)",
-  "/api/((?!status|instagram/callback|webhooks/instagram).*)",
+  "/onboarding(.*)",
+  "/help(.*)",
+  "/api/((?!status|instagram/callback|webhooks/instagram|contact).*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

@@ -1,6 +1,8 @@
 ﻿import type { Metadata } from "next";
 import { Zap, Heart, Globe, Shield } from "lucide-react";
 
+import { LAST_UPDATED } from "@/lib/legal";
+
 export const metadata: Metadata = {
   title: "About — ViraloKit",
   description: "Learn about ViraloKit — the AI-powered social media management platform.",
@@ -69,6 +71,9 @@ export default function AboutPage() {
         </p>
         <p className="mt-2">
           &copy; {new Date().getFullYear()} ViraloKit. All rights reserved.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          This page was last reviewed on {LAST_UPDATED}.
         </p>
       </div>
     </div>

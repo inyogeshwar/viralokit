@@ -1,10 +1,12 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LegalAuditBanner } from "@/components/legal-audit-banner";
 
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <LegalAuditBanner />
       <header className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
@@ -23,6 +25,11 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
             <Link href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</Link>
             <Link href="/refund-policy" className="hover:text-foreground transition-colors">Refund Policy</Link>
             <Link href="/cookie-policy" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+            <Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable Use</Link>
+            <Link href="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link>
+            <Link href="/accessibility" className="hover:text-foreground transition-colors">Accessibility</Link>
+            <Link href="/security" className="hover:text-foreground transition-colors">Security</Link>
+            <Link href="/responsible-disclosure" className="hover:text-foreground transition-colors">Responsible Disclosure</Link>
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
             <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
           </nav>

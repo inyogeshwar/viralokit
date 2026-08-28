@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { LAST_UPDATED, LEGAL_CONTACTS } from "@/lib/legal";
+
 export const metadata: Metadata = {
   title: "Cookie Policy — ViraloKit",
   description: "ViraloKit Cookie Policy — how we use cookies and tracking technologies.",
@@ -9,7 +11,7 @@ export default function CookiePolicyPage() {
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 prose prose-neutral dark:prose-invert">
       <h1>Cookie Policy</h1>
-      <p className="text-muted-foreground">Last updated: August 18, 2026</p>
+      <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
       <h2>1. What Are Cookies</h2>
       <p>
@@ -37,7 +39,9 @@ export default function CookiePolicyPage() {
       <h3>2.3 Analytics Cookies</h3>
       <p>
         We may use privacy-respecting analytics to understand how the Service is used. These cookies
-        do not track you across other websites.
+        do not track you across other websites. If a Google Tag Manager container is configured for
+        the deployment, GTM may also set cookies. The optional GTM container is loaded only when
+        the <code>NEXT_PUBLIC_GTM_ID</code> environment variable is set.
       </p>
 
       <h2>3. Third-Party Cookies</h2>
@@ -45,6 +49,8 @@ export default function CookiePolicyPage() {
       <ul>
         <li><strong>Clerk</strong> — Authentication and session management</li>
         <li><strong>Vercel</strong> — Hosting and performance monitoring</li>
+        <li><strong>Sentry</strong> — Error reporting and performance monitoring</li>
+        <li><strong>Google Tag Manager</strong> — Only if explicitly configured by the operator (off by default)</li>
       </ul>
 
       <h2>4. Managing Cookies</h2>
@@ -74,7 +80,7 @@ export default function CookiePolicyPage() {
       <h2>7. Contact</h2>
       <p>
         Questions about our use of cookies? Contact us at{" "}
-        <a href="mailto:privacy@viraloKit.app">privacy@viraloKit.app</a>.
+        <a href={`mailto:${LEGAL_CONTACTS.privacy}`}>{LEGAL_CONTACTS.privacy}</a>.
       </p>
     </article>
   );

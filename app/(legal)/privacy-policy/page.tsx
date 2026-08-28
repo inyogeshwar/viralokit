@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { LAST_UPDATED, LEGAL_CONTACTS } from "@/lib/legal";
+
 export const metadata: Metadata = {
   title: "Privacy Policy — ViraloKit",
   description: "ViraloKit Privacy Policy — how we collect, use, and protect your data.",
@@ -9,7 +11,7 @@ export default function PrivacyPolicyPage() {
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 prose prose-neutral dark:prose-invert">
       <h1>Privacy Policy</h1>
-      <p className="text-muted-foreground">Last updated: August 18, 2026</p>
+      <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>
 
       <h2>1. Introduction</h2>
       <p>
@@ -109,7 +111,7 @@ export default function PrivacyPolicyPage() {
       <h2>10. Contact Us</h2>
       <p>
         If you have questions about this Privacy Policy, please contact us at{" "}
-        <a href="mailto:privacy@viraloKit.app">privacy@viraloKit.app</a>.
+        <a href={`mailto:${LEGAL_CONTACTS.privacy}`}>{LEGAL_CONTACTS.privacy}</a>.
       </p>
     </article>
   );
