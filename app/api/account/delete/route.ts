@@ -39,10 +39,14 @@ export async function DELETE(req: NextRequest) {
     return jsonError("The email you entered does not match your account email.");
   }
 
+  const { env } = await import("@/lib/env");
+  if (env.mockMode) return jsonError("Workspace deletion is disabled in mock mode.", 409);
+
   const { ensureWorkspace } = await import("@/lib/workspace");
   const workspace = await ensureWorkspace(auth.userId, {});
   try {
-    await deleteWorkspace(workspace.id, auth.userId);
+    const deleted = await deleteWorkspace(workspace.id, auth.userId);
+    if (!deleted) return jsonError("Database is not configured.", 500);
   } catch (err) {
     return jsonError(
       err instanceof Error ? err.message : "Failed to delete workspace",
