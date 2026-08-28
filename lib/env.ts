@@ -14,6 +14,7 @@ export const env = {
   meta: {
     clientId: process.env.META_CLIENT_ID ?? "",
     clientSecret: process.env.META_CLIENT_SECRET ?? "",
+    appSecret: process.env.META_APP_SECRET ?? "",
     apiVersion: process.env.META_API_VERSION ?? "v23.0",
   },
   gemini: {
