@@ -16,20 +16,27 @@ export function OfflineBanner() {
     const update = () => setOnline(navigator.onLine);
     update();
 
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
     const onOnline = () => {
       setOnline(true);
       setShowReconnected(true);
-      const t = setTimeout(() => setShowReconnected(false), 4000);
-      return () => clearTimeout(t);
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(() => setShowReconnected(false), 4000);
     };
     const onOffline = () => {
       setOnline(false);
       setShowReconnected(false);
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
     };
 
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
