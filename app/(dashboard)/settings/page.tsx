@@ -99,13 +99,23 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-3">
-          <a
-            href="/api/account/export"
-            className="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
-          >
-            <Download className="size-4" />
-            Download my data (JSON)
-          </a>
+          {env.mockMode ? (
+            <span
+              className="inline-flex items-center gap-2 rounded-md border bg-muted px-3 py-2 text-sm font-medium text-muted-foreground"
+              aria-disabled="true"
+            >
+              <Download className="size-4" />
+              Download my data (JSON)
+            </span>
+          ) : (
+            <a
+              href="/api/account/export"
+              className="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+            >
+              <Download className="size-4" />
+              Download my data (JSON)
+            </a>
+          )}
           <DeleteAccountDialog ownerEmail={ownerEmail} disabled={env.mockMode} />
           {env.mockMode ? (
             <p className="text-xs text-muted-foreground">
