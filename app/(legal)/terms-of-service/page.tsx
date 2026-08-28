@@ -34,7 +34,7 @@ export default function TermsOfServicePage() {
 
       <h2>3. Account Registration</h2>
       <ul>
-        <li>You must be at least {MIN_AGE} years old to use the Service</li>
+        <li>You must be at least 13 years old to use the Service</li>
         <li>You must provide accurate and complete registration information</li>
         <li>You are responsible for maintaining the security of your account</li>
         <li>You must not share your account credentials with others</li>
@@ -69,16 +69,11 @@ export default function TermsOfServicePage() {
       </ul>
 
       <h2>7. Payment and Subscriptions</h2>
-      <p>
-        ViraloKit is currently provided free of charge. If paid plans are introduced in the
-        future, the following terms will apply at that time and will be reflected in an
-        updated version of these Terms and our Refund Policy:
-      </p>
       <ul>
         <li>Free tier usage is subject to applicable limits</li>
-        <li>Paid plans (if introduced) will be billed in advance on a monthly or annual basis</li>
-        <li>All fees will be non-refundable except as described in our Refund Policy</li>
-        <li>We will provide 30 days notice before changing pricing</li>
+        <li>Paid plans are billed in advance on a monthly or annual basis</li>
+        <li>All fees are non-refundable except as described in our Refund Policy</li>
+        <li>We reserve the right to change pricing with 30 days notice</li>
       </ul>
 
       <h2>8. Limitation of Liability</h2>
@@ -111,7 +106,7 @@ export default function TermsOfServicePage() {
       <h2>12. Contact</h2>
       <p>
         Questions about these Terms? Contact us at{" "}
-        <a href={`mailto:${LEGAL_CONTACTS.legal}`}>{LEGAL_CONTACTS.legal}</a>.
+        <a href="mailto:legal@viraloKit.app">legal@viraloKit.app</a>.
       </p>
     </article>
   );

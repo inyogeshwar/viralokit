@@ -39,9 +39,7 @@ export default function CookiePolicyPage() {
       <h3>2.3 Analytics Cookies</h3>
       <p>
         We may use privacy-respecting analytics to understand how the Service is used. These cookies
-        do not track you across other websites. If a Google Tag Manager container is configured for
-        the deployment, GTM may also set cookies. The optional GTM container is loaded only when
-        the <code>NEXT_PUBLIC_GTM_ID</code> environment variable is set.
+        do not track you across other websites.
       </p>
 
       <h2>3. Third-Party Cookies</h2>
@@ -49,8 +47,6 @@ export default function CookiePolicyPage() {
       <ul>
         <li><strong>Clerk</strong> — Authentication and session management</li>
         <li><strong>Vercel</strong> — Hosting and performance monitoring</li>
-        <li><strong>Sentry</strong> — Error reporting and performance monitoring</li>
-        <li><strong>Google Tag Manager</strong> — Only if explicitly configured by the operator (off by default)</li>
       </ul>
 
       <h2>4. Managing Cookies</h2>
@@ -80,7 +76,7 @@ export default function CookiePolicyPage() {
       <h2>7. Contact</h2>
       <p>
         Questions about our use of cookies? Contact us at{" "}
-        <a href={`mailto:${LEGAL_CONTACTS.privacy}`}>{LEGAL_CONTACTS.privacy}</a>.
+        <a href="mailto:privacy@viraloKit.app">privacy@viraloKit.app</a>.
       </p>
     </article>
   );

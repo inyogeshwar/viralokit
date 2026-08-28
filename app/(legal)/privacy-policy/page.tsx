@@ -111,7 +111,7 @@ export default function PrivacyPolicyPage() {
       <h2>10. Contact Us</h2>
       <p>
         If you have questions about this Privacy Policy, please contact us at{" "}
-        <a href={`mailto:${LEGAL_CONTACTS.privacy}`}>{LEGAL_CONTACTS.privacy}</a>.
+        <a href="mailto:privacy@viraloKit.app">privacy@viraloKit.app</a>.
       </p>
     </article>
   );
