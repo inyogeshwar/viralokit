@@ -86,3 +86,80 @@ export function rateLimit(opts: {
     resetMs: Math.max(0, refillMs - elapsed),
   };
 }
+
+// --- Per-post (anti-viral) rate limit ----------------------------------------
+//
+// A single post going viral can produce thousands of comments in minutes.
+// Meta flags accounts that send a sudden burst of private replies. We cap
+// the number of private replies per (account, media) pair to a safe burst
+// size. Meta's documented hourly cap is 250/hour, so 100/hour is comfortable
+// headroom and 25/min handles the 5-minute viral burst.
+
+const PER_POST_PRIVATE_REPLY = {
+  perHour: { max: 100, refillMs: 3600000 },
+  perMinute: { max: 25, refillMs: 60000 },
+} as const;
+
+/**
+ * Per-post private-reply guard. Returns true if we may send ONE more
+ * private reply for this (account, media) pair, false if the per-post
+ * caps are exhausted. Both the hourly AND the per-minute caps are checked;
+ * the request must satisfy both to proceed.
+ *
+ * Safe to call concurrently — the underlying token bucket is in-memory and
+ * single-process. For multi-process / serverless deployments replace this
+ * with a Redis-backed counter.
+ */
+export function acquirePerPostPrivateReply(
+  accountId: string,
+  mediaId: string,
+): boolean {
+  if (!mediaId) return false; // a missing mediaId would bypass the guard — fail closed
+  const safeMedia = mediaId.replace(/[^a-zA-Z0-9_:-]/g, "_").slice(0, 128);
+  const baseKey = `${accountId}:post:${safeMedia}`;
+
+  const hourBucket = getBucket(
+    `${baseKey}:hour`,
+    PER_POST_PRIVATE_REPLY.perHour.max,
+    PER_POST_PRIVATE_REPLY.perHour.refillMs,
+  );
+  const minuteBucket = getBucket(
+    `${baseKey}:minute`,
+    PER_POST_PRIVATE_REPLY.perMinute.max,
+    PER_POST_PRIVATE_REPLY.perMinute.refillMs,
+  );
+
+  if (hourBucket.tokens <= 0 || minuteBucket.tokens <= 0) {
+    return false;
+  }
+
+  hourBucket.tokens--;
+  minuteBucket.tokens--;
+  return true;
+}
+
+export function getPerPostPrivateReplyStatus(accountId: string, mediaId: string) {
+  const safeMedia = mediaId.replace(/[^a-zA-Z0-9_:-]/g, "_").slice(0, 128);
+  const baseKey = `${accountId}:post:${safeMedia}`;
+  const hourBucket = getBucket(
+    `${baseKey}:hour`,
+    PER_POST_PRIVATE_REPLY.perHour.max,
+    PER_POST_PRIVATE_REPLY.perHour.refillMs,
+  );
+  const minuteBucket = getBucket(
+    `${baseKey}:minute`,
+    PER_POST_PRIVATE_REPLY.perMinute.max,
+    PER_POST_PRIVATE_REPLY.perMinute.refillMs,
+  );
+  return {
+    remainingHour: hourBucket.tokens,
+    maxHour: PER_POST_PRIVATE_REPLY.perHour.max,
+    remainingMinute: minuteBucket.tokens,
+    maxMinute: PER_POST_PRIVATE_REPLY.perMinute.max,
+  };
+}
+
+// Internal — exposed for tests so a fresh process can start with empty buckets.
+export function _resetRateLimitBuckets() {
+  buckets.clear();
+}

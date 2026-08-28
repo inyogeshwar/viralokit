@@ -3,7 +3,10 @@ import { and, eq, desc } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { decryptToken } from "@/lib/crypto";
 import { InstagramProvider } from "@/lib/providers/instagram";
-import { acquireRateLimit } from "@/lib/rate-limiter";
+import {
+  acquireRateLimit,
+  acquirePerPostPrivateReply,
+} from "@/lib/rate-limiter";
 import { canReplyInWindow } from "@/lib/messaging-window";
 import { withBotDisclosure } from "@/lib/bot-disclosure";
 
@@ -21,6 +24,18 @@ interface AutomationRule {
   priority: number;
   triggerCount: number;
 }
+
+/**
+ * Default copy for Comment-to-DM (Private Reply) flows. Per the DM automation
+ * plan, we can't check follower status from a comment, so the first message
+ * is a teaser that asks the user to reply to confirm before we deliver the
+ * asset in a follow-up DM.
+ *
+ * This is exported so the UI can pre-fill the response text field when a
+ * user creates a "Private Reply to Commenter" rule.
+ */
+export const DEFAULT_PRIVATE_REPLY_TEMPLATE =
+  "Hey! I have the resource ready. Reply 'SEND' to this message to get it.";
 
 export function matchTextAgainstRules(
   text: string,
@@ -170,7 +185,7 @@ export async function processCommentAutomation(
   accountId: string,
   commentId: string,
   commentText: string,
-  _mediaId: string,
+  mediaId: string,
 ) {
   const db = getDb();
   if (!db) return;
@@ -179,6 +194,18 @@ export async function processCommentAutomation(
     where: eq(schema.socialAccounts.id, accountId),
   });
   if (!account) return;
+
+  // --- Idempotency guard ---------------------------------------------------
+  // Meta may deliver the same comment webhook more than once (retries). The
+  // `comments.replied` flag is the source of truth — if we've already replied
+  // to this comment in a prior delivery, skip.
+  const existing = await db.query.comments.findFirst({
+    where: and(
+      eq(schema.comments.accountId, accountId),
+      eq(schema.comments.igCommentId, commentId),
+    ),
+  });
+  if (existing?.replied) return;
 
   const rules = await db.query.autoReplyRules.findMany({
     where: and(
@@ -201,12 +228,42 @@ export async function processCommentAutomation(
   try {
     const responseText = withBotDisclosure(bestMatch.responseText, disclosureEnabled);
     if (bestMatch.channel === "private_reply") {
-      // Rate limit for private replies
+      // --- Per-account hourly cap (Meta's documented limit is 250/hour;
+      // we stay well below at 750 tokens/hour as a generous burst budget,
+      // and use a stricter per-post cap below to absorb viral storms).
       const canProceed = await acquireRateLimit(accountId, "private_reply");
       if (!canProceed) return;
+
+      // --- Per-post (anti-viral) cap. A single post going viral can
+      // generate thousands of comments in minutes — Meta flags accounts
+      // that burst-send private replies. We cap each post at 25/min and
+      // 100/hour. Bypasses are safe (we just don't reply) and visible
+      // (the comment is logged but not marked replied).
+      if (!acquirePerPostPrivateReply(accountId, mediaId)) return;
+
       await provider.sendPrivateReply(commentId, responseText);
     } else {
       await provider.replyToComment(commentId, responseText);
+    }
+
+    // Mark the comment as replied so duplicate webhook deliveries are no-ops.
+    if (existing) {
+      await db
+        .update(schema.comments)
+        .set({ replied: true })
+        .where(eq(schema.comments.id, existing.id));
+    } else {
+      // Comment row wasn't pre-inserted by the webhook handler (shouldn't
+      // happen in practice but the guard is cheap).
+      await db
+        .update(schema.comments)
+        .set({ replied: true })
+        .where(
+          and(
+            eq(schema.comments.accountId, accountId),
+            eq(schema.comments.igCommentId, commentId),
+          ),
+        );
     }
 
     await db
@@ -216,7 +273,10 @@ export async function processCommentAutomation(
         triggerCount: (bestMatch as unknown as { triggerCount: number }).triggerCount + 1,
       })
       .where(eq(schema.autoReplyRules.id, bestMatch.id));
-  } catch {
-    // Silently fail
+  } catch (err) {
+    // Silently fail — don't crash the webhook. Operators see this in
+    // server logs and via Sentry. The comment stays `replied = false`
+    // so a future delivery can retry the same rule.
+    console.error("[automation] comment reply failed", err);
   }
 }

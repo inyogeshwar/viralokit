@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send } from "lucide-react";
 
+import { DEFAULT_PRIVATE_REPLY_TEMPLATE } from "@/lib/automation";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +73,16 @@ export default function AutomationPage() {
   const [formResponseText, setFormResponseText] = useState("");
   const [formDelay, setFormDelay] = useState(0);
   const [formPriority, setFormPriority] = useState(0);
+
+  // When the user picks "Private Reply to Commenter", pre-fill the
+  // response field with the recommended copy if it's still empty. The
+  // user can edit the text after it's pre-filled.
+  function handleChannelChange(value: string) {
+    setFormChannel(value);
+    if (value === "private_reply" && !formResponseText) {
+      setFormResponseText(DEFAULT_PRIVATE_REPLY_TEMPLATE);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -262,7 +274,7 @@ export default function AutomationPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Channel</Label>
-                <Select value={formChannel} onValueChange={setFormChannel}>
+                <Select value={formChannel} onValueChange={handleChannelChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="dm">DM Reply</SelectItem>
