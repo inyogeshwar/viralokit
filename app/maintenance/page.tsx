@@ -35,13 +35,15 @@ export default function MaintenancePage() {
         </p>
         <div className="mt-4 inline-flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground">
           <Clock className="size-3.5" />
-          Status refreshes automatically — no need to reload.
+          {isOn
+            ? "Check back in a moment — you can retry below."
+            : "Maintenance is complete — you can head back to the app."}
         </div>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild>
-            <Link href="/api/status">
+            <Link href={isOn ? "/maintenance" : "/dashboard"}>
               <RefreshCw className="mr-2 size-4" />
-              Retry
+              {isOn ? "Retry" : "Open dashboard"}
             </Link>
           </Button>
           <Button variant="outline" asChild>
