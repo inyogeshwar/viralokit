@@ -67,18 +67,22 @@ export function rateLimit(opts: {
   limit: number;
   windowMs: number;
 }): RateLimitResult {
-  const bucket = getBucket(`generic:${opts.key}`, opts.limit, opts.windowMs);
+  // Token bucket: allow `limit` burst, then refill evenly across the window.
+  const refillMs = Math.max(1, Math.ceil(opts.windowMs / opts.limit));
+  const bucket = getBucket(`generic:${opts.key}`, opts.limit, refillMs);
   if (bucket.tokens > 0) {
     bucket.tokens--;
     return {
       allowed: true,
       remaining: bucket.tokens,
-      resetMs: opts.windowMs,
+      resetMs: refillMs,
     };
   }
+
+  const elapsed = Date.now() - bucket.lastRefill;
   return {
     allowed: false,
     remaining: 0,
-    resetMs: opts.windowMs,
+    resetMs: Math.max(0, refillMs - elapsed),
   };
 }
