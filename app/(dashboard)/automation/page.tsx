@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send } from "lucide-react";
+import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send, FileText, Users } from "lucide-react";
 
 import { DEFAULT_PRIVATE_REPLY_TEMPLATE } from "@/lib/automation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+interface DmResource {
+  id: string;
+  name: string;
+  triggerKeywords: string;
+  matchType: string;
+  resourceUrl: string;
+  buttonLabel: string;
+  teaserText: string;
+  followPrompt: string;
+  deliverText: string;
+  isActive: boolean;
+  deliveryCount: number;
+}
 
 interface AutoReplyRule {
   id: string;
@@ -108,6 +123,7 @@ export default function AutomationPage() {
       }
     }
     load();
+    loadResources();
     return () => { cancelled = true; };
   }, []);
 
@@ -178,6 +194,99 @@ export default function AutomationPage() {
   const activeCount = rules.filter((r) => r.isActive).length;
   const totalTriggers = rules.reduce((sum, r) => sum + (r.triggerCount ?? 0), 0);
 
+  // --- DM Resources (Phase 3) state ----------------------------------------
+  const [resources, setResources] = useState<DmResource[]>([]);
+  const [loadingResources, setLoadingResources] = useState(true);
+  const [showResourceForm, setShowResourceForm] = useState(false);
+  const [savingResource, setSavingResource] = useState(false);
+  const [resName, setResName] = useState("");
+  const [resKeywords, setResKeywords] = useState("");
+  const [resMatchType, setResMatchType] = useState("contains");
+  const [resUrl, setResUrl] = useState("");
+  const [resButtonLabel, setResButtonLabel] = useState("Download");
+  const [resTeaser, setResTeaser] = useState("Check your DMs!");
+  const [resFollowPrompt, setResFollowPrompt] = useState(
+    "Please follow this page first to unlock the resource! Once you've followed, reply 'Done' here.",
+  );
+  const [resDeliver, setResDeliver] = useState("Here's your resource! Let us know if you need anything else");
+
+  async function loadResources() {
+    try {
+      const res = await fetch("/api/automation/resources");
+      const data = await res.json();
+      if (data.ok) setResources(data.resources ?? []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingResources(false);
+    }
+  }
+
+  async function saveResource() {
+    if (!resName || !resKeywords || !resUrl) return;
+    setSavingResource(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/automation/resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId,
+          name: resName,
+          triggerKeywords: resKeywords,
+          matchType: resMatchType,
+          resourceUrl: resUrl,
+          buttonLabel: resButtonLabel,
+          teaserText: resTeaser,
+          followPrompt: resFollowPrompt,
+          deliverText: resDeliver,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Failed to save");
+      setMessage({ kind: "ok", text: "Resource created" });
+      setShowResourceForm(false);
+      setResName("");
+      setResKeywords("");
+      setResUrl("");
+      setResButtonLabel("Download");
+      setResTeaser("Check your DMs!");
+      setResFollowPrompt("Please follow this page first to unlock the resource! Once you've followed, reply 'Done' here.");
+      setResDeliver("Here's your resource! Let us know if you need anything else");
+      await loadResources();
+    } catch (err) {
+      setMessage({ kind: "error", text: String(err instanceof Error ? err.message : err) });
+    } finally {
+      setSavingResource(false);
+    }
+  }
+
+  async function toggleResource(id: string, isActive: boolean) {
+    try {
+      await fetch(`/api/automation/resources/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !isActive }),
+      });
+      setResources((prev) => prev.map((r) => (r.id === id ? { ...r, isActive: !isActive } : r)));
+    } catch {
+      // silent
+    }
+  }
+
+  async function deleteResource(id: string) {
+    try {
+      await fetch(`/api/automation/resources/${id}`, { method: "DELETE" });
+      setResources((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      // silent
+    }
+  }
+
+  const totalDeliveries = resources.reduce((sum, r) => sum + (r.deliveryCount ?? 0), 0);
+  const activeResourceCount = resources.filter((r) => r.isActive).length;
+
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -187,11 +296,27 @@ export default function AutomationPage() {
             Auto-reply to DMs, comments, and mentions with smart rules.
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus className="mr-1.5 size-3.5" />
-          New Rule
-        </Button>
       </div>
+
+      <Tabs defaultValue="rules">
+        <TabsList>
+          <TabsTrigger value="rules">
+            <MessageSquare className="mr-1.5 size-3.5" />
+            Rules
+          </TabsTrigger>
+          <TabsTrigger value="resources">
+            <FileText className="mr-1.5 size-3.5" />
+            Resources
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="rules" className="flex flex-col gap-6">
+          <div className="flex justify-end">
+            <Button onClick={() => setShowForm(!showForm)}>
+              <Plus className="mr-1.5 size-3.5" />
+              New Rule
+            </Button>
+          </div>
 
       {message && (
         <div
@@ -414,6 +539,182 @@ export default function AutomationPage() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        <TabsContent value="resources" className="flex flex-col gap-6">
+          <div className="flex justify-end">
+            <Button onClick={() => setShowResourceForm(!showResourceForm)}>
+              <Plus className="mr-1.5 size-3.5" />
+              New Resource
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardContent className="flex items-center gap-3 py-4">
+                <FileText className="size-8 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{activeResourceCount}</p>
+                  <p className="text-xs text-muted-foreground">Active resources</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="flex items-center gap-3 py-4">
+                <Users className="size-8 text-emerald-500" />
+                <div>
+                  <p className="text-2xl font-bold">{totalDeliveries}</p>
+                  <p className="text-xs text-muted-foreground">Total deliveries</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="flex items-center gap-3 py-4">
+                <MessageSquare className="size-8 text-blue-500" />
+                <div>
+                  <p className="text-2xl font-bold">{resources.length}</p>
+                  <p className="text-xs text-muted-foreground">Total resources</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {showResourceForm && (
+            <Card>
+              <CardHeader>
+                <CardTitle>New DM Resource</CardTitle>
+                <CardDescription>
+                  Gate a download / link behind a follow. Users DM the trigger
+                  keyword; we check follower status, send a teaser, and deliver
+                  the link when they reply &quot;Done&quot; after following.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Resource Name</Label>
+                    <Input value={resName} onChange={(e) => setResName(e.target.value)} placeholder="e.g. AI Coding Guide PDF" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>Trigger Keywords (comma-separated)</Label>
+                    <Input value={resKeywords} onChange={(e) => setResKeywords(e.target.value)} placeholder="guide, pdf, free" />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Match Type</Label>
+                    <Select value={resMatchType} onValueChange={setResMatchType}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="contains">Contains</SelectItem>
+                        <SelectItem value="exact">Exact Match</SelectItem>
+                        <SelectItem value="starts_with">Starts With</SelectItem>
+                        <SelectItem value="regex">Regex</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>Resource URL</Label>
+                    <Input value={resUrl} onChange={(e) => setResUrl(e.target.value)} placeholder="https://example.com/guide.pdf" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label>Button Label</Label>
+                  <Input value={resButtonLabel} onChange={(e) => setResButtonLabel(e.target.value)} placeholder="Download" />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label>Teaser Text (sent immediately on trigger keyword)</Label>
+                  <Textarea value={resTeaser} onChange={(e) => setResTeaser(e.target.value)} className="min-h-16" />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label>Follow Prompt (sent when user hasn&apos;t followed)</Label>
+                  <Textarea value={resFollowPrompt} onChange={(e) => setResFollowPrompt(e.target.value)} className="min-h-16" />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label>Delivery Text (sent with the resource button)</Label>
+                  <Textarea value={resDeliver} onChange={(e) => setResDeliver(e.target.value)} className="min-h-16" />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={saveResource} disabled={savingResource || !resName || !resKeywords || !resUrl}>
+                    {savingResource ? <Loader2 className="mr-1.5 size-3.5 animate-spin" /> : <Plus className="mr-1.5 size-3.5" />}
+                    Create Resource
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowResourceForm(false)}>Cancel</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {loadingResources ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-12">
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                <span className="text-sm text-muted-foreground">Loading resources...</span>
+              </CardContent>
+            </Card>
+          ) : resources.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+                <FileText className="size-10 text-muted-foreground" />
+                <div>
+                  <p className="font-semibold">No DM resources yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Gate a download / link behind a follow to grow your audience and deliver value.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Resources ({resources.length})</CardTitle>
+                <CardDescription>
+                  When a user DMs a trigger keyword, we check follower status and
+                  deliver the resource only after they follow.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                {resources.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-3">
+                      <FileText className="size-4 text-muted-foreground" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{r.name}</p>
+                          <Badge variant={r.isActive ? "success" : "secondary"}>
+                            {r.isActive ? "Active" : "Paused"}
+                          </Badge>
+                          <Badge variant="outline">{r.matchType}</Badge>
+                        </div>
+                        <p className="max-w-[400px] truncate text-xs text-muted-foreground">
+                          Keywords: {r.triggerKeywords}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Delivered {r.deliveryCount ?? 0} times
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="size-7" onClick={() => toggleResource(r.id, r.isActive)}>
+                        {r.isActive ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="size-7" onClick={() => deleteResource(r.id)}>
+                        <Trash2 className="size-3.5 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

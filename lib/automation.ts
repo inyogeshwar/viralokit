@@ -9,6 +9,7 @@ import {
 } from "@/lib/rate-limiter";
 import { canReplyInWindow } from "@/lib/messaging-window";
 import { withBotDisclosure } from "@/lib/bot-disclosure";
+import { handleFollowGate } from "@/lib/follow-gate";
 
 interface AutomationRule {
   id: string;
@@ -104,6 +105,26 @@ export async function processDmAautomation(
   // Check messaging window
   const windowStatus = await canReplyInWindow(accountId, senderIgsid);
   if (!windowStatus.canReply) return;
+
+  // --- Follow-gate: check the state machine BEFORE the regular rule
+  // matcher. If the user is in a follow-gate conversation (e.g. they said
+  // "DONE" or they triggered a resource keyword), the state machine
+  // handles the reply and we skip the keyword rules. This ordering
+  // matters: keyword rules can match "DONE" or "send" by accident.
+  try {
+    const gateResult = await handleFollowGate(
+      accountId,
+      senderIgsid,
+      messageText,
+      _messageId,
+    );
+    if (gateResult.handled) {
+      return; // follow-gate replied (or queued) — don't double-reply
+    }
+  } catch (err) {
+    // Never let a follow-gate error break the regular flow.
+    console.error("[automation] follow-gate error", err);
+  }
 
   const rules = await db.query.autoReplyRules.findMany({
     where: and(

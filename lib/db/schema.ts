@@ -229,5 +229,91 @@ export const autoReplyRules = pgTable(
   ],
 );
 
+// --- Follow-Gate / DM Resources (Phase 3) -----------------------------------
+//
+// A "DM Resource" is a piece of gated content (PDF link, discount code, etc.)
+// that a user can unlock by either (a) DMing a trigger keyword, or (b) replying
+// to a comment-to-DM prompt (Phase 2). The resource is delivered only AFTER
+// the user follows the account — see lib/follow-gate.ts for the state machine.
+
+export const dmResources = pgTable(
+  "dm_resources",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .references(() => workspaces.id, { onDelete: "cascade" })
+      .notNull(),
+    accountId: uuid("account_id")
+      .references(() => socialAccounts.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    triggerKeywords: text("trigger_keywords").notNull(), // comma-separated
+    matchType: text("match_type").default("contains").notNull(),
+    resourceUrl: text("resource_url").notNull(),
+    buttonLabel: text("button_label").default("Download").notNull(),
+    teaserText: text("teaser_text").notNull(),
+    followPrompt: text("follow_prompt").notNull(),
+    deliverText: text("deliver_text").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    deliveryCount: jsonb("delivery_count").$type<number>().default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("dm_resources_workspace_idx").on(table.workspaceId),
+    index("dm_resources_account_idx").on(table.accountId),
+    index("dm_resources_active_idx").on(table.isActive),
+  ],
+);
+
+// Per-(account, sender) state for the follow-gate conversation. One row per
+// user we're tracking through the gate. Updated in place as the state changes.
+export const dmConversationStates = pgTable(
+  "dm_conversation_states",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .references(() => workspaces.id, { onDelete: "cascade" })
+      .notNull(),
+    accountId: uuid("account_id")
+      .references(() => socialAccounts.id, { onDelete: "cascade" })
+      .notNull(),
+    senderIgsid: text("sender_igsid").notNull(), // Instagram Scoped User ID
+    state: text("state").notNull(), // "awaiting_follow" | "delivered" | "expired"
+    pendingResourceId: uuid("pending_resource_id").references(() => dmResources.id, {
+      onDelete: "set null",
+    }),
+    pendingCommentId: text("pending_comment_id"),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("dm_states_account_sender_idx").on(table.accountId, table.senderIgsid),
+    index("dm_states_state_idx").on(table.state),
+    index("dm_states_expires_idx").on(table.expiresAt),
+  ],
+);
+
+// TTL cache for the Meta "is_user_follow_business" check. The User Profile
+// API is rate-limited and the result rarely changes within a session, so
+// we cache each lookup for 1 hour by default.
+export const followerStatusCache = pgTable(
+  "follower_status_cache",
+  {
+    igUserId: text("ig_user_id").notNull(), // the IG business account we asked about
+    senderIgsid: text("sender_igsid").notNull(), // the follower we asked about
+    isFollower: boolean("is_follower").notNull(),
+    checkedAt: timestamp("checked_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("follower_cache_lookup_idx").on(table.igUserId, table.senderIgsid),
+    index("follower_cache_expires_idx").on(table.expiresAt),
+  ],
+);
+
 export type PostStatus = (typeof postStatusEnum.enumValues)[number];
 export type Role = (typeof roleEnum.enumValues)[number];
+export type DmConversationState = "awaiting_follow" | "delivered" | "expired";

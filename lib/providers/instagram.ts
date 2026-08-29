@@ -251,6 +251,24 @@ export class InstagramProvider {
     });
   }
 
+  // --- Follower check (User Profile API) -----------------------------------
+  //
+  // Returns true if the given Instagram Scoped User ID follows this
+  // business account. The Meta User Profile API:
+  //   GET /{ig-user-id}?fields=is_user_follow_business
+  //
+  // Throws InstagramError on rate limit (code 4) or auth errors so the
+  // caller (lib/follower-check.ts) can fail open / closed as appropriate.
+  async isUserFollowBusiness(senderIgsid: string): Promise<boolean> {
+    if (!senderIgsid) {
+      throw new InstagramError("INVALID_INPUT", "senderIgsid is required");
+    }
+    const data = await this.getNode(senderIgsid, {
+      fields: "is_user_follow_business",
+    });
+    return data["is_user_follow_business"] === true;
+  }
+
   // --- Messaging (Send + Reply) ---
 
   async sendTextMessage(
