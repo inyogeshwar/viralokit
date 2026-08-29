@@ -11,6 +11,7 @@ const isProtectedRoute = createRouteMatcher([
   "/settings(.*)",
   "/onboarding(.*)",
   "/help(.*)",
+  "/connect(.*)",
   "/api/((?!status|instagram/callback|webhooks/instagram|contact).*)",
 ]);
 

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 1100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <!-- Background -->
+  <rect width="920" height="1100" fill="#fafafa"/>
+
+  <!-- Decorative corner ribbon -->
+  <rect x="0" y="0" width="920" height="6" fill="#f43f5e"/>
+  <rect x="0" y="6" width="920" height="2" fill="#fb7185" opacity="0.5"/>
+
+  <!-- Header -->
+  <g transform="translate(40, 50)">
+    <text x="0" y="0" font-size="36" font-weight="800" fill="#0f172a">Done bhai ✓</text>
+    <text x="0" y="32" font-size="20" font-weight="600" fill="#475569">/connect page + 3-card redesign live.</text>
+  </g>
+
+  <!-- Files Added Section -->
+  <g transform="translate(40, 140)">
+    <text x="0" y="0" font-size="20" font-weight="700" fill="#0f172a">📁 Files added</text>
+
+    <g transform="translate(0, 30)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+      <!-- file icon -->
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#f43f5e" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#f43f5e"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#f43f5e" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">components/social-icon.tsx</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">Inline SVG brand glyphs for Instagram, Facebook, "Both".</text>
+      <text x="60" y="76" font-size="12" fill="#94a3b8" font-style="italic">fill="currentColor" so caller controls color via className.</text>
+    </g>
+
+    <g transform="translate(0, 145)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#f43f5e" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#f43f5e"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#f43f5e" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">components/connect-account-cards.tsx</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">3-card grid + "Meta Business Partner / Tech Provider" trust strip.</text>
+    </g>
+
+    <g transform="translate(0, 260)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#f43f5e" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#f43f5e"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#f43f5e" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#f43f5e" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">app/(dashboard)/connect/page.tsx</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">Focused connect screen, server component.</text>
+      <text x="60" y="76" font-size="12" fill="#94a3b8" font-style="italic">Redirects to /accounts if any account is already connected.</text>
+    </g>
+  </g>
+
+  <!-- Files Modified Section -->
+  <g transform="translate(40, 540)">
+    <text x="0" y="0" font-size="20" font-weight="700" fill="#0f172a">✏️ Files modified</text>
+
+    <g transform="translate(0, 30)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#fefce8" stroke="#fde047"/>
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#eab308" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#eab308"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#eab308" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">proxy.ts</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">Added /connect(.*) to the protected matcher.</text>
+    </g>
+
+    <g transform="translate(0, 145)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#fefce8" stroke="#fde047"/>
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#eab308" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#eab308"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#eab308" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">app/(dashboard)/accounts/page.tsx</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">Inserted &lt;ConnectAccountCards /&gt; between the success/error banners</text>
+      <text x="60" y="76" font-size="13" fill="#64748b">and the existing two-column card grid. AddAccountForm still sits below.</text>
+    </g>
+
+    <g transform="translate(0, 260)">
+      <rect x="0" y="0" width="840" height="100" rx="10" fill="#fefce8" stroke="#fde047"/>
+      <g transform="translate(20, 20)">
+        <rect x="0" y="0" width="24" height="32" rx="3" fill="#eab308" opacity="0.15"/>
+        <rect x="0" y="0" width="24" height="6" rx="2" fill="#eab308"/>
+        <line x1="6" y1="14" x2="18" y2="14" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="18" y2="20" stroke="#eab308" stroke-width="1.5"/>
+        <line x1="6" y1="26" x2="14" y2="26" stroke="#eab308" stroke-width="1.5"/>
+      </g>
+      <text x="60" y="34" font-size="15" font-weight="600" fill="#0f172a">app/(dashboard)/dashboard/page.tsx</text>
+      <text x="60" y="56" font-size="13" fill="#64748b">Empty-state CTA now links to /connect instead of /accounts.</text>
+    </g>
+  </g>
+
+  <!-- Visual Result Section -->
+  <g transform="translate(40, 940)">
+    <text x="0" y="0" font-size="18" font-weight="700" fill="#0f172a">🎨 Visual result (matches the inspiration)</text>
+
+    <!-- 3 card mock -->
+    <g transform="translate(0, 20)">
+      <!-- Instagram card -->
+      <rect x="0" y="0" width="270" height="60" rx="8" fill="#fff1f2" stroke="#f43f5e" stroke-width="2"/>
+      <circle cx="22" cy="30" r="14" fill="#f43f5e" opacity="0.15"/>
+      <circle cx="22" cy="30" r="6" fill="#f43f5e"/>
+      <text x="44" y="26" font-size="12" font-weight="700" fill="#0f172a">Instagram</text>
+      <text x="44" y="42" font-size="10" fill="#64748b">Real OAuth ✓</text>
+
+      <!-- Facebook card -->
+      <rect x="285" y="0" width="270" height="60" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 4"/>
+      <circle cx="307" cy="30" r="14" fill="#3b82f6" opacity="0.15"/>
+      <circle cx="307" cy="30" r="6" fill="#3b82f6"/>
+      <text x="329" y="26" font-size="12" font-weight="700" fill="#0f172a">Facebook</text>
+      <text x="329" y="42" font-size="10" fill="#64748b">Coming soon ⏳</text>
+
+      <!-- Both card -->
+      <rect x="570" y="0" width="270" height="60" rx="8" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+      <circle cx="592" cy="30" r="14" fill="#0f172a" opacity="0.15"/>
+      <circle cx="592" cy="30" r="6" fill="#0f172a"/>
+      <text x="614" y="26" font-size="12" font-weight="700" fill="#0f172a">Both</text>
+      <text x="614" y="42" font-size="10" fill="#64748b">Real OAuth ✓</text>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(40, 1060)">
+    <text x="0" y="0" font-size="11" fill="#94a3b8">ViraloKit · Phase 3 + Connect redesign · All assets served locally from /public</text>
+  </g>
+</svg>

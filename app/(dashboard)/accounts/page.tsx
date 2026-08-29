@@ -1,6 +1,7 @@
 ﻿import { CheckCircle2, Shield, XCircle } from "lucide-react";
 
 import { AddAccountForm } from "@/components/add-account-form";
+import { ConnectAccountCards } from "@/components/connect-account-cards";
 import { RemoveAccountButton } from "@/components/remove-account-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,8 @@ export default async function AccountsPage({
           <XCircle className="size-4 shrink-0" /> {params.error}
         </div>
       ) : null}
+
+      <ConnectAccountCards />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

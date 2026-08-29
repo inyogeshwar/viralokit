@@ -170,7 +170,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <Button asChild>
-              <Link href="/accounts">Connect an account</Link>
+              <Link href="/connect">Connect an account</Link>
             </Button>
           </CardContent>
         </Card>
