@@ -55,7 +55,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const parsed = parseSignedRequest(signedRequest, env.meta.appSecret);
+  const appSecret = env.meta.appSecret || null;
+  if (!appSecret && !env.mockMode) {
+    return NextResponse.json(
+      { ok: false, error: "META_APP_SECRET is not configured" },
+      { status: 500 },
+    );
+  }
+
+  const parsed = parseSignedRequest(signedRequest, appSecret);
   if (!parsed?.user_id) {
     return NextResponse.json(
       { ok: false, error: "Invalid signed_request" },
