@@ -3,15 +3,85 @@ import { env } from "@/lib/env";
 export const GRAPH_BASE = "https://graph.facebook.com";
 export const GRAPH_BASE_INSTAGRAM = "https://graph.instagram.com";
 
+/**
+ * Common Meta Graph API error codes.
+ *
+ * Reference:
+ *   https://developers.facebook.com/docs/graph-api/guides/error-handling
+ *   https://developers.facebook.com/docs/instagram-api/reference/error-codes
+ */
+export const META_ERROR_CODES = {
+  /** Unknown / generic — re-check the message. */
+  UNKNOWN: 1,
+  /** API session is invalid or has expired. The user's access token
+   *  needs to be refreshed or re-issued. */
+  SESSION_INVALID: 102,
+  /** Rate limit hit. Back off and retry with exponential jitter. */
+  RATE_LIMITED: 4,
+  /** Too many calls. Same family as 4 but at the app level. */
+  APP_RATE_LIMITED: 32,
+  /** Invalid OAuth / application secret. */
+  INVALID_OAUTH: 190,
+  /** Permission denied — required scope missing. */
+  PERMISSION_DENIED: 200,
+  /** Generic parameter error. */
+  PARAMETER: 100,
+  /** Invalid page or IG user ID. */
+  INVALID_ID: 803,
+} as const;
+
+export type MetaErrorCode =
+  (typeof META_ERROR_CODES)[keyof typeof META_ERROR_CODES];
+
+/**
+ * Classify a Meta Graph API error code so callers can take the right
+ * action (e.g. mark the account as needing re-auth instead of retrying).
+ */
+export function classifyMetaError(code: number | string | undefined):
+  | "token_expired"
+  | "rate_limited"
+  | "permission_denied"
+  | "parameter"
+  | "not_found"
+  | "unknown" {
+  if (code === META_ERROR_CODES.SESSION_INVALID) return "token_expired";
+  if (code === META_ERROR_CODES.INVALID_OAUTH) return "token_expired";
+  if (code === META_ERROR_CODES.RATE_LIMITED) return "rate_limited";
+  if (code === META_ERROR_CODES.APP_RATE_LIMITED) return "rate_limited";
+  if (code === META_ERROR_CODES.PERMISSION_DENIED) return "permission_denied";
+  if (code === META_ERROR_CODES.PARAMETER) return "parameter";
+  if (code === META_ERROR_CODES.INVALID_ID) return "not_found";
+  return "unknown";
+}
+
 export class InstagramError extends Error {
   code: number | string;
   statusCode?: number;
+  /** Coarse classification — see `classifyMetaError`. */
+  category: ReturnType<typeof classifyMetaError>;
 
   constructor(code: number | string, message: string, statusCode?: number) {
     super(message);
     this.name = "InstagramError";
     this.code = code;
     this.statusCode = statusCode;
+    this.category = classifyMetaError(code);
+  }
+
+  /**
+   * True if this error is recoverable by re-authenticating the user
+   * (their token has expired or been revoked).
+   */
+  isTokenExpired(): boolean {
+    return this.category === "token_expired";
+  }
+
+  /**
+   * True if this is a rate-limit / quota error. The caller should
+   * back off rather than retrying immediately.
+   */
+  isRateLimited(): boolean {
+    return this.category === "rate_limited";
   }
 }
 

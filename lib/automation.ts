@@ -14,6 +14,7 @@ import {
   shouldEscalateToHuman,
   defaultEscalationAck,
 } from "@/lib/escalation";
+import { reportError } from "@/lib/error-reporting";
 
 interface AutomationRule {
   id: string;
@@ -151,6 +152,11 @@ export async function processDmAautomation(
       });
     } catch (err) {
       console.error("[automation] story-mention reply failed", err);
+      await reportError(err, {
+        accountId,
+        feature: "story_mention",
+        workspaceId: account.workspaceId,
+      });
     }
     return;
   }
@@ -208,6 +214,11 @@ export async function processDmAautomation(
     }
   } catch (err) {
     console.error("[automation] escalation error", err);
+    await reportError(err, {
+      accountId,
+      feature: "escalation",
+      workspaceId: account.workspaceId,
+    });
   }
 
   // --- Follow-gate: check the state machine BEFORE the regular rule
@@ -228,6 +239,11 @@ export async function processDmAautomation(
   } catch (err) {
     // Never let a follow-gate error break the regular flow.
     console.error("[automation] follow-gate error", err);
+    await reportError(err, {
+      accountId,
+      feature: "follow_gate",
+      workspaceId: account.workspaceId,
+    });
   }
 
   const rules = await db.query.autoReplyRules.findMany({
@@ -301,8 +317,14 @@ export async function processDmAautomation(
         triggerCount: (bestMatch as unknown as { triggerCount: number }).triggerCount + 1,
       })
       .where(eq(schema.autoReplyRules.id, bestMatch.id));
-  } catch {
+  } catch (err) {
     // Silently fail — don't crash webhook
+    console.error("[automation] dm reply failed", err);
+    await reportError(err, {
+      accountId,
+      feature: "dm_reply",
+      workspaceId: account.workspaceId,
+    });
   }
 }
 
@@ -403,5 +425,10 @@ export async function processCommentAutomation(
     // server logs and via Sentry. The comment stays `replied = false`
     // so a future delivery can retry the same rule.
     console.error("[automation] comment reply failed", err);
+    await reportError(err, {
+      accountId,
+      feature: "comment_reply",
+      workspaceId: account.workspaceId,
+    });
   }
 }
