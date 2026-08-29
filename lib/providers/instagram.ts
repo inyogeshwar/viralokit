@@ -746,7 +746,7 @@ export class InstagramProvider {
   // Reference:
   //   https://developers.facebook.com/documentation/business-messaging/instagram-messaging/features/story-mention
 
-  async replyToStoryMention(storyId: string, text: string) {
+  async replyToStoryMention(recipientId: string, text: string) {
     // Per Meta docs, the recipient of a story-mention reply is the
     // user who posted the story — extracted from the webhook payload
     // upstream and passed in via the `sender.id` field. This helper
@@ -756,7 +756,7 @@ export class InstagramProvider {
     if (text.length > 1000) {
       throw new Error("replyToStoryMention: text exceeds 1000 char limit");
     }
-    return this.sendTextMessage("", text, { messagingType: "RESPONSE" });
+    return this.sendTextMessage(recipientId, text, { messagingType: "RESPONSE" });
   }
 
   // --- Ice Breakers (Phase 4) ---------------------------------------------
