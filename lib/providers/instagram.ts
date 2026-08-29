@@ -44,10 +44,18 @@ export function classifyMetaError(code: number | string | undefined):
   | "parameter"
   | "not_found"
   | "unknown" {
-  if (code === META_ERROR_CODES.SESSION_INVALID) return "token_expired";
-  if (code === META_ERROR_CODES.INVALID_OAUTH) return "token_expired";
-  if (code === META_ERROR_CODES.RATE_LIMITED) return "rate_limited";
-  if (code === META_ERROR_CODES.APP_RATE_LIMITED) return "rate_limited";
+  const n =
+    typeof code === "string" && code.trim() !== "" ? Number(code) : code;
+  if (typeof n !== "number" || !Number.isFinite(n)) return "unknown";
+
+  if (n === META_ERROR_CODES.SESSION_INVALID) return "token_expired";
+  if (n === META_ERROR_CODES.INVALID_OAUTH) return "token_expired";
+  if (n === META_ERROR_CODES.RATE_LIMITED) return "rate_limited";
+  if (n === META_ERROR_CODES.APP_RATE_LIMITED) return "rate_limited";
+  if (n === META_ERROR_CODES.PERMISSION_DENIED) return "permission_denied";
+  if (n === META_ERROR_CODES.PARAMETER) return "parameter";
+  if (n === META_ERROR_CODES.INVALID_ID) return "not_found";
+  return "unknown";
   if (code === META_ERROR_CODES.PERMISSION_DENIED) return "permission_denied";
   if (code === META_ERROR_CODES.PARAMETER) return "parameter";
   if (code === META_ERROR_CODES.INVALID_ID) return "not_found";
