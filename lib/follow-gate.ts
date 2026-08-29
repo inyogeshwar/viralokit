@@ -279,10 +279,12 @@ export async function handleFollowGate(
             ttlMs: stateTtl,
           });
           // Bump delivery counter on the resource.
+          const currentDeliveryCount =
+            (resource as unknown as { deliveryCount?: number }).deliveryCount ?? 0;
           await db
             .update(schema.dmResources)
             .set({
-              deliveryCount: sql`${schema.dmResources.deliveryCount} + 1`,
+              deliveryCount: currentDeliveryCount + 1,
               updatedAt: new Date(),
             })
             .where(eq(schema.dmResources.id, resource.id));
