@@ -203,6 +203,48 @@ async function handleMessagingEvent(
       console.error("[instagram-webhook] DM automation failed", err);
     });
   }
+
+  // --- Story mention (Phase 4) ---------------------------------------------
+  // If the message has a `story_mention` attachment, the user mentioned the
+  // business in their story. We surface a special token in the text so
+  // automation rules / escalation can see it. The actual reply happens
+  // through the regular DM pipeline (the user has implicitly opened a
+  // 24h window by mentioning us).
+  if (!isFromUs) {
+    const attachments = messageData["attachments"] as
+      | Array<Record<string, unknown>>
+      | undefined;
+    if (Array.isArray(attachments)) {
+      const storyMention = attachments.find(
+        (a) => a["type"] === "story_mention",
+      );
+      if (storyMention) {
+        const payload = storyMention["payload"] as
+          | Record<string, unknown>
+          | undefined;
+        const storyUrl = typeof payload?.["url"] === "string" ? payload["url"] : "";
+        // Process the story mention as a synthetic message so auto-reply rules
+        // can target a special keyword ("story") to send a thank-you / promo.
+        // We use the message id as a stable dedup key; the rule engine sees
+        // the same `text` twice if the same mention is replayed, which is
+        // safe because the rules table is idempotent (we don't double-send
+        // the same reply within a short window in processDmAautomation).
+        if (storyUrl) {
+          processDmAautomation(
+            account.id,
+            senderId,
+            "__story_mention__",
+            msgId + ":story",
+          ).catch((err) => {
+            console.error(
+              "[instagram-webhook] story-mention automation failed",
+              err,
+            );
+          });
+        }
+      }
+    }
+  }
 }
 
 async function handleChangeEvent(

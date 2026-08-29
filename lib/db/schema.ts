@@ -279,11 +279,13 @@ export const dmConversationStates = pgTable(
       .references(() => socialAccounts.id, { onDelete: "cascade" })
       .notNull(),
     senderIgsid: text("sender_igsid").notNull(), // Instagram Scoped User ID
-    state: text("state").notNull(), // "awaiting_follow" | "delivered" | "expired"
+    state: text("state").notNull(), // "awaiting_follow" | "delivered" | "expired" | "escalated"
     pendingResourceId: uuid("pending_resource_id").references(() => dmResources.id, {
       onDelete: "set null",
     }),
     pendingCommentId: text("pending_comment_id"),
+    escalationReason: text("escalation_reason"),
+    escalatedAt: timestamp("escalated_at", { withTimezone: true }),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }).defaultNow().notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -316,4 +318,4 @@ export const followerStatusCache = pgTable(
 
 export type PostStatus = (typeof postStatusEnum.enumValues)[number];
 export type Role = (typeof roleEnum.enumValues)[number];
-export type DmConversationState = "awaiting_follow" | "delivered" | "expired";
+export type DmConversationState = "awaiting_follow" | "delivered" | "expired" | "escalated";

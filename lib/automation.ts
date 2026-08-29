@@ -10,6 +10,10 @@ import {
 import { canReplyInWindow } from "@/lib/messaging-window";
 import { withBotDisclosure } from "@/lib/bot-disclosure";
 import { handleFollowGate } from "@/lib/follow-gate";
+import {
+  shouldEscalateToHuman,
+  defaultEscalationAck,
+} from "@/lib/escalation";
 
 interface AutomationRule {
   id: string;
@@ -105,6 +109,106 @@ export async function processDmAautomation(
   // Check messaging window
   const windowStatus = await canReplyInWindow(accountId, senderIgsid);
   if (!windowStatus.canReply) return;
+
+  // --- Skip automation if this conversation is already escalated. The user
+  // asked for a human; we replied once; further messages should reach the
+  // human directly (or sit in the inbox).
+  const priorState = await db.query.dmConversationStates.findFirst({
+    where: and(
+      eq(schema.dmConversationStates.accountId, accountId),
+      eq(schema.dmConversationStates.senderIgsid, senderIgsid),
+      eq(schema.dmConversationStates.state, "escalated"),
+    ),
+  });
+  if (priorState) {
+    return; // conversation is paused for a human
+  }
+
+  // --- Story mention (Phase 4): synthetic message body "__story_mention__".
+  // Send a thank-you / promo reply and return without invoking the regular
+  // rule engine (this is a unique event type, not a user text).
+  if (messageText === "__story_mention__") {
+    try {
+      const token = decryptToken(account.accessToken);
+      const storyProvider = new InstagramProvider({
+        igUserId: account.igUserId,
+        accessToken: token,
+      });
+      // Find a configured "story" trigger rule; fall back to a generic reply.
+      const storyRules = await db.query.autoReplyRules.findMany({
+        where: and(
+          eq(schema.autoReplyRules.accountId, accountId),
+          eq(schema.autoReplyRules.isActive, true),
+          eq(schema.autoReplyRules.trigger, "story_mention"),
+        ),
+        orderBy: [desc(schema.autoReplyRules.priority)],
+      });
+      const storyText =
+        storyRules[0]?.responseText ??
+        "Thanks for the mention!";
+      await storyProvider.sendTextMessage(senderIgsid, storyText, {
+        messagingType: "RESPONSE",
+      });
+    } catch (err) {
+      console.error("[automation] story-mention reply failed", err);
+    }
+    return;
+  }
+
+  // --- Escalation: detect human-handoff keywords BEFORE rule matching.
+  // A user typing "help" or "talk to a person" should never be auto-replied
+  // to with a marketing funnel. Send an acknowledgment, persist escalated
+  // state, then return.
+  try {
+    const esc = shouldEscalateToHuman(messageText);
+    if (esc.shouldEscalate) {
+      const token = decryptToken(account.accessToken);
+      const escProvider = new InstagramProvider({
+        igUserId: account.igUserId,
+        accessToken: token,
+      });
+      await escProvider.sendTextMessage(
+        senderIgsid,
+        defaultEscalationAck(account.name ?? account.username ?? undefined),
+        { messagingType: "RESPONSE" },
+      );
+      // Persist escalated state. We re-use dmConversationStates so a
+      // follow-gate conversation is also "paused" if escalated.
+      const existing = await db.query.dmConversationStates.findFirst({
+        where: and(
+          eq(schema.dmConversationStates.accountId, accountId),
+          eq(schema.dmConversationStates.senderIgsid, senderIgsid),
+        ),
+      });
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7d
+      if (existing) {
+        await db
+          .update(schema.dmConversationStates)
+          .set({
+            state: "escalated",
+            escalationReason: esc.matchedKeyword,
+            escalatedAt: new Date(),
+            lastMessageAt: new Date(),
+            expiresAt,
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.dmConversationStates.id, existing.id));
+      } else {
+        await db.insert(schema.dmConversationStates).values({
+          workspaceId: account.workspaceId,
+          accountId,
+          senderIgsid,
+          state: "escalated",
+          escalationReason: esc.matchedKeyword,
+          escalatedAt: new Date(),
+          expiresAt,
+        });
+      }
+      return;
+    }
+  } catch (err) {
+    console.error("[automation] escalation error", err);
+  }
 
   // --- Follow-gate: check the state machine BEFORE the regular rule
   // matcher. If the user is in a follow-gate conversation (e.g. they said

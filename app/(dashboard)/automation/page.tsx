@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send, FileText, Users } from "lucide-react";
+import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send, FileText, Users, Sparkles } from "lucide-react";
 
 import { DEFAULT_PRIVATE_REPLY_TEMPLATE } from "@/lib/automation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EngagementPanel } from "@/components/engagement-panel";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -307,6 +308,10 @@ export default function AutomationPage() {
           <TabsTrigger value="resources">
             <FileText className="mr-1.5 size-3.5" />
             Resources
+          </TabsTrigger>
+          <TabsTrigger value="engagement">
+            <Sparkles className="mr-1.5 size-3.5" />
+            Engagement
           </TabsTrigger>
         </TabsList>
 
@@ -713,6 +718,10 @@ export default function AutomationPage() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="engagement" className="flex flex-col gap-6">
+          <EngagementPanel setMessage={setMessage} />
         </TabsContent>
       </Tabs>
     </div>

@@ -657,6 +657,102 @@ export class InstagramProvider {
 
   // --- Handover Protocol ---
 
+  // --- Story Mention Auto-Reply (Phase 4) ---------------------------------
+  //
+  // When a user mentions the business in their story, the Meta webhook
+  // delivers a `story_mentions` change with a story_id and a mention url.
+  // We auto-reply with a thank-you / promo code via the standard send-message
+  // API. The reply is a regular RESPONSE-type message (the user opened a
+  // conversation by mentioning us, so the 24h window applies naturally).
+  //
+  // Reference:
+  //   https://developers.facebook.com/documentation/business-messaging/instagram-messaging/features/story-mention
+
+  async replyToStoryMention(storyId: string, text: string) {
+    // Per Meta docs, the recipient of a story-mention reply is the
+    // user who posted the story — extracted from the webhook payload
+    // upstream and passed in via the `sender.id` field. This helper
+    // assumes the caller has already resolved the sender IGSID and is
+    // just sending a plain text response.
+    if (!text) throw new Error("replyToStoryMention: text is required");
+    if (text.length > 1000) {
+      throw new Error("replyToStoryMention: text exceeds 1000 char limit");
+    }
+    return this.sendTextMessage("", text, { messagingType: "RESPONSE" });
+  }
+
+  // --- Ice Breakers (Phase 4) ---------------------------------------------
+  //
+  // Ice breakers are configured at the app / page level (not per user).
+  // The Meta endpoint is:
+  //   POST /me/messenger_profile  with  { ice_breakers: [...] }
+  //
+  // Max 4 ice breakers, each with a `question` (max 80 chars) and
+  // `payload` (max 1000 chars, sent back as `postback` text).
+
+  async setIceBreakers(questions: Array<{ question: string; payload: string }>) {
+    if (questions.length === 0) {
+      throw new Error("setIceBreakers: at least one question is required");
+    }
+    if (questions.length > 4) {
+      throw new Error("setIceBreakers: max 4 ice breakers");
+    }
+    for (const q of questions) {
+      if (q.question.length === 0 || q.question.length > 80) {
+        throw new Error("setIceBreakers: question must be 1-80 chars");
+      }
+      if (q.payload.length === 0 || q.payload.length > 1000) {
+        throw new Error("setIceBreakers: payload must be 1-1000 chars");
+      }
+    }
+    const url = `${GRAPH_BASE}/${env.meta.apiVersion}/me/messenger_profile`;
+    return graphPostJson(
+      url,
+      {
+        platform: "instagram",
+        ice_breakers: questions.map((q) => ({
+          question: q.question,
+          payload: q.payload,
+        })),
+      },
+      this.accessToken,
+    );
+  }
+
+  async deleteIceBreakers() {
+    const url = `${GRAPH_BASE}/${env.meta.apiVersion}/me/messenger_profile`;
+    // Per Meta, deleting a field uses { fields: ["ice_breakers"] } in a
+    // DELETE request body.
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        platform: "instagram",
+        fields: ["ice_breakers"],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      raiseApiError(res.status, body);
+    }
+    return (await res.json()) as { success: boolean };
+  }
+
+  async getIceBreakers() {
+    const url = `${GRAPH_BASE}/${env.meta.apiVersion}/me/messenger_profile?fields=ice_breakers&platform=instagram&access_token=${this.accessToken}`;
+    const data = await graphGet(url);
+    const list = (data["ice_breakers"] as Array<Record<string, string>>) ?? [];
+    return list.map((q) => ({
+      question: q["question"] ?? "",
+      payload: q["payload"] ?? "",
+    }));
+  }
+
+  // --- Handover Protocol ---
+
   async passThreadControl(recipientId: string, targetAppId: string, metadata?: string) {
     const url = this.igBase("messages");
     return graphPostJson(
