@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { EngagementBreakdown } from "@/components/dashboard/engagement-breakdown";
 import { getAccountAnalytics, getMediaAnalytics } from "@/lib/analytics";
 import { getDashboardContext } from "@/lib/context";
 import { formatNumber } from "@/lib/utils";
@@ -17,28 +19,16 @@ import { formatNumber } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 const statColors = [
-  "border-l-violet-500",
-  "border-l-rose-500",
-  "border-l-amber-500",
-  "border-l-emerald-500",
-  "border-l-sky-500",
-  "border-l-pink-500",
+  "from-violet-500/10 to-violet-500/5 text-violet-600 dark:text-violet-400",
+  "from-rose-500/10 to-rose-500/5 text-rose-600 dark:text-rose-400",
+  "from-amber-500/10 to-amber-500/5 text-amber-600 dark:text-amber-400",
+  "from-emerald-500/10 to-emerald-500/5 text-emerald-600 dark:text-emerald-400",
+  "from-sky-500/10 to-sky-500/5 text-sky-600 dark:text-sky-400",
+  "from-pink-500/10 to-pink-500/5 text-pink-600 dark:text-pink-400",
 ];
 
 const statIcons = [Users, Images, Eye, TrendingUp, Heart, Heart];
 const statLabels = ["Followers", "Posts", "Reach", "Profile views", "Accounts engaged", "Total interactions"];
-
-function Bar({ value, max }: { value: number; max: number }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-      <div
-        className="h-full rounded-full bg-primary transition-all"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
 
 export default async function AnalyticsPage({
   searchParams,
@@ -94,7 +84,6 @@ export default async function AnalyticsPage({
     totalShares += (ins["shares"] as number) ?? 0;
     totalSaved += (ins["saved"] as number) ?? 0;
   }
-  const maxEngagement = Math.max(totalLikes, totalComments, totalShares, totalSaved, 1);
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,15 +98,14 @@ export default async function AnalyticsPage({
         {statLabels.map((label, i) => {
           const Icon = statIcons[i];
           return (
-            <Card key={label} className={`border-l-4 ${statColors[i]} py-4`}>
-              <CardContent className="flex flex-col gap-1 px-4">
-                <Icon className="size-4 text-muted-foreground" />
-                <span className="text-2xl font-bold tabular-nums">
-                  {formatNumber(statValues[i] as number | null | undefined)}
-                </span>
-                <span className="text-xs text-muted-foreground">{label}</span>
-              </CardContent>
-            </Card>
+            <StatCard
+              key={label}
+              label={label}
+              value={formatNumber(statValues[i] as number | null | undefined)}
+              icon={Icon}
+              gradient={statColors[i]}
+              delay={i * 0.05}
+            />
           );
         })}
       </div>
@@ -141,28 +129,12 @@ export default async function AnalyticsPage({
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Engagement breakdown</CardTitle>
-          <CardDescription>Likes vs comments vs shares vs saved across your posts.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[
-            { label: "Likes", value: totalLikes, color: "bg-rose-500" },
-            { label: "Comments", value: totalComments, color: "bg-sky-500" },
-            { label: "Shares", value: totalShares, color: "bg-amber-500" },
-            { label: "Saved", value: totalSaved, color: "bg-emerald-500" },
-          ].map((bar) => (
-            <div key={bar.label} className="flex items-center gap-3">
-              <span className="w-20 text-xs font-medium text-muted-foreground">{bar.label}</span>
-              <div className="flex-1">
-                <Bar value={bar.value} max={maxEngagement} />
-              </div>
-              <span className="w-12 text-right text-xs font-bold tabular-nums">{formatNumber(bar.value)}</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <EngagementBreakdown
+        totalLikes={totalLikes}
+        totalComments={totalComments}
+        totalShares={totalShares}
+        totalSaved={totalSaved}
+      />
 
       <Card>
         <CardHeader>

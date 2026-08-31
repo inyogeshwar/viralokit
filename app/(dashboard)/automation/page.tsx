@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bot, Plus, Trash2, Loader2, Power, PowerOff, MessageSquare, AtSign, Send, FileText, Users, Sparkles } from "lucide-react";
+import { Bot, Plus, Trash2, Loader2, MessageSquare, AtSign, Send, FileText, Users, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { DEFAULT_PRIVATE_REPLY_TEMPLATE } from "@/lib/automation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 interface DmResource {
@@ -509,7 +511,12 @@ export default function AutomationPage() {
             {rules.map((rule) => {
               const Icon = channelIcons[rule.channel] ?? MessageSquare;
               return (
-                <div key={rule.id} className="flex items-center justify-between rounded-md border p-3">
+                <motion.div
+                  key={rule.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center justify-between rounded-md border p-3 transition-colors hover:border-foreground/20"
+                >
                   <div className="flex items-center gap-3">
                     <Icon className="size-4 text-muted-foreground" />
                     <div>
@@ -530,15 +537,17 @@ export default function AutomationPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="size-7" onClick={() => toggleRule(rule.id, rule.isActive)}>
-                      {rule.isActive ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={rule.isActive}
+                      onCheckedChange={() => toggleRule(rule.id, rule.isActive)}
+                      aria-label={`Toggle ${rule.name}`}
+                    />
                     <Button variant="ghost" size="icon" className="size-7" onClick={() => deleteRule(rule.id)}>
                       <Trash2 className="size-3.5 text-muted-foreground" />
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </CardContent>
@@ -686,7 +695,7 @@ export default function AutomationPage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 {resources.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between rounded-md border p-3">
+                  <div key={r.id} className="flex items-center justify-between rounded-md border p-3 transition-colors hover:border-foreground/20">
                     <div className="flex items-center gap-3">
                       <FileText className="size-4 text-muted-foreground" />
                       <div>
@@ -705,10 +714,12 @@ export default function AutomationPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="size-7" onClick={() => toggleResource(r.id, r.isActive)}>
-                        {r.isActive ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={r.isActive}
+                        onCheckedChange={() => toggleResource(r.id, r.isActive)}
+                        aria-label={`Toggle ${r.name}`}
+                      />
                       <Button variant="ghost" size="icon" className="size-7" onClick={() => deleteResource(r.id)}>
                         <Trash2 className="size-3.5 text-muted-foreground" />
                       </Button>

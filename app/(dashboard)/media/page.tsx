@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Cloud, Images, Loader2, Trash2 } from "lucide-react";
+import { Check, Cloud, Images, Loader2, Trash2, ZoomIn } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface CloudinaryResource {
   publicId: string;
@@ -32,6 +40,7 @@ export default function MediaPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [preview, setPreview] = useState<CloudinaryResource | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -184,11 +193,18 @@ export default function MediaPage() {
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {resources.map((r) => (
-                <figure
+                <motion.figure
                   key={r.publicId}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
                   className={`group relative overflow-hidden rounded-lg border-2 transition-all ${selected.has(r.publicId) ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-border"}`}
                 >
-                  <button onClick={() => toggle(r.publicId)} className="block w-full text-left">
+                  <button
+                    onClick={() => setPreview(r)}
+                    className="block w-full text-left"
+                    aria-label="Preview image"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={r.url}
@@ -197,22 +213,48 @@ export default function MediaPage() {
                       loading="lazy"
                     />
                   </button>
-                  {selected.has(r.publicId) && (
-                    <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                      <Check className="size-3" />
-                    </div>
-                  )}
+                  <button
+                    onClick={() => toggle(r.publicId)}
+                    className={`absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full border text-primary-foreground transition-all ${selected.has(r.publicId) ? "border-primary bg-primary" : "border-foreground/20 bg-background/70 text-foreground/70 hover:bg-background"}`}
+                    aria-label={selected.has(r.publicId) ? "Deselect image" : "Select image"}
+                  >
+                    <Check className="size-3.5" />
+                  </button>
                   <figcaption className="flex items-center justify-between px-2 py-1.5">
                     <span className="truncate text-xs text-muted-foreground">
                       {formatBytes(r.bytes)} · {r.format.toUpperCase()}
                     </span>
+                    <ZoomIn className="size-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
                   </figcaption>
-                </figure>
+                </motion.figure>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="truncate">
+              {preview?.publicId.split("/").pop() ?? "Image"}
+            </DialogTitle>
+            <DialogDescription>
+              {preview ? `${formatBytes(preview.bytes)} · ${preview.width}×${preview.height} · ${preview.format.toUpperCase()}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {preview && (
+            <div className="overflow-hidden rounded-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview.url}
+                alt={preview.publicId.split("/").pop() ?? "image"}
+                className="h-auto max-h-[60vh] w-full object-contain"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

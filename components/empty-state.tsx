@@ -1,5 +1,8 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -27,7 +30,10 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
       className={cn(
         "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/30 px-6 py-12 text-center",
         className,
@@ -69,6 +75,6 @@ export function EmptyState({
           {secondaryLabel}
         </Link>
       ) : null}
-    </div>
+    </motion.div>
   );
 }

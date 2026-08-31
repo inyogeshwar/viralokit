@@ -1,40 +1,14 @@
 import Link from "next/link";
 import { Eye, Heart, Image, Megaphone, PenSquare, TrendingUp, Users, Zap } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { RecentPostsCard } from "@/components/dashboard/recent-posts";
 import { getAccountAnalytics, listPosts } from "@/lib/analytics";
 import { getDashboardContext } from "@/lib/context";
-import { formatDateTime, formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, "success" | "warning" | "info" | "destructive" | "secondary"> = {
-    published: "success",
-    scheduled: "info",
-    draft: "secondary",
-    processing: "warning",
-    partial: "warning",
-    failed: "destructive",
-  };
-  return <Badge variant={map[status] ?? "secondary"}>{status}</Badge>;
-}
 
 const statColors = [
   "from-violet-500/10 to-violet-500/5 text-violet-600 dark:text-violet-400",
@@ -56,12 +30,12 @@ export default async function DashboardPage() {
   const insights = (analytics?.insights ?? {}) as Record<string, unknown>;
 
   const stats = [
-    { label: "Followers", value: account["followersCount"], icon: Users },
-    { label: "Posts", value: account["mediaCount"], icon: Image },
-    { label: "Reach", value: insights["reach"], icon: Eye },
-    { label: "Profile views", value: insights["profileViews"], icon: TrendingUp },
-    { label: "Total interactions", value: insights["totalInteractions"], icon: Heart },
-    { label: "Accounts engaged", value: insights["accountsEngaged"], icon: Megaphone },
+    { label: "Followers", value: account["followersCount"], icon: Users, gradient: statColors[0] },
+    { label: "Posts", value: account["mediaCount"], icon: Image, gradient: statColors[1] },
+    { label: "Reach", value: insights["reach"], icon: Eye, gradient: statColors[2] },
+    { label: "Profile views", value: insights["profileViews"], icon: TrendingUp, gradient: statColors[3] },
+    { label: "Total interactions", value: insights["totalInteractions"], icon: Heart, gradient: statColors[4] },
+    { label: "Accounts engaged", value: insights["accountsEngaged"], icon: Megaphone, gradient: statColors[5] },
   ];
 
   return (
@@ -97,83 +71,32 @@ export default async function DashboardPage() {
         <>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
             {stats.map((stat, i) => (
-              <Card key={stat.label} className="relative overflow-hidden py-4">
-                <div className={`absolute inset-0 bg-gradient-to-br ${statColors[i]} opacity-50`} />
-                <CardContent className="relative flex flex-col gap-1 px-4">
-                  <stat.icon className="size-4 text-muted-foreground" />
-                  <span className="text-2xl font-bold tabular-nums">
-                    {formatNumber(stat.value as number | null | undefined)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{stat.label}</span>
-                </CardContent>
-              </Card>
+              <StatCard
+                key={stat.label}
+                label={stat.label}
+                value={formatNumber(stat.value as number | null | undefined)}
+                icon={stat.icon}
+                gradient={stat.gradient}
+                delay={i * 0.05}
+              />
             ))}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent posts</CardTitle>
-              <CardDescription>Latest posts across your connected account.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Post</TableHead>
-                      <TableHead className="hidden sm:table-cell">Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="hidden md:table-cell">Scheduled</TableHead>
-                      <TableHead className="hidden md:table-cell">Published</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {posts.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                          No posts yet. Create your first post from the compose page.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      posts.map((post) => (
-                        <TableRow key={post.id}>
-                          <TableCell className="max-w-[200px] truncate font-medium sm:max-w-[260px]">
-                            {post.caption || "(no caption)"}
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell capitalize">{post.mediaType}</TableCell>
-                          <TableCell>
-                            <StatusBadge status={post.status} />
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell text-muted-foreground">
-                            {formatDateTime(post.scheduledAt?.toISOString() ?? "")}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell text-muted-foreground">
-                            {formatDateTime(post.publishedAt?.toISOString() ?? "")}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <RecentPostsCard posts={posts} />
         </>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <Users className="size-10 text-muted-foreground" />
-            <div>
-              <p className="font-semibold">No Instagram account connected</p>
-              <p className="text-sm text-muted-foreground">
-                Connect via Instagram OAuth or paste a dev token to get started.
-              </p>
-            </div>
-            <Button asChild>
-              <Link href="/connect">Connect an account</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed bg-muted/30 px-6 py-12 text-center">
+          <Users className="size-10 text-muted-foreground" />
+          <div>
+            <p className="font-semibold">No Instagram account connected</p>
+            <p className="text-sm text-muted-foreground">
+              Connect via Instagram OAuth or paste a dev token to get started.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/connect">Connect an account</Link>
+          </Button>
+        </div>
       )}
     </div>
   );

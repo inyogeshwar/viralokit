@@ -1,30 +1,18 @@
 import Link from "next/link";
-import { CheckCircle2, Circle, AtSign, PenSquare, Calendar, Zap, ArrowRight } from "lucide-react";
 
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 
 import { getDb, schema } from "@/lib/db";
 import { ensureWorkspace } from "@/lib/workspace";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { PRODUCT_NAME } from "@/lib/legal";
+import { OnboardingWizard, type WizardStep } from "@/components/onboarding-wizard";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: `Get started · ${PRODUCT_NAME}`,
   description: "Set up your account in four quick steps.",
-};
-
-type Step = {
-  key: string;
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-  icon: React.ComponentType<{ className?: string }>;
-  done: boolean;
 };
 
 export default async function OnboardingPage() {
@@ -76,7 +64,7 @@ export default async function OnboardingPage() {
     }
   }
 
-  const steps: Step[] = [
+  const steps: WizardStep[] = [
     {
       key: "connect",
       title: "Connect your Instagram",
@@ -84,7 +72,6 @@ export default async function OnboardingPage() {
         "Link the Instagram business account you want to publish to. You can add more later.",
       href: "/dashboard/accounts",
       cta: "Connect account",
-      icon: AtSign,
       done: hasAccount,
     },
     {
@@ -94,7 +81,6 @@ export default async function OnboardingPage() {
         "Draft a caption and drop in an image or short video. The composer saves as a draft automatically.",
       href: "/dashboard/compose",
       cta: "Open composer",
-      icon: PenSquare,
       done: hasPost,
     },
     {
@@ -104,7 +90,6 @@ export default async function OnboardingPage() {
         "Pick a date and time — we will publish it for you. Times are shown in your local timezone.",
       href: "/dashboard/calendar",
       cta: "Open calendar",
-      icon: Calendar,
       done: hasScheduled,
     },
     {
@@ -114,7 +99,6 @@ export default async function OnboardingPage() {
         "Auto-publish new posts by hashtag, or auto-reply to comments that match a rule.",
       href: "/dashboard/automations",
       cta: "Browse automations",
-      icon: Zap,
       done: hasRule,
     },
   ];
@@ -140,69 +124,13 @@ export default async function OnboardingPage() {
         </p>
       </header>
 
-      <div className="rounded-lg border bg-muted/20 p-4">
-        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {completed} of {total} complete
-          </span>
-          <span>{pct}%</span>
-        </div>
-        <div
-          className="h-2 w-full overflow-hidden rounded-full bg-muted"
-          role="progressbar"
-          aria-valuenow={pct}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Onboarding progress"
-        >
-          <div
-            className="h-full rounded-full bg-emerald-500 transition-all"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-
-      <ol className="grid gap-4">
-        {steps.map((step, i) => {
-          const Icon = step.icon;
-          return (
-            <li key={step.key}>
-              <Card>
-                <CardHeader className="flex flex-row items-start gap-3 space-y-0">
-                  <div
-                    className={`mt-1 flex size-9 shrink-0 items-center justify-center rounded-full ${
-                      step.done
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {step.done ? (
-                      <CheckCircle2 className="size-5" />
-                    ) : (
-                      <Circle className="size-5" />
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <span className="text-muted-foreground">{i + 1}.</span> {step.title}
-                    </CardTitle>
-                    <CardDescription>{step.description}</CardDescription>
-                  </div>
-                  <Icon className="size-5 shrink-0 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <Button asChild variant={step.done ? "outline" : "default"}>
-                    <Link href={step.href}>
-                      {step.done ? "Review" : step.cta}
-                      <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </li>
-          );
-        })}
-      </ol>
+      <OnboardingWizard
+        steps={steps}
+        completed={completed}
+        total={total}
+        pct={pct}
+        allDone={allDone}
+      />
 
       <p className="text-center text-xs text-muted-foreground">
         Need a hand?{" "}

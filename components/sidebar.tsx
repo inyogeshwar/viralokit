@@ -8,6 +8,7 @@ import {
   Images,
   Inbox,
   LayoutDashboard,
+  LifeBuoy,
   Menu,
   PenSquare,
   Settings,
@@ -15,76 +16,103 @@ import {
   X,
   Zap,
   Bot,
+  Rocket,
 } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/compose", label: "Compose", icon: PenSquare },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/media", label: "Media", icon: Images },
-  { href: "/inbox", label: "Inbox", icon: Inbox },
-  { href: "/automation", label: "Automation", icon: Bot },
-  { href: "/accounts", label: "Accounts", icon: Users },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
+const navGroups = [
+  {
+    label: "Main",
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/compose", label: "Compose", icon: PenSquare },
+      { href: "/calendar", label: "Calendar", icon: CalendarDays },
+    ],
+  },
+  {
+    label: "Manage",
+    items: [
+      { href: "/media", label: "Media", icon: Images },
+      { href: "/inbox", label: "Inbox", icon: Inbox },
+      { href: "/automation", label: "Automation", icon: Bot },
+      { href: "/accounts", label: "Accounts", icon: Users },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [{ href: "/analytics", label: "Analytics", icon: BarChart3 }],
+  },
+  {
+    label: "Preferences",
+    items: [
+      { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/help", label: "Help Center", icon: LifeBuoy },
+      { href: "/onboarding", label: "Get Started", icon: Rocket },
+    ],
+  },
 ];
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function isActive(pathname: string, href: string) {
+  return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+}
+
+function NavGroup({ group, onNavigate }: { group: (typeof navGroups)[number]; onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-1">
-      {navItems.map((item) => {
-        const isActive =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+    <div className="flex flex-col gap-1">
+      <p className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+        {group.label}
+      </p>
+      {group.items.map((item) => {
+        const active = isActive(pathname, item.href);
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-              isActive
-                ? "bg-primary/10 text-primary shadow-sm"
+              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              active
+                ? "text-primary"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
-            <item.icon className="size-4 shrink-0" />
-            {item.label}
+            {active && (
+              <motion.span
+                layoutId={`sidebar-pill-${group.label}`}
+                className="absolute inset-0 rounded-lg bg-primary/10"
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              />
+            )}
+            <item.icon className="relative z-10 size-4 shrink-0" />
+            <span className="relative z-10">{item.label}</span>
           </Link>
         );
       })}
-    </nav>
+    </div>
   );
 }
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-56 shrink-0 flex-col border-r bg-card px-3 py-4 md:flex">
-      <Link href="/dashboard" className="mb-6 flex items-center gap-2 px-2 text-lg font-bold">
+    <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-4 md:flex">
+      <Link href="/dashboard" className="mb-4 flex items-center gap-2 px-2 text-lg font-bold">
         <Zap className="size-5 text-rose-500" />
         ViraloKit
       </Link>
-      <NavLinks />
-      <div className="mt-auto space-y-4 pt-4">
-        <nav className="flex flex-col gap-1 text-xs text-muted-foreground">
-          <Link href="/help" className="hover:text-foreground transition-colors px-3 py-1">Help center</Link>
-          <Link href="/onboarding" className="hover:text-foreground transition-colors px-3 py-1">Onboarding</Link>
-          <Link href="/about" className="hover:text-foreground transition-colors px-3 py-1">About</Link>
-          <Link href="/privacy-policy" className="hover:text-foreground transition-colors px-3 py-1">Privacy Policy</Link>
-          <Link href="/terms-of-service" className="hover:text-foreground transition-colors px-3 py-1">Terms of Service</Link>
-          <Link href="/acceptable-use" className="hover:text-foreground transition-colors px-3 py-1">Acceptable use</Link>
-          <Link href="/security" className="hover:text-foreground transition-colors px-3 py-1">Security</Link>
-          <Link href="/contact" className="hover:text-foreground transition-colors px-3 py-1">Contact</Link>
-        </nav>
-        <ThemeToggle />
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        {navGroups.map((group) => (
+          <NavGroup key={group.label} group={group} />
+        ))}
+      </div>
+      <div className="mt-4 border-t pt-4">
+        <ThemeToggle className="w-full" />
       </div>
     </aside>
   );
@@ -95,12 +123,12 @@ export function MobileSidebar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden size-8">
+        <Button variant="ghost" size="icon" className="size-8 md:hidden">
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-4">
-        <div className="mb-6 flex items-center justify-between">
+      <SheetContent side="left" className="w-72 p-4">
+        <div className="mb-2 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold" onClick={() => setOpen(false)}>
             <Zap className="size-5 text-rose-500" />
             ViraloKit
@@ -109,8 +137,12 @@ export function MobileSidebar() {
             <X className="size-4" />
           </Button>
         </div>
-        <NavLinks onNavigate={() => setOpen(false)} />
-        <div className="mt-4">
+        <div className="flex flex-col gap-4 overflow-y-auto pb-6">
+          {navGroups.map((group) => (
+            <NavGroup key={group.label} group={group} onNavigate={() => setOpen(false)} />
+          ))}
+        </div>
+        <div className="border-t pt-4">
           <ThemeToggle />
         </div>
       </SheetContent>
@@ -128,23 +160,28 @@ export function MobileBottomNav() {
     { href: "/analytics", label: "Stats", icon: BarChart3 },
   ];
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t bg-card/95 px-2 py-1 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t bg-card/95 px-2 py-1.5 backdrop-blur md:hidden">
       {items.map((item) => {
-        const isActive =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+        const active =
+          item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-colors",
-              isActive ? "text-primary" : "text-muted-foreground",
+              "relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-colors",
+              active ? "text-primary" : "text-muted-foreground",
             )}
           >
-            <item.icon className="size-5" />
-            {item.label}
+            {active && (
+              <motion.span
+                layoutId="bottom-nav-active"
+                className="absolute inset-0 rounded-lg bg-primary/10"
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              />
+            )}
+            <item.icon className="relative z-10 size-5" />
+            <span className="relative z-10">{item.label}</span>
           </Link>
         );
       })}

@@ -1,6 +1,4 @@
 ﻿import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
-import { SignInButton, UserButton } from "@clerk/nextjs";
 import {
   BarChart3,
   CalendarDays,
@@ -17,16 +15,22 @@ import {
   Check,
   Star,
   Globe,
-  Smartphone,
   TrendingUp,
-  MessageSquare,
   AtSign,
-  Eye,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Reveal,
+  StaggerGroup,
+  StaggerItem,
+  AnimatedCounter,
+} from "@/components/landing/animated";
+import { LandingHeader } from "@/components/landing/header";
+import { Hero } from "@/components/landing/hero";
+import { CTAButton } from "@/components/landing/cta-button";
 
 const features = [
   {
@@ -95,10 +99,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "100%", label: "Free Forever" },
-  { value: "50+", label: "API Methods" },
-  { value: "24/7", label: "Automation" },
-  { value: "< 1s", label: "Deploy Time" },
+  { value: 100, suffix: "%", label: "Free Forever" },
+  { value: 50, suffix: "+", label: "API Methods" },
+  { value: 24, suffix: "/7", label: "Automation" },
+  { value: 1, suffix: "s", label: "Deploy Time" },
 ];
 
 const steps = [
@@ -192,304 +196,233 @@ const testimonials = [
   },
 ];
 
-export default async function LandingPage() {
-  const { userId } = await auth();
-  const signedIn = Boolean(userId);
-
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Zap className="size-6 text-rose-500" />
-            ViraloKit
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              How it Works
-            </a>
-            <a href="#compare" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Compare
-            </a>
-            <a href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              FAQ
-            </a>
-          </nav>
-          <div className="flex items-center gap-3">
-            {!signedIn ? (
-              <SignInButton mode="modal">
-                <Button variant="ghost" size="sm">Sign in</Button>
-              </SignInButton>
-            ) : (
-              <UserButton />
-            )}
-            {!signedIn ? (
-              <SignInButton mode="modal">
-                <Button size="sm" className="bg-rose-500 hover:bg-rose-600">
-                  Get Started Free
-                  <ArrowRight className="ml-1.5 size-3.5" />
-                </Button>
-              </SignInButton>
-            ) : (
-              <Button size="sm" className="bg-rose-500 hover:bg-rose-600" asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main className="flex-1">
-        {/* Hero */}
-        <section className="relative overflow-hidden px-6 py-24 md:py-32">
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 via-purple-500/5 to-amber-500/5" />
-          <div className="relative mx-auto max-w-4xl text-center">
-            <Badge variant="secondary" className="mb-6 gap-1.5 px-4 py-1.5">
-              <Sparkles className="size-3.5 text-amber-500" />
-              AI-Powered Social Media Management
-            </Badge>
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl lg:text-7xl">
-              Publish. Schedule.{" "}
-              <span className="bg-gradient-to-r from-rose-500 via-purple-500 to-amber-500 bg-clip-text text-transparent">
-                Automate.
-              </span>{" "}
-              Analyze.
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              Manage multiple Instagram accounts from one beautiful dashboard. AI captions, smart scheduling, DM automation, and real analytics — all completely free.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              {!signedIn ? (
-                <SignInButton mode="modal">
-                  <Button size="lg" className="bg-rose-500 hover:bg-rose-600 px-8 text-base">
-                    Get Started Free
-                    <ArrowRight className="ml-2 size-4" />
-                  </Button>
-                </SignInButton>
-              ) : (
-                <Button size="lg" className="bg-rose-500 hover:bg-rose-600 px-8 text-base" asChild>
-                  <Link href="/dashboard">
-                    Open Dashboard
-                    <ArrowRight className="ml-2 size-4" />
-                  </Link>
-                </Button>
-              )}
-              <Button variant="outline" size="lg" className="px-8 text-base" asChild>
-                <a href="#features">See Features</a>
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              No credit card required · Free forever · Open source
-            </p>
-          </div>
-        </section>
+        <Hero />
 
         {/* Stats */}
         <section className="border-y bg-muted/30 px-6 py-12">
           <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 md:grid-cols-4">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-3xl font-bold text-rose-500">{stat.value}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
+            <StaggerGroup>
+              {stats.map((stat) => (
+                <StaggerItem key={stat.label}>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-rose-500">
+                      <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerGroup>
           </div>
         </section>
 
         {/* Features */}
         <section id="features" className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <Badge variant="outline" className="mb-4">Features</Badge>
-              <h2 className="text-3xl font-bold md:text-4xl">Everything you need</h2>
-              <p className="mt-3 text-muted-foreground">
-                From publishing to automation — ViraloKit has it all.
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <Card key={feature.title} className="group hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className={`mb-4 inline-flex rounded-xl p-3 ${feature.bg}`}>
-                      <feature.icon className={`size-6 ${feature.color}`} />
-                    </div>
-                    <h3 className="mb-2 font-semibold">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Reveal>
+              <div className="mb-12 text-center">
+                <Badge variant="outline" className="mb-4">Features</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">Everything you need</h2>
+                <p className="mt-3 text-muted-foreground">
+                  From publishing to automation — ViraloKit has it all.
+                </p>
+              </div>
+            </Reveal>
+            <StaggerGroup>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {features.map((feature) => (
+                  <StaggerItem key={feature.title}>
+                    <Card className="group h-full transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                      <CardContent className="p-6">
+                        <div className={`mb-4 inline-flex rounded-xl p-3 ${feature.bg}`}>
+                          <feature.icon className={`size-6 ${feature.color}`} />
+                        </div>
+                        <h3 className="mb-2 font-semibold">{feature.title}</h3>
+                        <p className="text-sm text-muted-foreground">{feature.description}</p>
+                      </CardContent>
+                    </Card>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerGroup>
           </div>
         </section>
 
         {/* How it Works */}
         <section id="how-it-works" className="border-y bg-muted/30 px-6 py-20">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-12 text-center">
-              <Badge variant="outline" className="mb-4">How it Works</Badge>
-              <h2 className="text-3xl font-bold md:text-4xl">3 simple steps</h2>
-              <p className="mt-3 text-muted-foreground">
-                Get started in minutes, not hours.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-3">
-              {steps.map((step) => (
-                <div key={step.step} className="relative text-center">
-                  <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-rose-500/10">
-                    <step.icon className="size-8 text-rose-500" />
-                  </div>
-                  <Badge variant="secondary" className="mb-3">Step {step.step}</Badge>
-                  <h3 className="mb-2 text-lg font-semibold">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
-                </div>
-              ))}
-            </div>
+            <Reveal>
+              <div className="mb-12 text-center">
+                <Badge variant="outline" className="mb-4">How it Works</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">3 simple steps</h2>
+                <p className="mt-3 text-muted-foreground">Get started in minutes, not hours.</p>
+              </div>
+            </Reveal>
+            <StaggerGroup>
+              <div className="grid gap-8 md:grid-cols-3">
+                {steps.map((step) => (
+                  <StaggerItem key={step.step}>
+                    <div className="relative text-center">
+                      <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-rose-500/10">
+                        <step.icon className="size-8 text-rose-500" />
+                      </div>
+                      <Badge variant="secondary" className="mb-3">Step {step.step}</Badge>
+                      <h3 className="mb-2 text-lg font-semibold">{step.title}</h3>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerGroup>
           </div>
         </section>
 
         {/* Comparison */}
         <section id="compare" className="px-6 py-20">
           <div className="mx-auto max-w-3xl">
-            <div className="mb-12 text-center">
-              <Badge variant="outline" className="mb-4">Comparison</Badge>
-              <h2 className="text-3xl font-bold md:text-4xl">Why ViraloKit?</h2>
-              <p className="mt-3 text-muted-foreground">
-                See how we compare to paid alternatives.
-              </p>
-            </div>
-            <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-4 py-3 text-left font-medium">Feature</th>
-                      <th className="px-4 py-3 text-center font-medium text-rose-500">ViraloKit</th>
-                      <th className="px-4 py-3 text-center font-medium text-muted-foreground">Buffer</th>
-                      <th className="px-4 py-3 text-center font-medium text-muted-foreground">Hootsuite</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparisons.map((row) => (
-                      <tr key={row.feature} className="border-b last:border-0">
-                        <td className="px-4 py-3">{row.feature}</td>
-                        <td className="px-4 py-3 text-center">
-                          {row.viralokit ? (
-                            <Check className="mx-auto size-4 text-emerald-500" />
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {row.buffer ? (
-                            <Check className="mx-auto size-4 text-emerald-500" />
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {row.hootsuite ? (
-                            <Check className="mx-auto size-4 text-emerald-500" />
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-muted/50 font-semibold">
-                      <td className="px-4 py-3">Price</td>
-                      <td className="px-4 py-3 text-center text-rose-500">FREE</td>
-                      <td className="px-4 py-3 text-center text-muted-foreground">$6/mo</td>
-                      <td className="px-4 py-3 text-center text-muted-foreground">$99/mo</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <Reveal>
+              <div className="mb-12 text-center">
+                <Badge variant="outline" className="mb-4">Comparison</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">Why ViraloKit?</h2>
+                <p className="mt-3 text-muted-foreground">See how we compare to paid alternatives.</p>
               </div>
-            </Card>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="px-4 py-3 text-left font-medium">Feature</th>
+                        <th className="px-4 py-3 text-center font-medium text-rose-500">ViraloKit</th>
+                        <th className="px-4 py-3 text-center font-medium text-muted-foreground">Buffer</th>
+                        <th className="px-4 py-3 text-center font-medium text-muted-foreground">Hootsuite</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comparisons.map((row) => (
+                        <tr key={row.feature} className="border-b transition-colors last:border-0 hover:bg-muted/40">
+                          <td className="px-4 py-3">{row.feature}</td>
+                          <td className="px-4 py-3 text-center">
+                            {row.viralokit ? (
+                              <Check className="mx-auto size-4 text-emerald-500" />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {row.buffer ? (
+                              <Check className="mx-auto size-4 text-emerald-500" />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {row.hootsuite ? (
+                              <Check className="mx-auto size-4 text-emerald-500" />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-muted/50 font-semibold">
+                        <td className="px-4 py-3">Price</td>
+                        <td className="px-4 py-3 text-center text-rose-500">FREE</td>
+                        <td className="px-4 py-3 text-center text-muted-foreground">$6/mo</td>
+                        <td className="px-4 py-3 text-center text-muted-foreground">$99/mo</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </Reveal>
           </div>
         </section>
 
         {/* Testimonials */}
         <section className="border-y bg-muted/30 px-6 py-20">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-12 text-center">
-              <Badge variant="outline" className="mb-4">Testimonials</Badge>
-              <h2 className="text-3xl font-bold md:text-4xl">Loved by creators</h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {testimonials.map((t) => (
-                <Card key={t.name}>
-                  <CardContent className="p-6">
-                    <div className="mb-3 flex gap-0.5">
-                      {Array.from({ length: t.rating }).map((_, i) => (
-                        <Star key={i} className="size-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="mb-4 text-sm text-muted-foreground">&ldquo;{t.text}&rdquo;</p>
-                    <div>
-                      <p className="text-sm font-semibold">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Reveal>
+              <div className="mb-12 text-center">
+                <Badge variant="outline" className="mb-4">Testimonials</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">Loved by creators</h2>
+              </div>
+            </Reveal>
+            <StaggerGroup>
+              <div className="grid gap-6 md:grid-cols-3">
+                {testimonials.map((t) => (
+                  <StaggerItem key={t.name}>
+                    <Card className="h-full transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                      <CardContent className="p-6">
+                        <div className="mb-3 flex gap-0.5">
+                          {Array.from({ length: t.rating }).map((_, i) => (
+                            <Star key={i} className="size-4 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        <p className="mb-4 text-sm text-muted-foreground">&ldquo;{t.text}&rdquo;</p>
+                        <div>
+                          <p className="text-sm font-semibold">{t.name}</p>
+                          <p className="text-xs text-muted-foreground">{t.role}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerGroup>
           </div>
         </section>
 
         {/* FAQ */}
         <section id="faq" className="px-6 py-20">
           <div className="mx-auto max-w-3xl">
-            <div className="mb-12 text-center">
-              <Badge variant="outline" className="mb-4">FAQ</Badge>
-              <h2 className="text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
-            </div>
-            <div className="space-y-4">
-              {faqs.map((faq) => (
-                <Card key={faq.q}>
-                  <CardContent className="p-6">
-                    <h3 className="mb-2 font-semibold">{faq.q}</h3>
-                    <p className="text-sm text-muted-foreground">{faq.a}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Reveal>
+              <div className="mb-12 text-center">
+                <Badge variant="outline" className="mb-4">FAQ</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
+              </div>
+            </Reveal>
+            <StaggerGroup>
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <StaggerItem key={faq.q}>
+                    <Card className="transition-colors hover:border-foreground/20">
+                      <CardContent className="p-6">
+                        <h3 className="mb-2 font-semibold">{faq.q}</h3>
+                        <p className="text-sm text-muted-foreground">{faq.a}</p>
+                      </CardContent>
+                    </Card>
+                  </StaggerItem>
+                ))}
+              </div>
+            </StaggerGroup>
           </div>
         </section>
 
         {/* CTA */}
         <section className="px-6 py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="rounded-3xl bg-gradient-to-r from-rose-500 via-purple-500 to-amber-500 p-px">
-              <div className="rounded-3xl bg-background px-8 py-16">
-                <h2 className="text-3xl font-bold md:text-4xl">
-                  Ready to go viral?
-                </h2>
-                <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                  Join thousands of creators using ViraloKit to grow their Instagram. It&apos;s free, it&apos;s powerful, it&apos;s yours.
-                </p>
-                <div className="mt-8">
-                  {!signedIn ? (
-                    <SignInButton mode="modal">
-                      <Button size="lg" className="bg-rose-500 hover:bg-rose-600 px-8 text-base">
-                        Start for Free
-                        <ArrowRight className="ml-2 size-4" />
-                      </Button>
-                    </SignInButton>
-                  ) : (
-                    <Button size="lg" className="bg-rose-500 hover:bg-rose-600 px-8 text-base" asChild>
-                      <Link href="/dashboard">
-                        Open Dashboard
-                        <ArrowRight className="ml-2 size-4" />
-                      </Link>
-                    </Button>
-                  )}
+            <Reveal>
+              <div className="rounded-3xl bg-gradient-to-r from-rose-500 via-purple-500 to-amber-500 p-px">
+                <div className="rounded-3xl bg-background px-8 py-16">
+                  <h2 className="text-3xl font-bold md:text-4xl">Ready to go viral?</h2>
+                  <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+                    Join thousands of creators using ViraloKit to grow their Instagram. It&apos;s
+                    free, it&apos;s powerful, it&apos;s yours.
+                  </p>
+                  <div className="mt-8 flex justify-center">
+                    <CTAButton />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>
@@ -509,39 +442,43 @@ export default async function LandingPage() {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How it Works</a></li>
-              <li><a href="#compare" className="hover:text-foreground transition-colors">Compare</a></li>
-              <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
-              <li><Link href="/help" className="hover:text-foreground transition-colors">Help Center</Link></li>
+              <li><a href="#features" className="transition-colors hover:text-foreground">Features</a></li>
+              <li><a href="#how-it-works" className="transition-colors hover:text-foreground">How it Works</a></li>
+              <li><a href="#compare" className="transition-colors hover:text-foreground">Compare</a></li>
+              <li><a href="#faq" className="transition-colors hover:text-foreground">FAQ</a></li>
+              <li><Link href="/help" className="transition-colors hover:text-foreground">Help Center</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Legal</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
-              <li><Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable Use</Link></li>
-              <li><Link href="/refund-policy" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
-              <li><Link href="/cookie-policy" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
-              <li><Link href="/acceptable-use" className="hover:text-foreground transition-colors">Acceptable use</Link></li>
-              <li><Link href="/security" className="hover:text-foreground transition-colors">Security</Link></li>
-              <li><Link href="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link></li>
-              <li><Link href="/accessibility" className="hover:text-foreground transition-colors">Accessibility</Link></li>
+              <li><Link href="/privacy-policy" className="transition-colors hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="transition-colors hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href="/acceptable-use" className="transition-colors hover:text-foreground">Acceptable Use</Link></li>
+              <li><Link href="/refund-policy" className="transition-colors hover:text-foreground">Refund Policy</Link></li>
+              <li><Link href="/cookie-policy" className="transition-colors hover:text-foreground">Cookie Policy</Link></li>
+              <li><Link href="/security" className="transition-colors hover:text-foreground">Security</Link></li>
+              <li><Link href="/disclaimer" className="transition-colors hover:text-foreground">Disclaimer</Link></li>
+              <li><Link href="/accessibility" className="transition-colors hover:text-foreground">Accessibility</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Connect</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/help" className="hover:text-foreground transition-colors">Help center</Link></li>
-              <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact Us</Link></li>
-              <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
-              <li><a href="https://github.com/inyogeshwar/viralo-kit" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+              <li><Link href="/help" className="transition-colors hover:text-foreground">Help center</Link></li>
+              <li><Link href="/contact" className="transition-colors hover:text-foreground">Contact Us</Link></li>
+              <li><Link href="/about" className="transition-colors hover:text-foreground">About</Link></li>
+              <li>
+                <a href="https://github.com/inyogeshwar/viralo-kit" className="transition-colors hover:text-foreground" target="_blank" rel="noopener noreferrer">
+                  GitHub
+                </a>
+              </li>
             </ul>
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-6xl border-t pt-6 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} ViraloKit. Built with Next.js, Clerk, Neon, Drizzle, Cloudinary & Gemini.
+          &copy; {new Date().getFullYear()} ViraloKit. Built with Next.js, Clerk, Neon, Drizzle,
+          Cloudinary &amp; Gemini.
         </div>
       </footer>
     </div>
