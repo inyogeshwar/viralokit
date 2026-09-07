@@ -58,5 +58,12 @@ export interface NormalizedAccountAnalytics {
   };
   recentMedia: InstagramMediaItem[];
   topPosts: InstagramMediaItem[];
+  summaryMetrics?: {
+    totalLikes: number;
+    totalComments: number;
+    totalInteractions: number;
+    averageEngagementRate: string;
+  };
   snapshotsTimestamp: string;
 }
+

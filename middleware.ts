@@ -48,5 +48,7 @@ export const config = {
     "/analytics/:path*",
     "/ai-analysis/:path*",
     "/settings/:path*",
+    "/api/auth/:path*",
   ],
 };
+

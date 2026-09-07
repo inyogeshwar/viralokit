@@ -8,6 +8,7 @@ import { getDb, schema } from "@/db";
 const auditSchema = z.object({
   modelId: z.string().default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
+  language: z.string().default("English"),
 });
 
 export async function POST(request: Request) {
@@ -15,9 +16,9 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     const rawBody = await request.json().catch(() => ({}));
     const validated = auditSchema.safeParse(rawBody);
-    const { modelId, enableGeminiFallback } = validated.success
+    const { modelId, enableGeminiFallback, language } = validated.success
       ? validated.data
-      : { modelId: "openrouter/free", enableGeminiFallback: true };
+      : { modelId: "openrouter/free", enableGeminiFallback: true, language: "English" };
 
     // 1. Fetch real Meta analytics
     const analytics = await fetchAccountAnalytics();
@@ -28,8 +29,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Run strategic AI audit
-    const audit = await generateAccountAnalysisWithAi(analytics, modelId, enableGeminiFallback);
+    // 2. Run strategic AI audit with language preference
+    const audit = await generateAccountAnalysisWithAi(analytics, modelId, enableGeminiFallback, language);
 
     // 3. Save generation record
     const db = getDb();

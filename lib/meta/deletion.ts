@@ -43,18 +43,18 @@ export async function deleteInstagramMedia(
       if (code === 10 || code === 200 || code === 190) {
         return {
           success: false,
-          reason: "Permission denied. The connected token lacks media deletion authorization.",
+          reason: "Meta Graph API restricts deleting published Instagram posts via third-party apps for account safety. Please delete directly in the Instagram app or Meta Business Suite.",
         };
       }
       if (code === 100) {
         return {
           success: false,
-          reason: "Invalid media ID or this media type does not support deletion via API.",
+          reason: "Invalid media ID or this media object cannot be deleted via API.",
         };
       }
       return {
         success: false,
-        reason: message.length > 120 ? message.slice(0, 120) + "..." : message,
+        reason: "Meta Graph API policy requires deleting published posts directly in the Instagram app or Meta Business Suite.",
       };
     }
 

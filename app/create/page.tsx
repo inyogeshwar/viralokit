@@ -34,6 +34,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageAnalysisResult } from "@/lib/ai/image-analysis";
 
+function sanitizeCaption(text: string): string {
+  if (!text) return "";
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{") && (trimmed.includes('"caption"') || trimmed.includes("'caption'"))) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && parsed.caption) return String(parsed.caption);
+    } catch {
+      const match = trimmed.match(/"caption"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:cta|hashtags)"|"$|(?<!\\)")/);
+      if (match && match[1]) {
+        return match[1].replace(/\\n/g, "\n").replace(/\\"/g, '"').trim();
+      }
+    }
+  }
+  return text;
+}
+
 export default function CreatePostPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,52 +92,130 @@ export default function CreatePostPage() {
     },
   });
 
-  // Handle Cloudinary Image Upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  // Client-side image optimizer to stay well below Vercel's 4.5MB limit
+  const optimizeImageForUpload = async (file: File): Promise<File | Blob> => {
+    if (file.size <= 1.2 * 1024 * 1024) return file;
 
-    // Check count for carousel
-    if (postType === "IMAGE" && files.length > 1) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const maxDimension = 1920;
+        let { width, height } = img;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" }));
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.88
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+      img.src = objectUrl;
+    });
+  };
+
+  // Process files one-by-one to prevent Vercel 4.5MB request payload limit
+  const processAndUploadFiles = async (files: FileList | File[]) => {
+    const fileList = Array.from(files);
+    if (fileList.length === 0) return;
+
+    if (postType === "IMAGE" && fileList.length > 1) {
       toast.info("Switched to Carousel mode for multiple images.");
       setPostType("CAROUSEL");
     }
 
-    if (postType === "CAROUSEL" && images.length + files.length > 10) {
+    if (postType === "CAROUSEL" && images.length + fileList.length > 10) {
       toast.error("Instagram carousels support a maximum of 10 images.");
       return;
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("file", files[i]);
-    }
+    const newUrls: string[] = [];
 
     try {
-      const res = await fetch("/api/cloudinary/upload", {
-        method: "POST",
-        body: formData,
-      });
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        toast.loading(`Uploading slide ${i + 1} of ${fileList.length}...`, { id: "upload-toast" });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Upload failed");
+        const optimized = await optimizeImageForUpload(file);
+        const formData = new FormData();
+        formData.append("file", optimized);
+
+        const res = await fetch("/api/cloudinary/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const rawText = await res.text();
+          let errText = `Upload failed for ${file.name}`;
+          try {
+            const parsed = JSON.parse(rawText);
+            errText = parsed.error || errText;
+          } catch {
+            if (rawText.includes("Request Entity Too Large") || res.status === 413) {
+              errText = `Image "${file.name}" is too large. Please select a smaller image.`;
+            }
+          }
+          throw new Error(errText);
+        }
+
+        const data = await res.json();
+        if (data.assets && data.assets.length > 0) {
+          for (const asset of data.assets) {
+            if (asset.secureUrl) newUrls.push(asset.secureUrl);
+          }
+        }
       }
 
-      const newUrls = (data.assets || []).map((a: any) => a.secureUrl);
       if (postType === "IMAGE") {
         setImages([newUrls[0]]);
       } else {
         setImages((prev) => [...prev, ...newUrls].slice(0, 10));
       }
 
-      toast.success(`Uploaded ${newUrls.length} image(s) to Cloudinary CDN`);
+      toast.success(`Successfully uploaded ${newUrls.length} image(s)!`, { id: "upload-toast" });
     } catch (err: any) {
-      toast.error(err?.message || "Failed to upload image.");
+      toast.error(err?.message || "Failed to upload images.", { id: "upload-toast" });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processAndUploadFiles(e.target.files);
     }
   };
 
@@ -196,7 +291,8 @@ export default function CreatePostPage() {
         throw new Error(data.error || "Caption generation failed");
       }
 
-      setCaption(data.caption);
+      const cleanCaption = sanitizeCaption(data.caption);
+      setCaption(cleanCaption);
       if (Array.isArray(data.hashtags) && data.hashtags.length > 0) {
         setHashtags(data.hashtags);
       }
@@ -229,10 +325,11 @@ export default function CreatePostPage() {
 
     try {
       setPublishStatus("creating_container");
-      // Append hashtags to caption if not already present
-      let finalCaption = caption;
-      if (hashtags.length > 0 && !caption.includes("#")) {
-        finalCaption = `${caption}\n\n${hashtags.join(" ")}`;
+      // Sanitize and append hashtags to caption if not already present
+      const cleanUserCaption = sanitizeCaption(caption);
+      let finalCaption = cleanUserCaption;
+      if (hashtags.length > 0 && !finalCaption.includes("#")) {
+        finalCaption = `${finalCaption}\n\n${hashtags.join(" ")}`;
       }
 
       setPublishStatus("processing");
@@ -451,6 +548,17 @@ export default function CreatePostPage() {
                 {/* Dotted Upload Dropzone */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                      processAndUploadFiles(e.dataTransfer.files);
+                    }
+                  }}
                   className="border-2 border-dashed border-zinc-700/80 hover:border-pink-500/60 bg-gradient-to-b from-zinc-900/40 via-zinc-950/50 to-zinc-900/30 hover:bg-zinc-900/40 rounded-2xl p-7 text-center cursor-pointer transition-all duration-300 group shadow-inner"
                 >
                   <input
@@ -871,7 +979,7 @@ export default function CreatePostPage() {
                     avatarUrl={accountData?.profilePictureUrl}
                     mediaType={postType}
                     imageUrls={images}
-                    caption={caption}
+                    caption={sanitizeCaption(caption)}
                     hashtags={hashtags}
                     aspectRatio={aspectRatio}
                   />

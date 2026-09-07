@@ -520,7 +520,7 @@ export default function PostsPage() {
                     {bulkProgress.running ? (
                       <span className="flex items-center gap-1.5 text-pink-400">
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Executing deletions on Meta...
+                        Sending deletion requests to Meta...
                       </span>
                     ) : (
                       "Completed"
@@ -529,30 +529,45 @@ export default function PostsPage() {
                 </div>
 
                 {/* Per-post item report */}
-                <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 bg-zinc-950 rounded-xl border border-zinc-800 text-xs">
+                <div className="max-h-56 overflow-y-auto space-y-2 p-2.5 bg-zinc-950 rounded-xl border border-zinc-800 text-xs">
                   {bulkProgress.results.map((r, i) => (
-                    <div key={i} className="flex items-center justify-between p-1.5 rounded bg-zinc-900/60">
-                      <span className="font-mono text-zinc-400">Post {r.mediaId.slice(-6)}</span>
-                      {r.status === "deleted" ? (
-                        <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Deleted</span>
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-red-400 font-medium" title={r.reason}>
-                          <XCircle className="w-3.5 h-3.5" />
-                          <span>Failed</span>
-                        </span>
+                    <div key={i} className="p-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-zinc-300 font-medium">Post ID: {r.mediaId.slice(-8)}</span>
+                        {r.status === "deleted" ? (
+                          <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Deleted</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-amber-400 font-medium">
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Meta Restricted</span>
+                          </span>
+                        )}
+                      </div>
+                      {r.status === "failed" && (
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          {r.reason || "Meta Graph API restricts deleting published feed posts via third-party apps for account safety."}
+                        </p>
                       )}
                     </div>
                   ))}
                 </div>
+
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-300 leading-relaxed">
+                  💡 <strong>Meta API Notice:</strong> Meta Graph API permits publishing content and insights, but strictly restricts third-party applications from deleting published feed media to protect your profile. Please delete any unwanted posts directly inside the <strong>Instagram mobile app</strong> or <strong>Meta Business Suite</strong>.
+                </div>
               </div>
             ) : (
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                This will delete {selectedIds.length} media item(s) from your connected Instagram account.
-                Successful removals cannot be undone.
-              </p>
+              <div className="space-y-3">
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  This will attempt to delete {selectedIds.length} media item(s) from your connected Instagram account via the Meta Graph API.
+                </p>
+                <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 leading-relaxed">
+                  ℹ️ <em>Note:</em> Meta Graph API restricts third-party applications from deleting published feed media for account security. If Meta rejects the API request, posts can be removed directly inside the Instagram app.
+                </div>
+              </div>
             )}
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">

@@ -26,6 +26,7 @@ import { AccountAuditResult } from "@/lib/ai/account-analysis";
 
 export default function AiAnalysisPage() {
   const [selectedModel, setSelectedModel] = useState("openrouter/free");
+  const [selectedLanguage, setSelectedLanguage] = useState("Hinglish");
   const [auditResult, setAuditResult] = useState<AccountAuditResult | null>(null);
   const [isAuditing, setIsAuditing] = useState(false);
 
@@ -56,6 +57,7 @@ export default function AiAnalysisPage() {
         body: JSON.stringify({
           modelId: selectedModel,
           enableGeminiFallback: true,
+          language: selectedLanguage,
         }),
       });
 
@@ -65,7 +67,7 @@ export default function AiAnalysisPage() {
       }
 
       setAuditResult(data.audit);
-      toast.success("AI Account Audit complete!");
+      toast.success(`AI Account Audit complete in ${selectedLanguage}!`);
     } catch (err: any) {
       toast.error(err?.message || "Audit failed. Check keys or try another free model.");
     } finally {
@@ -92,12 +94,31 @@ export default function AiAnalysisPage() {
                 </Badge>
               </div>
               <p className="text-xs text-zinc-400">
-                Synthesizes official Meta analytics, caption history, and visual patterns to discover actionable growth opportunities.
+                Synthesizes official Meta analytics, caption history, and visual patterns to discover actionable growth opportunities for @{accountData?.username || "Creator"}.
               </p>
             </div>
 
-            {/* Model Selector & Action */}
-            <div className="flex items-center gap-3">
+            {/* Language & Model Selector & Action */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Language Selector */}
+              <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1">
+                <span className="text-[10px] uppercase font-semibold text-zinc-400">Lang:</span>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="bg-transparent text-xs text-zinc-200 focus:outline-none cursor-pointer"
+                >
+                  <option value="Hinglish" className="bg-zinc-900 text-zinc-200">Hinglish (Hindi + Eng)</option>
+                  <option value="Hindi" className="bg-zinc-900 text-zinc-200">हिन्दी (Hindi)</option>
+                  <option value="English" className="bg-zinc-900 text-zinc-200">English</option>
+                  <option value="Gujarati" className="bg-zinc-900 text-zinc-200">ગુજરાતી (Gujarati)</option>
+                  <option value="Marathi" className="bg-zinc-900 text-zinc-200">मराठी (Marathi)</option>
+                  <option value="Bengali" className="bg-zinc-900 text-zinc-200">বাংলা (Bengali)</option>
+                  <option value="Spanish" className="bg-zinc-900 text-zinc-200">Español (Spanish)</option>
+                </select>
+              </div>
+
+              {/* Model Selector */}
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}

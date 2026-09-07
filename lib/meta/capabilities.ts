@@ -98,8 +98,8 @@ export async function detectAccountCapabilities(
     }
 
     // 4. Deletion capability:
-    // Instagram Graph API allows deleting media for business accounts that possess publish permissions.
-    canDeleteMedia = canPublish;
+    // Meta Graph API explicitly blocks third-party deletion of feed media/posts for account integrity
+    canDeleteMedia = false;
 
     return {
       connected: true,

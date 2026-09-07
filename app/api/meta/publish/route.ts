@@ -10,6 +10,9 @@ const publishSchema = z.object({
   imageUrls: z.array(z.string().url()).min(1),
 });
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();

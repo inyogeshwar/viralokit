@@ -19,15 +19,21 @@ async function postMeta(path: string, body: Record<string, string>, accessToken:
     access_token: accessToken,
   });
 
-  const response = await fetch(`${url}?${params.toString()}`, {
+  const response = await fetch(url, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params.toString(),
   });
 
   const data = await response.json();
   if (!response.ok || data.error) {
     const err = data.error || {};
+    const errMsg = err.error_user_msg || err.message || `Meta API error on ${path}`;
+    console.error(`[postMeta] Error on ${path}:`, err);
     throw new MetaApiError(
-      err.message || `Meta API error on ${path}`,
+      errMsg,
       err.code,
       err.error_subcode
     );
@@ -58,7 +64,12 @@ async function getMeta(path: string, params: Record<string, string>, accessToken
 }
 
 // Poll container status until ready (FINISHED) or failed (ERROR)
-async function waitForContainer(containerId: string, accessToken: string, maxAttempts = 10, delayMs = 2000): Promise<void> {
+async function waitForContainer(
+  containerId: string,
+  accessToken: string,
+  maxAttempts = 15,
+  delayMs = 1200
+): Promise<void> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const data = await getMeta(containerId, { fields: "status_code" }, accessToken);
@@ -73,7 +84,7 @@ async function waitForContainer(containerId: string, accessToken: string, maxAtt
       if (err instanceof MetaApiError && err.message.includes("Media container processing failed")) {
         throw err;
       }
-      // Transient check error: keep polling
+      // Non-terminal error or transient status check error: continue polling
     }
     await new Promise((res) => setTimeout(res, delayMs));
   }
@@ -154,24 +165,31 @@ export async function publishCarousel(
     throw new MetaApiError("Instagram carousels require between 2 and 10 images.");
   }
 
-  // 1. Create child containers sequentially
-  const childContainerIds: string[] = [];
-  for (const url of imageUrls) {
-    const child = await postMeta(
-      `${userId}/media`,
-      {
-        image_url: url,
-        is_carousel_item: "true",
-      },
-      accessToken
-    );
-    childContainerIds.push(child.id);
-  }
+  console.log(`[publishCarousel] Creating ${imageUrls.length} child containers in parallel...`);
 
-  // 2. Poll child containers
-  for (const childId of childContainerIds) {
-    await waitForContainer(childId, accessToken);
-  }
+  // 1. Create child containers in parallel for speed
+  const childContainerIds = await Promise.all(
+    imageUrls.map(async (url) => {
+      const child = await postMeta(
+        `${userId}/media`,
+        {
+          image_url: url,
+          is_carousel_item: "true",
+        },
+        accessToken
+      );
+      return child.id as string;
+    })
+  );
+
+  console.log(`[publishCarousel] Child containers created:`, childContainerIds);
+
+  // 2. Poll child containers in parallel
+  await Promise.all(
+    childContainerIds.map((childId) => waitForContainer(childId, accessToken, 15, 1000))
+  );
+
+  console.log(`[publishCarousel] All child containers ready. Creating parent container...`);
 
   // 3. Create parent carousel container
   const carouselContainer = await postMeta(
@@ -185,9 +203,12 @@ export async function publishCarousel(
   );
 
   const carouselContainerId = carouselContainer.id;
+  console.log(`[publishCarousel] Parent container created: ${carouselContainerId}. Polling...`);
 
   // 4. Poll parent container
-  await waitForContainer(carouselContainerId, accessToken);
+  await waitForContainer(carouselContainerId, accessToken, 15, 1000);
+
+  console.log(`[publishCarousel] Publishing parent container: ${carouselContainerId}...`);
 
   // 5. Publish Carousel
   const published = await postMeta(
@@ -199,6 +220,7 @@ export async function publishCarousel(
   );
 
   const mediaId = published.id;
+  console.log(`[publishCarousel] Live published with mediaId: ${mediaId}`);
 
   // 6. Fetch live permalink
   let permalink: string | undefined;

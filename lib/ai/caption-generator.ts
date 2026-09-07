@@ -87,7 +87,7 @@ Return ONLY a valid JSON object matching this schema without any markdown backti
           model: modelId,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 1200,
         }),
       });
 
@@ -130,31 +130,153 @@ Return ONLY a valid JSON object matching this schema without any markdown backti
     };
   }
 
-  try {
-    const cleaned = jsonText.replace(/```json/gi, "").replace(/```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    const caption = parsed.caption || currentCaption || "Capturing moments that matter.";
-    const hashtags = Array.isArray(parsed.hashtags) ? parsed.hashtags : [];
-    const cta = parsed.cta || "";
+  const { caption, hashtags, cta } = parseAiCaptionResponse(jsonText, currentCaption);
 
+  return {
+    caption,
+    hashtags,
+    cta,
+    charCount: caption.length,
+    hashtagCount: hashtags.length,
+    provider: chosenProvider,
+    model: chosenModel,
+  };
+}
+
+/**
+ * Robustly parses caption, hashtags, and CTA from AI output.
+ * Handles valid JSON, markdown blocks, truncated JSON strings, unescaped newlines,
+ * and ensures raw JSON syntax is never returned as caption text.
+ */
+export function parseAiCaptionResponse(
+  rawText: string,
+  currentCaption: string = ""
+): {
+  caption: string;
+  hashtags: string[];
+  cta: string;
+} {
+  if (!rawText || !rawText.trim()) {
     return {
-      caption,
-      hashtags,
-      cta,
-      charCount: caption.length,
-      hashtagCount: hashtags.length,
-      provider: chosenProvider,
-      model: chosenModel,
-    };
-  } catch {
-    return {
-      caption: jsonText.slice(0, 1000),
+      caption: currentCaption || "Capturing moments that inspire.",
       hashtags: ["#creator", "#postgram"],
       cta: "",
-      charCount: jsonText.length,
-      hashtagCount: 2,
-      provider: chosenProvider,
-      model: chosenModel,
     };
   }
+
+  // Strip markdown code fences if present
+  let cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+  // 1. Try standard JSON.parse
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (parsed && typeof parsed === "object") {
+      const cap = typeof parsed.caption === "string" ? parsed.caption.trim() : "";
+      const cta = typeof parsed.cta === "string" ? parsed.cta.trim() : "";
+      let tags: string[] = [];
+      if (Array.isArray(parsed.hashtags)) {
+        tags = parsed.hashtags
+          .map((t: any) => String(t).trim())
+          .filter((t: string) => t.length > 0);
+      }
+      if (cap) {
+        return { caption: cap, hashtags: tags, cta };
+      }
+    }
+  } catch {
+    // Proceed to robust extraction
+  }
+
+  // 2. Try parsing candidate between outermost braces { ... }
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const candidate = cleaned.slice(firstBrace, lastBrace + 1);
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === "object" && parsed.caption) {
+        return {
+          caption: String(parsed.caption).trim(),
+          hashtags: Array.isArray(parsed.hashtags)
+            ? parsed.hashtags.map(String).filter(Boolean)
+            : [],
+          cta: parsed.cta ? String(parsed.cta).trim() : "",
+        };
+      }
+    } catch {
+      // Continue to regex
+    }
+  }
+
+  // 3. Robust Regex Extraction (handles truncated JSON, unescaped newlines inside strings)
+  let extractedCaption = "";
+  let extractedCta = "";
+  const extractedTags: string[] = [];
+
+  // Match "caption": "..."
+  const captionMatch = cleaned.match(
+    /"caption"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:cta|hashtags)"|"$|(?<!\\)")/
+  );
+  if (captionMatch && captionMatch[1]) {
+    extractedCaption = captionMatch[1]
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, "\\")
+      .trim();
+  }
+
+  // Match "cta": "..."
+  const ctaMatch = cleaned.match(
+    /"cta"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:hashtags|caption)"|"$|(?<!\\)")/
+  );
+  if (ctaMatch && ctaMatch[1]) {
+    extractedCta = ctaMatch[1]
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, "\\")
+      .trim();
+  }
+
+  // Extract all hashtags from the text (e.g. #AestheticVibes)
+  const tagMatches = cleaned.match(/#[a-zA-Z0-9_\u0900-\u097F]+/g);
+  if (tagMatches) {
+    for (const tag of tagMatches) {
+      if (!extractedTags.includes(tag)) {
+        extractedTags.push(tag);
+      }
+    }
+  }
+
+  // 4. Fallback if regex failed to find "caption" property
+  if (!extractedCaption) {
+    if (!cleaned.startsWith("{")) {
+      extractedCaption = cleaned;
+    } else {
+      extractedCaption = cleaned
+        .replace(/\{[\s\S]*?"caption"\s*:\s*"/, "")
+        .replace(/"\s*,\s*"cta"[\s\S]*$/, "")
+        .replace(/"\s*,\s*"hashtags"[\s\S]*$/, "")
+        .replace(/["}]/g, "")
+        .replace(/\\n/g, "\n")
+        .trim();
+    }
+  }
+
+  // Final sanity check: if extractedCaption still contains JSON keys, sanitize
+  if (extractedCaption.startsWith("{") || extractedCaption.includes('"caption":')) {
+    extractedCaption = extractedCaption
+      .replace(/^[^{]*\{/, "")
+      .replace(/"caption"\s*:\s*"?/g, "")
+      .replace(/"cta"\s*:\s*"?/g, "")
+      .replace(/"hashtags"\s*:\s*\[[\s\S]*?\]/g, "")
+      .replace(/["}]/g, "")
+      .replace(/\\n/g, "\n")
+      .trim();
+  }
+
+  return {
+    caption: extractedCaption || currentCaption || "Capturing moments that matter.",
+    hashtags: extractedTags.length > 0 ? extractedTags : ["#creator", "#postgram"],
+    cta: extractedCta,
+  };
 }
