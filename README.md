@@ -105,7 +105,7 @@ WORKOS_COOKIE_PASSWORD=your_secure_32_character_password
 # ==========================================
 # 🗄️ NEON POSTGRESQL (https://neon.tech)
 # ==========================================
-DATABASE_URL=postgresql://neondb_owner:...@ep-example.us-east-2.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgresql://[user]:[password]@[neon-host].neon.tech/neondb?sslmode=require
 
 # ==========================================
 # ☁️ CLOUDINARY CDN (https://cloudinary.com)
