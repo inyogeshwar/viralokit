@@ -6,9 +6,9 @@
 [![WorkOS AuthKit](https://img.shields.io/badge/WorkOS-AuthKit-6366F1?style=for-the-badge)](https://workos.com)
 [![Neon](https://img.shields.io/badge/Neon-Serverless_Postgres-00E599?style=for-the-badge&logo=postgresql)](https://neon.tech)
 [![Cloudinary](https://img.shields.io/badge/Cloudinary-Media_CDN-3448C5?style=for-the-badge&logo=cloudinary)](https://cloudinary.com)
-[![OpenRouter](https://img.shields.io/badge/OpenRouter-100%25_FREE_AI-FF6B6B?style=for-the-badge)](https://openrouter.ai)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-Dynamic_FREE_Model_Routing-FF6B6B?style=for-the-badge)](https://openrouter.ai)
 
-> A modern, zero-cost production Instagram Creator Studio built with **Next.js 15 (App Router)**, official **Meta Graph API v23.0**, **WorkOS AuthKit**, **Neon PostgreSQL**, **Cloudinary CDN**, and **OpenRouter Free AI models** (with Gemini Flash fallback).
+> A modern, free-tier optimized production Instagram Creator Studio built with **Next.js 15 (App Router)**, official **Meta Graph API v23.0**, **WorkOS AuthKit**, **Neon PostgreSQL**, **Cloudinary CDN**, and **OpenRouter Dynamic Free Model Routing** (with Gemini Flash fallback).
 
 ---
 
@@ -17,9 +17,9 @@
 
 ---
 
-## ⚡ Zero-Cost Production Stack (100% Free Tiers)
+## ⚡ Free-Tier Optimized Production Stack
 
-Every component of PostGram is engineered to run permanently on verified free tiers with zero credit card or subscription requirements:
+Every component of PostGram is engineered to run on generous, verified free tiers with zero paid subscriptions required:
 
 | Component | Provider | Tier & Capabilities |
 |---|---|---|
