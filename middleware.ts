@@ -8,14 +8,10 @@ export default async function middleware(request: NextRequest) {
   }
 
   try {
-    const proto = request.headers.get("x-forwarded-proto") || (request.nextUrl.protocol.replace(":", ""));
-    const host = request.headers.get("host") || request.nextUrl.host;
-    const origin = `${proto}://${host}`;
-    const rawRedirectUri = process.env.WORKOS_REDIRECT_URI || `${origin}/callback`;
-    const redirectUri = rawRedirectUri
-      .replace(/[\u200B-\u200D\uFEFF]/g, "")
-      .trim()
-      .replace(/^["']|["']$/g, "");
+    const redirectUri =
+      process.env.NODE_ENV === "production"
+        ? "https://viralokit.vercel.app/callback"
+        : `${request.nextUrl.origin}/callback`;
 
     const { session, headers, authorizationUrl } = await authkit(request, {
       redirectUri,

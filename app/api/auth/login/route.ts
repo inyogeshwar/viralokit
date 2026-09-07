@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const proto = process.env.NODE_ENV === "production" ? "https" : "http";
-    const host = process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, "") || "viralokit.vercel.app";
-    const redirectUri = `${proto}://${host}/callback`.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+    const redirectUri =
+      process.env.NODE_ENV === "production"
+        ? "https://viralokit.vercel.app/callback"
+        : "http://localhost:3000/callback";
 
     const signInUrl = await getSignInUrl({ redirectUri });
-    const cleanUrl = signInUrl.replace(/%EF%BB%BF/g, "").replace(/[\u200B-\u200D\uFEFF]/g, "");
-    return NextResponse.redirect(cleanUrl);
+    return NextResponse.redirect(signInUrl);
   } catch (err: any) {
     return NextResponse.redirect(new URL("/", "https://viralokit.vercel.app"));
   }
