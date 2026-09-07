@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -22,8 +22,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatNumber, formatDate } from "@/lib/utils";
+import { InstagramMediaItem } from "@/lib/meta/types";
+import { PostInsightsModal } from "@/components/posts/post-insights-modal";
 
 export default function DashboardPage() {
+  const [selectedPostForInsights, setSelectedPostForInsights] = useState<InstagramMediaItem | null>(null);
+
   // 1. Fetch system & user status
   const { data: authData } = useQuery({
     queryKey: ["auth-me"],
@@ -200,7 +204,8 @@ export default function DashboardPage() {
                 {analytics.recentMedia.slice(0, 4).map((post: any) => (
                   <div
                     key={post.id}
-                    className="group relative rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 aspect-square"
+                    onClick={() => setSelectedPostForInsights(post)}
+                    className="group relative rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 aspect-square cursor-pointer hover:border-purple-500/80 transition-all hover:shadow-lg hover:shadow-purple-500/10"
                   >
                     <img
                       src={post.media_url || post.thumbnail_url}
@@ -209,7 +214,7 @@ export default function DashboardPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-between text-xs">
                       <div className="flex justify-end">
-                        <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
+                        <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-black/60 backdrop-blur-sm">
                           {post.media_type}
                         </Badge>
                       </div>
@@ -217,7 +222,13 @@ export default function DashboardPage() {
                         <p className="text-white line-clamp-2 text-[11px] font-medium leading-snug">
                           {post.caption || "No caption"}
                         </p>
-                        <p className="text-zinc-400 text-[10px]">{formatDate(post.timestamp)}</p>
+                        <div className="flex items-center justify-between text-[10px] text-zinc-400">
+                          <span>{formatDate(post.timestamp)}</span>
+                          <span className="text-purple-400 font-semibold flex items-center gap-1">
+                            <BarChart3 className="w-2.5 h-2.5" />
+                            Insights
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -240,6 +251,12 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      {/* Post Insights Modal */}
+      <PostInsightsModal
+        post={selectedPostForInsights}
+        onClose={() => setSelectedPostForInsights(null)}
+      />
 
       <MobileNav />
     </div>

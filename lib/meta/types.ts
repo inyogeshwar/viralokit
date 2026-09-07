@@ -67,3 +67,35 @@ export interface NormalizedAccountAnalytics {
   snapshotsTimestamp: string;
 }
 
+export interface InstagramPostInsights {
+  mediaId: string;
+  views: {
+    total: number;
+    followersPercent: number;
+    nonFollowersPercent: number;
+    fromHome: number;
+    fromProfile: number;
+    fromOther: number;
+    viewers: number;
+  };
+  interactions: {
+    total: number;
+    followersPercent: number;
+    nonFollowersPercent: number;
+    postInteractions: number;
+    likes: number;
+    shares: number;
+    saves: number;
+    comments: number;
+    accountsEngaged: number;
+  };
+  profile: {
+    activity: number;
+    visits: number;
+    externalLinkTaps: number;
+    businessAddressTaps: number;
+    follows: number;
+  };
+  boostUrl?: string;
+}
+

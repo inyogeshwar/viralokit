@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   Plus,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -29,12 +30,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { InstagramMediaItem } from "@/lib/meta/types";
+import { PostInsightsModal } from "@/components/posts/post-insights-modal";
 
 export default function PostsPage() {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [postToDelete, setPostToDelete] = useState<InstagramMediaItem | null>(null);
+  const [selectedPostForInsights, setSelectedPostForInsights] = useState<InstagramMediaItem | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{
     running: boolean;
@@ -243,10 +246,11 @@ export default function PostsPage() {
                 return (
                   <div
                     key={post.id}
-                    className={`group relative rounded-2xl overflow-hidden bg-zinc-900/60 border transition-all duration-200 flex flex-col ${
+                    onClick={() => setSelectedPostForInsights(post)}
+                    className={`group relative rounded-2xl overflow-hidden bg-zinc-900/60 border transition-all duration-200 flex flex-col cursor-pointer ${
                       isSelected
                         ? "border-pink-500 ring-2 ring-pink-500/30 shadow-lg shadow-pink-500/10"
-                        : "border-zinc-800 hover:border-zinc-700"
+                        : "border-zinc-800 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/50"
                     }`}
                   >
                     {/* Media Thumbnail */}
@@ -284,6 +288,7 @@ export default function PostsPage() {
                           href={post.permalink}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="absolute bottom-2.5 right-2.5 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-pink-600 transition-colors opacity-0 group-hover:opacity-100"
                           title="View on Instagram"
                         >
@@ -314,12 +319,28 @@ export default function PostsPage() {
                           <span className="text-[10px] text-zinc-500">{formatDate(post.timestamp)}</span>
                         </div>
 
-                        {/* Single Delete Button */}
-                        <div className="flex justify-end pt-1">
+                        {/* Action Buttons: Insights + Single Delete */}
+                        <div className="flex items-center justify-between pt-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setPostToDelete(post)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPostForInsights(post);
+                            }}
+                            className="text-[11px] h-7 px-2 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 gap-1 font-medium"
+                          >
+                            <BarChart3 className="w-3 h-3" />
+                            <span>Insights</span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPostToDelete(post);
+                            }}
                             className="text-[11px] h-7 px-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 gap-1"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -356,24 +377,29 @@ export default function PostsPage() {
                         {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                       </button>
 
-                      <div className="w-14 h-14 rounded-lg bg-zinc-950 overflow-hidden shrink-0 border border-zinc-800">
-                        <img
-                          src={post.media_url || post.thumbnail_url}
-                          alt="Thumbnail"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-[9px] py-0">
-                            {post.media_type}
-                          </Badge>
-                          <span className="text-[10px] text-zinc-500 font-mono">ID: {post.id}</span>
+                      <div
+                        onClick={() => setSelectedPostForInsights(post)}
+                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1 group"
+                      >
+                        <div className="w-14 h-14 rounded-lg bg-zinc-950 overflow-hidden shrink-0 border border-zinc-800 group-hover:border-purple-500 transition-colors">
+                          <img
+                            src={post.media_url || post.thumbnail_url}
+                            alt="Thumbnail"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
                         </div>
-                        <p className="text-xs text-zinc-200 line-clamp-1">
-                          {post.caption || "No caption"}
-                        </p>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="secondary" className="text-[9px] py-0">
+                              {post.media_type}
+                            </Badge>
+                            <span className="text-[10px] text-zinc-500 font-mono">ID: {post.id}</span>
+                          </div>
+                          <p className="text-xs text-zinc-200 line-clamp-1 group-hover:text-purple-300 transition-colors">
+                            {post.caption || "No caption"}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -391,6 +417,15 @@ export default function PostsPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedPostForInsights(post)}
+                          className="p-1.5 text-purple-400 hover:text-purple-300 rounded hover:bg-purple-500/10 transition-colors flex items-center gap-1 text-xs"
+                          title="View Post Insights"
+                        >
+                          <BarChart3 className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline font-medium">Insights</span>
+                        </button>
+
                         {post.permalink && (
                           <a
                             href={post.permalink}
@@ -599,6 +634,12 @@ export default function PostsPage() {
           </div>
         </div>
       )}
+
+      {/* Instagram Post Insights Modal */}
+      <PostInsightsModal
+        post={selectedPostForInsights}
+        onClose={() => setSelectedPostForInsights(null)}
+      />
 
       <MobileNav />
     </div>
