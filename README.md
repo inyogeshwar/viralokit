@@ -144,12 +144,39 @@ To publish posts and fetch analytics for your Instagram account:
 4. **Find Your `IG_USER_ID`**:
    * In Graph API Explorer, run `GET /v23.0/me/accounts?fields=instagram_business_account{id,username,name}`.
    * Copy the `instagram_business_account.id` (e.g. `17841400000000000`).
-5. **Generate 60-Day Long-Lived Token (`IG_ACCESS_TOKEN`)**:
-   * Generate a User Token in the Explorer.
-   * Exchange it for a long-lived token via:
+5. **Generate a Permanent (Lifetime / Never-Expiring) Meta Access Token [RECOMMENDED]**:
+   *Standard Graph API Explorer user tokens expire every 60 days. To obtain a **Permanent System User Access Token** that **NEVER expires**, follow these steps:*
+   1. Go to **[Meta Business Settings](https://business.facebook.com/settings)** and select your Business Portfolio (e.g. *Jay Gurudev Enterprises*).
+   2. In the left sidebar, navigate to **Users** ➔ **System Users**.
+   3. Click **Add** (Create System User):
+      - **System Username**: e.g. `ViraloKit Bot` or `PostGram System`
+      - **System User Role**: Select **Admin**.
+   4. Click on your newly created System User, then click **Add Assets**:
+      - Under **Pages**: Select your connected Facebook Page and enable **Full Control (Manage Page)**.
+      - Under **Apps**: Select your Meta Developer App and enable **Full Control**.
+      - Click **Save Changes**.
+   5. With the System User selected, click **Generate New Token**:
+      - **Select App**: Choose your Meta Developer App.
+      - **Token Expiration**: Select **Never** *(Permanent / Lifetime)*.
+      - **Select Permissions**: Check the following required scopes:
+        - `instagram_basic`
+        - `instagram_content_publish`
+        - `instagram_manage_insights`
+        - `pages_show_list`
+        - `pages_read_engagement`
+        - `pages_manage_posts`
+      - Click **Generate Token**.
+   6. **Copy and save the token immediately** (Meta will not show it again).
+   7. Put this permanent token into your `.env.local` and Vercel environment as `IG_ACCESS_TOKEN`.
+
+   *(Alternative — 60-Day Long-Lived Token)*:
+   If using Graph API Explorer User Tokens:
+   - Generate a User Token in the Explorer with the above permissions.
+   - Exchange it for a 60-day token via:
      ```bash
      curl -i -X GET "https://graph.facebook.com/v23.0/oauth/access_token?grant_type=fb_exchange_token&client_id={app-id}&client_secret={app-secret}&fb_exchange_token={short-lived-token}"
      ```
+
 
 ---
 
