@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     }
 
     const urlObj = new URL(request.url);
-    const customIgUserId = urlObj.searchParams.get("igUserId");
-    const userFolderInfo = await getUserCloudinaryFolder(user, customIgUserId);
+    const customUsername = urlObj.searchParams.get("username") || urlObj.searchParams.get("igUserId");
+    const userFolderInfo = await getUserCloudinaryFolder(user, customUsername);
 
     let body: any = {};
     try {

@@ -1,5 +1,5 @@
 import { CurrentUser } from "@/lib/auth/current-user";
-import { config } from "@/lib/config";
+import { config, getMetaGraphUrl } from "@/lib/config";
 import { getDb } from "@/db";
 import { instagramAccounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -8,73 +8,126 @@ export interface UserFolderInfo {
   folder: string;
   prefix: string;
   userIdentifier: string;
-  isIgId: boolean;
+  isIgUsername: boolean;
+}
+
+// In-memory cache for resolved server-side Instagram username
+let cachedDefaultIgUsername: string | null = null;
+let cachedDefaultIgFetchTime = 0;
+
+/**
+ * Resolves the Instagram username for the server-configured account.
+ * Caches the result in-memory for 1 hour to prevent redundant Meta API calls.
+ */
+async function getDefaultIgUsername(): Promise<string | null> {
+  const now = Date.now();
+  if (cachedDefaultIgUsername && now - cachedDefaultIgFetchTime < 60 * 60 * 1000) {
+    return cachedDefaultIgUsername;
+  }
+
+  const userId = config.meta.defaultUserId;
+  const accessToken = config.meta.defaultAccessToken;
+  if (!userId || !accessToken) return null;
+
+  try {
+    const profileUrl = `${getMetaGraphUrl(userId)}?fields=id,username&access_token=${encodeURIComponent(accessToken)}`;
+    const res = await fetch(profileUrl);
+    const data = await res.json();
+    if (res.ok && data?.username) {
+      cachedDefaultIgUsername = String(data.username).trim();
+      cachedDefaultIgFetchTime = now;
+      return cachedDefaultIgUsername;
+    }
+  } catch (err) {
+    console.warn("Failed to fetch Instagram username for Cloudinary folder:", err);
+  }
+
+  return null;
+}
+
+function sanitizeForPath(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/^@+/, "") // remove leading @
+    .replace(/[^a-z0-9_.-]/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 50);
 }
 
 /**
- * Computes the isolated Cloudinary folder path for a given user.
- * Format: "postgram/users/ig_{instagram_user_id}" or "postgram/users/u_{workos_user_id}"
+ * Computes the isolated Cloudinary folder path for a given user using their USERNAME.
+ * Never uses raw numeric Meta/Instagram IDs in folder names.
  *
- * This ensures strict per-user isolation:
- * - User uploads are kept strictly separated by IG account / user ID.
- * - Cleanup commands will NEVER touch other users' folders or assets.
+ * Output format: "postgram/users/ig_{instagram_username}" or "postgram/users/u_{username}"
+ * Example: "postgram/users/ig_jay_gurudeventerprises"
  */
 export async function getUserCloudinaryFolder(
   user: CurrentUser,
-  customIgUserId?: string | null
+  customUsername?: string | null
 ): Promise<UserFolderInfo> {
-  // 1. Explicitly supplied Instagram ID (verified numeric)
-  if (customIgUserId && /^\d+$/.test(customIgUserId.trim())) {
-    const cleanIg = customIgUserId.trim();
-    return {
-      folder: `postgram/users/ig_${cleanIg}`,
-      prefix: `postgram/users/ig_${cleanIg}/`,
-      userIdentifier: cleanIg,
-      isIgId: true,
-    };
+  // 1. Explicitly passed Instagram username (e.g. from client request)
+  if (customUsername && typeof customUsername === "string" && customUsername.trim().length > 0) {
+    const cleanUser = sanitizeForPath(customUsername);
+    if (cleanUser.length > 0) {
+      return {
+        folder: `postgram/users/ig_${cleanUser}`,
+        prefix: `postgram/users/ig_${cleanUser}/`,
+        userIdentifier: cleanUser,
+        isIgUsername: true,
+      };
+    }
   }
 
-  // 2. Query connected account from Neon PostgreSQL
+  // 2. Query Neon PostgreSQL database for connected account username
   try {
     const db = getDb();
     if (db) {
       const account = await db
-        .select({ instagramUserId: instagramAccounts.instagramUserId })
+        .select({ username: instagramAccounts.username })
         .from(instagramAccounts)
         .where(eq(instagramAccounts.workosUserId, user.workosUserId))
         .limit(1);
 
-      if (account && account.length > 0 && account[0].instagramUserId) {
-        const cleanIg = account[0].instagramUserId.replace(/[^a-zA-Z0-9_-]/g, "");
-        return {
-          folder: `postgram/users/ig_${cleanIg}`,
-          prefix: `postgram/users/ig_${cleanIg}/`,
-          userIdentifier: cleanIg,
-          isIgId: true,
-        };
+      if (account && account.length > 0 && account[0].username) {
+        const cleanUser = sanitizeForPath(account[0].username);
+        if (cleanUser.length > 0) {
+          return {
+            folder: `postgram/users/ig_${cleanUser}`,
+            prefix: `postgram/users/ig_${cleanUser}/`,
+            userIdentifier: cleanUser,
+            isIgUsername: true,
+          };
+        }
       }
     }
   } catch (err) {
-    // Graceful fallback if database query fails
+    // Database query fallback
   }
 
-  // 3. Fallback to default server-side IG_USER_ID if configured
-  if (config.meta.defaultUserId && /^\d+$/.test(config.meta.defaultUserId)) {
-    return {
-      folder: `postgram/users/ig_${config.meta.defaultUserId}`,
-      prefix: `postgram/users/ig_${config.meta.defaultUserId}/`,
-      userIdentifier: config.meta.defaultUserId,
-      isIgId: true,
-    };
+  // 3. Resolve default Instagram account's username from Meta Graph API
+  const defaultIgUser = await getDefaultIgUsername();
+  if (defaultIgUser) {
+    const cleanUser = sanitizeForPath(defaultIgUser);
+    if (cleanUser.length > 0) {
+      return {
+        folder: `postgram/users/ig_${cleanUser}`,
+        prefix: `postgram/users/ig_${cleanUser}/`,
+        userIdentifier: cleanUser,
+        isIgUsername: true,
+      };
+    }
   }
 
-  // 4. Default fallback to WorkOS user ID
-  const sanitizedWorkos = user.workosUserId.replace(/[^a-zA-Z0-9_-]/g, "_");
+  // 4. Fallback: User email prefix or friendly name (no numeric IDs)
+  let fallbackName = user.email ? user.email.split("@")[0] : user.name || "creator";
+  const cleanFallback = sanitizeForPath(fallbackName);
+
   return {
-    folder: `postgram/users/u_${sanitizedWorkos}`,
-    prefix: `postgram/users/u_${sanitizedWorkos}/`,
-    userIdentifier: sanitizedWorkos,
-    isIgId: false,
+    folder: `postgram/users/u_${cleanFallback || "creator"}`,
+    prefix: `postgram/users/u_${cleanFallback || "creator"}/`,
+    userIdentifier: cleanFallback || "creator",
+    isIgUsername: false,
   };
 }
 
@@ -87,12 +140,16 @@ export function validateFolderOwnership(
   userFolderInfo: UserFolderInfo
 ): boolean {
   if (!targetPrefix || typeof targetPrefix !== "string") return false;
-  
+
   // Must start strictly with "postgram/users/"
   if (!targetPrefix.startsWith("postgram/users/")) return false;
 
   // Cannot be the base directory
-  if (targetPrefix === "postgram/users/" || targetPrefix === "postgram/users" || targetPrefix === "postgram") {
+  if (
+    targetPrefix === "postgram/users/" ||
+    targetPrefix === "postgram/users" ||
+    targetPrefix === "postgram"
+  ) {
     return false;
   }
 

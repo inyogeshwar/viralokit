@@ -14,8 +14,8 @@ export async function GET(request: Request) {
     }
 
     const urlObj = new URL(request.url);
-    const customIgUserId = urlObj.searchParams.get("igUserId");
-    const userFolderInfo = await getUserCloudinaryFolder(user, customIgUserId);
+    const customUsername = urlObj.searchParams.get("username") || urlObj.searchParams.get("igUserId");
+    const userFolderInfo = await getUserCloudinaryFolder(user, customUsername);
 
     const stats = await getUserStorageStats(userFolderInfo.folder, userFolderInfo.prefix);
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       data: {
         ...stats,
         userIdentifier: userFolderInfo.userIdentifier,
-        isIgId: userFolderInfo.isIgId,
+        isIgUsername: userFolderInfo.isIgUsername,
       },
     });
   } catch (err: any) {

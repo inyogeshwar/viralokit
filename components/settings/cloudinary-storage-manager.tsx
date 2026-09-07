@@ -36,7 +36,7 @@ interface StorageStatsData {
   totalBytes: number;
   totalMB: number;
   userIdentifier: string;
-  isIgId: boolean;
+  isIgUsername?: boolean;
   resources: UserResourceItem[];
   globalUsage: {
     plan: string;

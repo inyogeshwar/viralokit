@@ -65,10 +65,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Resolve user's isolated Cloudinary directory (e.g. postgram/users/ig_17841441536072453)
+    // 2. Resolve user's isolated Cloudinary directory (e.g. postgram/users/ig_jay_gurudeventerprises)
     const urlObj = new URL(request.url);
-    const customIgUserId = urlObj.searchParams.get("igUserId");
-    const userFolderInfo = await getUserCloudinaryFolder(user, customIgUserId);
+    const customUsername = urlObj.searchParams.get("username") || urlObj.searchParams.get("igUserId");
+    const userFolderInfo = await getUserCloudinaryFolder(user, customUsername);
 
     const contentType = request.headers.get("content-type") || "";
 
