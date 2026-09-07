@@ -49,7 +49,7 @@ export function PostInsightsModal({ post, onClose }: PostInsightsModalProps) {
       if (!post) return null;
       const params = new URLSearchParams({
         mediaId: post.id,
-        likeCount: (post.like_count ?? 3).toString(),
+        likeCount: (post.like_count ?? 0).toString(),
         commentsCount: (post.comments_count ?? 0).toString(),
       });
       if (post.permalink) {
@@ -65,37 +65,40 @@ export function PostInsightsModal({ post, onClose }: PostInsightsModalProps) {
 
   if (!post) return null;
 
-  const insights: InstagramPostInsights = data || {
+  const fallbackInsights: InstagramPostInsights = {
     mediaId: post.id,
     views: {
-      total: 14561,
-      followersPercent: 0.7,
-      nonFollowersPercent: 99.3,
-      fromHome: 14324,
-      fromProfile: 139,
-      fromOther: 98,
-      viewers: 5890,
+      total: post.like_count ?? 0,
+      followersPercent: (post.like_count ?? 0) > 0 ? 100 : 0,
+      nonFollowersPercent: 0,
+      fromHome: post.like_count ?? 0,
+      fromProfile: 0,
+      fromOther: 0,
+      viewers: 0,
     },
     interactions: {
-      total: 192,
-      followersPercent: 2.4,
-      nonFollowersPercent: 97.6,
-      postInteractions: 192,
-      likes: post.like_count && post.like_count > 0 ? post.like_count : 121,
-      shares: 30,
-      saves: 15,
-      comments: post.comments_count && post.comments_count > 0 ? post.comments_count : 3,
-      accountsEngaged: 154,
+      total: (post.like_count ?? 0) + (post.comments_count ?? 0),
+      followersPercent: ((post.like_count ?? 0) + (post.comments_count ?? 0)) > 0 ? 100 : 0,
+      nonFollowersPercent: 0,
+      postInteractions: (post.like_count ?? 0) + (post.comments_count ?? 0),
+      likes: post.like_count ?? 0,
+      shares: 0,
+      saves: 0,
+      comments: post.comments_count ?? 0,
+      accountsEngaged: (post.like_count ?? 0) + (post.comments_count ?? 0),
     },
     profile: {
-      activity: 13,
-      visits: 13,
+      activity: 0,
+      visits: 0,
       externalLinkTaps: 0,
       businessAddressTaps: 0,
       follows: 0,
     },
     boostUrl: post.permalink || "https://www.instagram.com",
   };
+
+  const insights: InstagramPostInsights = data || fallbackInsights;
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-200">

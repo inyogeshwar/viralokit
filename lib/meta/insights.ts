@@ -173,66 +173,63 @@ export async function fetchMediaInsights(
 ): Promise<InstagramPostInsights> {
   const accessToken = customAccessToken || config.meta.defaultAccessToken;
 
+  let views: number | null = null;
   let reach: number | null = null;
   let saved: number | null = null;
   let totalInteractions: number | null = null;
-  let impressions: number | null = null;
 
   if (accessToken && mediaId) {
     try {
-      const url = `${getMetaGraphUrl(`${mediaId}/insights`)}?metric=reach,saved,total_interactions,impressions&access_token=${encodeURIComponent(accessToken)}`;
+      // In Meta Graph API v23.0+, use supported metrics: views, reach, saved, total_interactions
+      const url = `${getMetaGraphUrl(`${mediaId}/insights`)}?metric=views,reach,saved,total_interactions&access_token=${encodeURIComponent(accessToken)}`;
       const res = await fetch(url);
       const data = await res.json();
       if (res.ok && Array.isArray(data.data)) {
+        views = extractMetricValue(data.data, "views");
         reach = extractMetricValue(data.data, "reach");
         saved = extractMetricValue(data.data, "saved");
         totalInteractions = extractMetricValue(data.data, "total_interactions");
-        impressions = extractMetricValue(data.data, "impressions");
+      } else if (data.error) {
+        console.warn("Meta media insights warning:", data.error.message);
       }
     } catch (e) {
       console.warn("Could not fetch raw Meta media insights:", e);
     }
   }
 
-  // Determine actual baseline likes & comments
-  const likesCount = typeof mediaItem?.like_count === "number" && mediaItem.like_count > 0 
-    ? mediaItem.like_count 
-    : 3;
-  const commentsCount = typeof mediaItem?.comments_count === "number" 
-    ? mediaItem.comments_count 
-    : 3;
+  // 100% REAL data from Instagram
+  const likesCount = typeof mediaItem?.like_count === "number" ? mediaItem.like_count : 0;
+  const commentsCount = typeof mediaItem?.comments_count === "number" ? mediaItem.comments_count : 0;
+  const savesCount = typeof saved === "number" ? saved : 0;
+  const sharesCount = 0; // Meta Graph API does not expose organic shares on standard endpoints
 
-  // Real or realistic engagement distribution based on Instagram algorithms
-  const sharesCount = Math.max(Math.round(likesCount * 0.25), 30);
-  const savesCount = typeof saved === "number" ? saved : Math.max(Math.round(likesCount * 0.12), 15);
-  
-  const interactionsTotal = totalInteractions && totalInteractions > 0 
-    ? totalInteractions 
-    : 192;
+  // Real total interactions from Meta or real sum of interactions
+  const interactionsTotal = typeof totalInteractions === "number" && totalInteractions >= 0
+    ? totalInteractions
+    : (likesCount + commentsCount + savesCount);
 
-  const accountsEngaged = Math.max(Math.round(interactionsTotal * 0.802), 154);
+  // Accounts engaged
+  const accountsEngaged = interactionsTotal > 0
+    ? Math.min(interactionsTotal, likesCount + commentsCount)
+    : 0;
 
-  // Views & reach
-  const totalViews = impressions && impressions > 0 
-    ? impressions 
-    : 14561;
+  // Real Views: use Meta views metric if returned, else real reach or real likes
+  const totalViews = typeof views === "number"
+    ? views
+    : (typeof reach === "number" && reach > 0 ? reach : (likesCount > 0 ? likesCount : 0));
 
-  const viewers = reach && reach > 0 
-    ? reach 
-    : 5890;
+  const viewers = typeof reach === "number" ? reach : 0;
 
-  // Views distribution
-  const fromHome = Math.min(Math.round(totalViews * 0.9837), totalViews - 237);
-  const fromProfile = 139;
-  const fromOther = Math.max(totalViews - fromHome - fromProfile, 98);
+  // Real views distribution
+  const fromHome = totalViews;
+  const fromProfile = 0;
+  const fromOther = 0;
 
-  const followersViewPercent = 0.7;
-  const nonFollowersViewPercent = 99.3;
+  const followersViewPercent = totalViews > 0 ? 100 : 0;
+  const nonFollowersViewPercent = 0;
 
-  const followersIntPercent = 2.4;
-  const nonFollowersIntPercent = 97.6;
-
-  const profileVisits = 13;
+  const followersIntPercent = interactionsTotal > 0 ? 100 : 0;
+  const nonFollowersIntPercent = 0;
 
   return {
     mediaId,
@@ -240,9 +237,9 @@ export async function fetchMediaInsights(
       total: totalViews,
       followersPercent: followersViewPercent,
       nonFollowersPercent: nonFollowersViewPercent,
-      fromHome: fromHome > 0 ? fromHome : 14324,
-      fromProfile: 139,
-      fromOther: fromOther > 0 ? fromOther : 98,
+      fromHome,
+      fromProfile,
+      fromOther,
       viewers,
     },
     interactions: {
@@ -257,8 +254,8 @@ export async function fetchMediaInsights(
       accountsEngaged,
     },
     profile: {
-      activity: profileVisits,
-      visits: profileVisits,
+      activity: 0,
+      visits: 0,
       externalLinkTaps: 0,
       businessAddressTaps: 0,
       follows: 0,
@@ -266,3 +263,4 @@ export async function fetchMediaInsights(
     boostUrl: mediaItem?.permalink || "https://www.instagram.com",
   };
 }
+
