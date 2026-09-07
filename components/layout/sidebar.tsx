@@ -42,7 +42,7 @@ const navItems = [
     name: "AI Analysis",
     href: "/ai-analysis",
     icon: Sparkles,
-    badge: "FREE AI",
+    badge: "AI",
   },
   {
     name: "Settings",
@@ -110,8 +110,8 @@ export function Sidebar() {
                 </div>
                 {item.badge && (
                   <Badge
-                    variant={item.badge === "FREE AI" ? "default" : "secondary"}
-                    className="text-[10px] py-0 px-1.5 font-normal"
+                    variant={isActive ? "default" : "secondary"}
+                    className="text-[10px] py-0 px-1.5 font-medium"
                   >
                     {item.badge}
                   </Badge>
@@ -122,26 +122,20 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Free-tier infrastructure pill */}
-      <div className="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
-          <Zap className="w-3.5 h-3.5 text-pink-400" />
-          <span>Zero-Cost Stack</span>
+      {/* Pro Studio Status Badge */}
+      <div className="p-3 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-white flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+            Lumina Studio
+          </span>
+          <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-pink-500/40 text-pink-300">
+            v23.0
+          </Badge>
         </div>
-        <div className="text-[11px] text-zinc-400 space-y-1">
-          <p className="flex justify-between">
-            <span>Auth:</span>
-            <span className="text-zinc-300 font-mono">WorkOS</span>
-          </p>
-          <p className="flex justify-between">
-            <span>Database:</span>
-            <span className="text-zinc-300 font-mono">Neon PG</span>
-          </p>
-          <p className="flex justify-between">
-            <span>AI:</span>
-            <span className="text-pink-400 font-mono">OpenRouter Free</span>
-          </p>
-        </div>
+        <p className="text-[11px] text-zinc-400 leading-tight">
+          Meta Graph API Connected & Multi-Model AI Engine
+        </p>
       </div>
     </aside>
   );

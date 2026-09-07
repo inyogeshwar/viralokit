@@ -100,7 +100,7 @@ export default function SettingsPage() {
               Settings & Integrations
             </h1>
             <p className="text-xs text-zinc-400">
-              Manage your connected Instagram account, dynamic AI routing, and zero-cost infrastructure status.
+              Manage your connected Instagram business accounts, AI model routing, and cloud infrastructure.
             </p>
           </div>
 
@@ -117,7 +117,7 @@ export default function SettingsPage() {
                 </Badge>
               </div>
               <CardDescription className="text-xs text-zinc-400">
-                PostGram connects directly to Meta Graph API v23.0 using your server-side access token.
+                Connected directly to Meta Graph API v23.0 with server-side secure authentication.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -163,34 +163,34 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
                   <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span>OpenRouter Dynamic AI System</span>
+                  <span>AI Engine & Model Routing</span>
                 </CardTitle>
                 <Badge variant="default" className="text-[10px]">
-                  100% Free AI Tier
+                  Lumina Engine
                 </Badge>
               </div>
               <CardDescription className="text-xs text-zinc-400">
-                Models are dynamically fetched from OpenRouter and strictly filtered for zero-cost prompt and completion pricing.
+                High-speed multi-model AI routing with multimodal vision support for creative copy & accounts auditing.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="text-xs text-zinc-300 font-medium">Default Free Model:</label>
+                <label className="text-xs text-zinc-300 font-medium">Active AI Model:</label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500"
                 >
-                  <option value="openrouter/free">Auto — Best Free Model (openrouter/free)</option>
+                  <option value="openrouter/free">Auto — Intelligent Smart Router (Recommended)</option>
                   {modelsData?.freeTextModels?.map((m: any) => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.supportsVision ? "• Vision Supported" : ""} (Free)
+                      {m.name.replace(/\s*\(free\)/gi, "")} {m.supportsVision ? "• Vision Supported" : ""}
                     </option>
                   ))}
                 </select>
                 <p className="text-[11px] text-zinc-500">
                   {modelsData?.totalAvailable
-                    ? `Currently ${modelsData.totalAvailable} free models discovered on OpenRouter.`
+                    ? `${modelsData.totalAvailable} high-performance AI models available for captioning and visual analysis.`
                     : "Fetching available models..."}
                 </p>
               </div>
@@ -198,9 +198,9 @@ export default function SettingsPage() {
               {/* Gemini Fallback Toggle */}
               <div className="p-3.5 bg-zinc-950/60 rounded-xl border border-zinc-800 flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium text-white text-xs">Gemini API Free Tier Fallback</h4>
+                  <h4 className="font-medium text-white text-xs">Multimodal Failover (Google Gemini)</h4>
                   <p className="text-[11px] text-zinc-400">
-                    If OpenRouter encounters rate limits or temporary downtime, automatically fall back to Google Gemini Flash.
+                    Automatic failover routing to ensure 99.9% uptime for AI captions and visual media analysis.
                   </p>
                 </div>
                 <input
@@ -213,21 +213,21 @@ export default function SettingsPage() {
 
               <div className="flex justify-end">
                 <Button size="sm" onClick={handleSavePreferences} className="text-xs">
-                  Save AI Preferences
+                  Save Preferences
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Zero-Cost Production Infrastructure Overview */}
+          {/* Cloud Infrastructure Overview */}
           <Card className="bg-zinc-900/50 border-zinc-800">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span>Zero-Cost Production Infrastructure</span>
+                <span>Cloud & System Integrations</span>
               </CardTitle>
               <CardDescription className="text-xs text-zinc-400">
-                Status of all integrated services running within free tiers.
+                Connected production services and live backend health status.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                       {authData?.systemStatus?.authKitConfigured ? "Connected" : "Dev Mock"}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-zinc-400">Up to 1,000,000 MAUs free</p>
+                  <p className="text-[11px] text-zinc-400">Enterprise Authentication & SSO</p>
                 </div>
 
                 <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                       {authData?.systemStatus?.databaseConfigured ? "Connected" : "Dev Mock"}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-zinc-400">0.5 GiB serverless free tier</p>
+                  <p className="text-[11px] text-zinc-400">Serverless High-Speed Database</p>
                 </div>
 
                 <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                       {authData?.systemStatus?.cloudinaryConfigured ? "Connected" : "Pending"}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-zinc-400">25 monthly free credits</p>
+                  <p className="text-[11px] text-zinc-400">Optimized Global Media CDN</p>
                 </div>
               </div>
             </CardContent>

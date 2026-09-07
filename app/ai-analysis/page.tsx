@@ -14,6 +14,7 @@ import {
   Loader2,
   Wand2,
   HelpCircle,
+  Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -69,7 +70,7 @@ export default function AiAnalysisPage() {
       setAuditResult(data.audit);
       toast.success(`AI Account Audit complete in ${selectedLanguage}!`);
     } catch (err: any) {
-      toast.error(err?.message || "Audit failed. Check keys or try another free model.");
+      toast.error(err?.message || "Audit could not be completed. Please try another model.");
     } finally {
       setIsAuditing(false);
     }
@@ -83,38 +84,34 @@ export default function AiAnalysisPage() {
         <Header />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
-            <div>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                  AI Account Performance Audit
-                </h1>
-                <Badge variant="default" className="text-[10px] py-0">
-                  AI-Generated
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                <h1 className="text-2xl font-bold tracking-tight text-white">AI Account Audit & Strategy</h1>
+                <Badge variant="default" className="text-[10px] bg-purple-500/20 text-purple-300 border-purple-500/30">
+                  Lumina AI
                 </Badge>
               </div>
               <p className="text-xs text-zinc-400">
-                Synthesizes official Meta analytics, caption history, and visual patterns to discover actionable growth opportunities for @{accountData?.username || "Creator"}.
+                Deep architectural analysis of your Instagram presence powered by multi-model AI reasoning.
               </p>
             </div>
 
-            {/* Language & Model Selector & Action */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2.5">
               {/* Language Selector */}
-              <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1">
-                <span className="text-[10px] uppercase font-semibold text-zinc-400">Lang:</span>
+              <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200">
+                <Languages className="w-3.5 h-3.5 text-pink-400" />
                 <select
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="bg-transparent text-xs text-zinc-200 focus:outline-none cursor-pointer"
+                  className="bg-transparent border-0 text-xs text-zinc-200 focus:outline-none cursor-pointer"
                 >
-                  <option value="Hinglish" className="bg-zinc-900 text-zinc-200">Hinglish (Hindi + Eng)</option>
-                  <option value="Hindi" className="bg-zinc-900 text-zinc-200">हिन्दी (Hindi)</option>
-                  <option value="English" className="bg-zinc-900 text-zinc-200">English</option>
-                  <option value="Gujarati" className="bg-zinc-900 text-zinc-200">ગુજરાતી (Gujarati)</option>
-                  <option value="Marathi" className="bg-zinc-900 text-zinc-200">मराठी (Marathi)</option>
-                  <option value="Bengali" className="bg-zinc-900 text-zinc-200">বাংলা (Bengali)</option>
-                  <option value="Spanish" className="bg-zinc-900 text-zinc-200">Español (Spanish)</option>
+                  <option value="English" className="bg-zinc-900">English</option>
+                  <option value="Hinglish" className="bg-zinc-900">Hinglish (Hindi+Eng)</option>
+                  <option value="Hindi" className="bg-zinc-900">हिन्दी (Hindi)</option>
+                  <option value="Spanish" className="bg-zinc-900">Español (Spanish)</option>
                 </select>
               </div>
 
@@ -124,10 +121,10 @@ export default function AiAnalysisPage() {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500"
               >
-                <option value="openrouter/free">Auto — Best Free Model</option>
+                <option value="openrouter/free">Auto — Intelligent Router</option>
                 {modelsData?.freeTextModels?.map((m: any) => (
                   <option key={m.id} value={m.id}>
-                    {m.name} (Free)
+                    {m.name.replace(/\s*\(free\)/gi, "")}
                   </option>
                 ))}
               </select>

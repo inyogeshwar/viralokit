@@ -773,10 +773,10 @@ export default function CreatePostPage() {
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-200 focus:outline-none focus:border-pink-500"
                     >
-                      <option value="openrouter/free">Auto — Best Free Model</option>
+                      <option value="openrouter/free">Auto — Intelligent Router</option>
                       {modelsData?.freeTextModels?.map((m: any) => (
                         <option key={m.id} value={m.id}>
-                          {m.name} (Free)
+                          {m.name.replace(/\s*\(free\)/gi, "")}
                         </option>
                       ))}
                     </select>
