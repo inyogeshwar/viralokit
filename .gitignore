@@ -20,6 +20,7 @@
 
 # Vercel
 .vercel
+meta-dev-knowledge-base/
 
 # TypeScript
 *.tsbuildinfo
@@ -31,3 +32,5 @@ next-env.d.ts
 Thumbs.db
 .neon
 .env.local.bak
+
+.vercel
