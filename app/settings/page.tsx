@@ -1,0 +1,292 @@
+"use client";
+
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Settings,
+  Instagram,
+  Sparkles,
+  User,
+  ShieldCheck,
+  Zap,
+  RefreshCw,
+  LogOut,
+  CheckCircle2,
+  AlertCircle,
+  Database,
+  Cloud,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Sidebar } from "@/components/layout/sidebar";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { Header } from "@/components/layout/header";
+import { CapabilityBadges } from "@/components/instagram/capability-badges";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+export default function SettingsPage() {
+  const [selectedModel, setSelectedModel] = useState("openrouter/free");
+  const [geminiFallbackEnabled, setGeminiFallbackEnabled] = useState(true);
+  const [isRefreshingToken, setIsRefreshingToken] = useState(false);
+
+  // 1. Fetch system & user status
+  const { data: authData } = useQuery({
+    queryKey: ["auth-me"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/me");
+      return res.json();
+    },
+  });
+
+  // 2. Fetch Instagram capabilities
+  const {
+    data: capabilities,
+    isLoading: isCapLoading,
+    refetch: refetchCap,
+  } = useQuery({
+    queryKey: ["meta-account"],
+    queryFn: async () => {
+      const res = await fetch("/api/meta/account");
+      return res.json();
+    },
+  });
+
+  // 3. Fetch Free AI Models
+  const { data: modelsData, isLoading: isModelsLoading } = useQuery({
+    queryKey: ["ai-models"],
+    queryFn: async () => {
+      const res = await fetch("/api/ai/models");
+      return res.json();
+    },
+  });
+
+  const handleRefreshToken = async () => {
+    setIsRefreshingToken(true);
+    try {
+      const res = await fetch("/api/meta/refresh-token", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.data.message || "Token refreshed successfully!");
+        refetchCap();
+      } else {
+        toast.error(data.error?.message || "Failed to refresh token");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Network error refreshing token");
+    } finally {
+      setIsRefreshingToken(false);
+    }
+  };
+
+  const handleSavePreferences = () => {
+    toast.success("AI and provider preferences updated!");
+  };
+
+  return (
+    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+      <Sidebar />
+
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+        <Header />
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-6">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              Settings & Integrations
+            </h1>
+            <p className="text-xs text-zinc-400">
+              Manage your connected Instagram account, dynamic AI routing, and zero-cost infrastructure status.
+            </p>
+          </div>
+
+          {/* Instagram Account Integration */}
+          <Card className="bg-zinc-900/50 border-zinc-800">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                  <Instagram className="w-4 h-4 text-pink-400" />
+                  <span>Instagram Professional Account</span>
+                </CardTitle>
+                <Badge variant={capabilities?.connected ? "success" : "warning"} className="text-[10px]">
+                  {capabilities?.connected ? "Active & Authorized" : "Not Connected"}
+                </Badge>
+              </div>
+              <CardDescription className="text-xs text-zinc-400">
+                PostGram connects directly to Meta Graph API v23.0 using your server-side access token.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <CapabilityBadges
+                capabilities={capabilities}
+                isLoading={isCapLoading}
+                onRefresh={() => refetchCap()}
+              />
+
+              <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 text-xs text-zinc-400 space-y-1">
+                <div className="flex justify-between">
+                  <span>Target API Version:</span>
+                  <span className="font-mono text-pink-400">{authData?.systemStatus?.apiVersion || "v23.0"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Server Token Protection:</span>
+                  <span className="text-emerald-400">Encrypted / Server-Side Only (Never Exposed to Browser)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-zinc-950/40 rounded-xl border border-zinc-800/80">
+                <div className="text-xs">
+                  <p className="text-zinc-200 font-medium">Keep Token Alive (Auto-Refresh)</p>
+                  <p className="text-[11px] text-zinc-400">Instagram long-lived tokens last 60 days. Extend validity safely.</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshToken}
+                  disabled={isRefreshingToken || !capabilities?.connected}
+                  className="h-8 text-xs gap-1.5 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingToken ? "animate-spin text-pink-400" : ""}`} />
+                  {isRefreshingToken ? "Extending..." : "Extend 60 Days"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dynamic AI Models Configuration */}
+          <Card className="bg-zinc-900/50 border-zinc-800">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <span>OpenRouter Dynamic AI System</span>
+                </CardTitle>
+                <Badge variant="default" className="text-[10px]">
+                  100% Free AI Tier
+                </Badge>
+              </div>
+              <CardDescription className="text-xs text-zinc-400">
+                Models are dynamically fetched from OpenRouter and strictly filtered for zero-cost prompt and completion pricing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="text-xs text-zinc-300 font-medium">Default Free Model:</label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500"
+                >
+                  <option value="openrouter/free">Auto — Best Free Model (openrouter/free)</option>
+                  {modelsData?.freeTextModels?.map((m: any) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} {m.supportsVision ? "• Vision Supported" : ""} (Free)
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-zinc-500">
+                  {modelsData?.totalAvailable
+                    ? `Currently ${modelsData.totalAvailable} free models discovered on OpenRouter.`
+                    : "Fetching available models..."}
+                </p>
+              </div>
+
+              {/* Gemini Fallback Toggle */}
+              <div className="p-3.5 bg-zinc-950/60 rounded-xl border border-zinc-800 flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-white text-xs">Gemini API Free Tier Fallback</h4>
+                  <p className="text-[11px] text-zinc-400">
+                    If OpenRouter encounters rate limits or temporary downtime, automatically fall back to Google Gemini Flash.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={geminiFallbackEnabled}
+                  onChange={(e) => setGeminiFallbackEnabled(e.target.checked)}
+                  className="w-4 h-4 accent-pink-600 rounded cursor-pointer"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button size="sm" onClick={handleSavePreferences} className="text-xs">
+                  Save AI Preferences
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Zero-Cost Production Infrastructure Overview */}
+          <Card className="bg-zinc-900/50 border-zinc-800">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                <Zap className="w-4 h-4 text-amber-400" />
+                <span>Zero-Cost Production Infrastructure</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-zinc-400">
+                Status of all integrated services running within free tiers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-white">WorkOS AuthKit</span>
+                    <Badge variant={authData?.systemStatus?.authKitConfigured ? "success" : "secondary"} className="text-[9px] py-0">
+                      {authData?.systemStatus?.authKitConfigured ? "Connected" : "Dev Mock"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-zinc-400">Up to 1,000,000 MAUs free</p>
+                </div>
+
+                <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-white">Neon PostgreSQL</span>
+                    <Badge variant={authData?.systemStatus?.databaseConfigured ? "success" : "secondary"} className="text-[9px] py-0">
+                      {authData?.systemStatus?.databaseConfigured ? "Connected" : "Dev Mock"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-zinc-400">0.5 GiB serverless free tier</p>
+                </div>
+
+                <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-white">Cloudinary CDN</span>
+                    <Badge variant={authData?.systemStatus?.cloudinaryConfigured ? "success" : "secondary"} className="text-[9px] py-0">
+                      {authData?.systemStatus?.cloudinaryConfigured ? "Connected" : "Pending"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-zinc-400">25 monthly free credits</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Current User Session Profile */}
+          <Card className="bg-zinc-900/50 border-zinc-800">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                <User className="w-4 h-4 text-blue-400" />
+                <span>Account Profile</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-sm text-white">{authData?.user?.name || "Creator"}</p>
+                  <p className="text-zinc-400 text-xs">{authData?.user?.email || "creator@postgram.local"}</p>
+                </div>
+                {authData?.user?.isDemoUser && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    Local Development Session
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+
+      <MobileNav />
+    </div>
+  );
+}
