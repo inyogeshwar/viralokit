@@ -8,7 +8,14 @@ export default async function middleware(request: NextRequest) {
   }
 
   try {
-    const { session, headers, authorizationUrl } = await authkit(request);
+    const proto = request.headers.get("x-forwarded-proto") || (request.nextUrl.protocol.replace(":", ""));
+    const host = request.headers.get("host") || request.nextUrl.host;
+    const origin = `${proto}://${host}`;
+    const redirectUri = process.env.WORKOS_REDIRECT_URI || `${origin}/callback`;
+
+    const { session, headers, authorizationUrl } = await authkit(request, {
+      redirectUri,
+    });
     const { pathname } = request.nextUrl;
 
     const protectedRoutes = [
