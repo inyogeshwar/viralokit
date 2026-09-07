@@ -234,6 +234,26 @@ export default function CreatePostPage() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handlePurgeFromCloudinary = async () => {
+    try {
+      toast.loading("Purging images from Cloudinary to free CDN space...", { id: "purge-cdn" });
+      const res = await fetch("/api/cloudinary/cleanup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_all" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setImages([]);
+        toast.success(data.message || "All uploads purged from Cloudinary! CDN quota freed.", { id: "purge-cdn" });
+      } else {
+        toast.error(data.error || "Failed to purge CDN media", { id: "purge-cdn" });
+      }
+    } catch {
+      toast.error("Network error while purging CDN storage", { id: "purge-cdn" });
+    }
+  };
+
   // AI Image Analysis
   const handleAnalyzeImage = async () => {
     if (images.length === 0) {
@@ -600,14 +620,26 @@ export default function CreatePostPage() {
                       <span className="font-medium text-zinc-400">
                         {postType === "CAROUSEL" ? "Reorder or remove slides:" : "Selected Image:"}
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setImages([])}
-                        className="text-xs text-red-400 hover:text-red-300 h-6 px-2"
-                      >
-                        Clear all
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePurgeFromCloudinary}
+                          className="text-[11px] text-zinc-400 hover:text-red-400 border-zinc-800 hover:border-red-500/40 h-6 px-2 gap-1"
+                          title="Permanently delete uploaded images from Cloudinary to keep 25 GB CDN storage free"
+                        >
+                          <Trash2 className="w-3 h-3 text-zinc-500 hover:text-red-400" />
+                          <span>Purge from Cloudinary</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setImages([])}
+                          className="text-[11px] text-zinc-400 hover:text-white h-6 px-2"
+                        >
+                          Clear
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5">

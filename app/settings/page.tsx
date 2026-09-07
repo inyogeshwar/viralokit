@@ -24,6 +24,7 @@ import { CapabilityBadges } from "@/components/instagram/capability-badges";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CloudinaryStorageManager } from "@/components/settings/cloudinary-storage-manager";
 
 export default function SettingsPage() {
   const [selectedModel, setSelectedModel] = useState("openrouter/free");
@@ -264,6 +265,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Cloudinary CDN Quota & User Directory Storage Manager */}
+          <CloudinaryStorageManager />
 
           {/* Current User Session Profile */}
           <Card className="bg-zinc-900/50 border-zinc-800">
