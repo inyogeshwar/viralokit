@@ -88,7 +88,11 @@ export default function SettingsPage() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
-        <Header />
+        <Header
+          user={authData?.user}
+          accountUsername={capabilities?.username}
+          isConnected={capabilities?.connected}
+        />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-6">
           <div className="border-b border-zinc-800/80 pb-4">
@@ -271,14 +275,37 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-xs">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-sm text-white">{authData?.user?.name || "Creator"}</p>
-                  <p className="text-zinc-400 text-xs">{authData?.user?.email || "creator@postgram.local"}</p>
-                </div>
-                {authData?.user?.isDemoUser && (
-                  <Badge variant="secondary" className="text-[10px]">
-                    Local Development Session
-                  </Badge>
+                {authData?.user ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center font-bold text-sm text-pink-400">
+                      {authData.user.name?.charAt(0).toUpperCase() || "C"}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-white">{authData.user.name}</p>
+                      <p className="text-zinc-400 text-xs">{authData.user.email}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="font-semibold text-sm text-white">Not Signed In</p>
+                    <p className="text-zinc-400 text-xs">Sign in with your email or SSO to link your profile.</p>
+                  </div>
+                )}
+
+                {authData?.user ? (
+                  <a href="/api/auth/logout">
+                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1.5 border-zinc-800 text-zinc-400 hover:text-white">
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </Button>
+                  </a>
+                ) : (
+                  <a href="/api/auth/login">
+                    <Button size="sm" className="text-xs h-8 gap-1.5">
+                      <User className="w-3.5 h-3.5" />
+                      <span>Sign In with WorkOS</span>
+                    </Button>
+                  </a>
                 )}
               </div>
             </CardContent>
