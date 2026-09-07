@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ViraloKitLogo } from "@/components/brand/logo";
 
 export default function LandingPage() {
   const jsonLd = {
@@ -56,19 +57,7 @@ export default function LandingPage() {
       {/* Top Navigation Bar */}
       <header className="border-b border-zinc-800/80 bg-[#09090b]/80 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center shadow-lg shadow-pink-500/25 group-hover:scale-105 transition-transform duration-300">
-              <Instagram className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5 font-headline-md">
-                PostGram
-              </span>
-              <span className="text-[10px] text-zinc-400 block -mt-1 font-medium tracking-wider uppercase">
-                Creator Studio
-              </span>
-            </div>
-          </Link>
+          <ViraloKitLogo href="/" size="md" />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-zinc-400">
@@ -433,12 +422,7 @@ export default function LandingPage() {
       {/* Professional Footer */}
       <footer className="border-t border-zinc-800/80 py-10 px-6 bg-zinc-950 text-xs text-zinc-400">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 flex items-center justify-center">
-              <Instagram className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-white text-sm">PostGram Creator Studio</span>
-          </div>
+          <ViraloKitLogo href="/" size="sm" />
 
           <div className="flex flex-wrap items-center justify-center gap-6 text-zinc-400">
             <Link href="/dashboard" className="hover:text-white transition-colors">
@@ -465,7 +449,7 @@ export default function LandingPage() {
           </div>
 
           <p className="text-zinc-500 text-center md:text-right">
-            © {new Date().getFullYear()} PostGram. Built for official Meta Graph API v23.0.
+            © {new Date().getFullYear()} ViraloKit. Built for official Meta Graph API v23.0.
           </p>
         </div>
       </footer>
