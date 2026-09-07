@@ -34,3 +34,6 @@ Thumbs.db
 .env.local.bak
 
 .vercel
+
+# Added by ggshield
+.cache_ggshield
