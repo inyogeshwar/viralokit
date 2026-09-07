@@ -30,7 +30,12 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     }
   }
 
-  // Development / Demo Mode fallback when WorkOS credentials are not yet configured
+  // In production, unauthenticated requests MUST strictly return null
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
+
+  // Local development fallback ONLY when WorkOS credentials are not configured
   return {
     workosUserId: "dev_creator_local",
     email: "creator@postgram.local",

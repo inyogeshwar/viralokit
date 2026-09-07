@@ -27,9 +27,24 @@ export default async function middleware(request: NextRequest) {
       "/settings",
     ];
 
-    const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+    const isPageProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+    const isApiProtected =
+      pathname.startsWith("/api/meta") ||
+      pathname.startsWith("/api/cloudinary") ||
+      pathname.startsWith("/api/ai");
 
-    if (isProtected && !session.user && authorizationUrl) {
+    // Unauthenticated API calls must receive 401 Unauthorized
+    if (isApiProtected && !session.user) {
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+          { error: "Authentication required", code: "UNAUTHORIZED" },
+          { status: 401 }
+        );
+      }
+    }
+
+    // Unauthenticated page visits redirect to WorkOS AuthKit
+    if (isPageProtected && !session.user && authorizationUrl) {
       return handleAuthkitHeaders(request, headers, { redirect: authorizationUrl });
     }
 
@@ -49,6 +64,9 @@ export const config = {
     "/ai-analysis/:path*",
     "/settings/:path*",
     "/api/auth/:path*",
+    "/api/meta/:path*",
+    "/api/cloudinary/:path*",
+    "/api/ai/:path*",
   ],
 };
 

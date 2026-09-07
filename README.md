@@ -92,7 +92,7 @@ NEXT_PUBLIC_APP_URL=https://viralokit.vercel.app
 META_GRAPH_API_VERSION=v23.0
 META_APP_ID=your_meta_app_id
 META_APP_SECRET=your_meta_app_secret
-IG_USER_ID=17841441536072453
+IG_USER_ID=your_instagram_user_id
 IG_ACCESS_TOKEN=your_long_lived_user_access_token
 
 # ==========================================
@@ -143,7 +143,7 @@ To publish posts and fetch analytics for your Instagram account:
    * `public_profile`
 4. **Find Your `IG_USER_ID`**:
    * In Graph API Explorer, run `GET /v23.0/me/accounts?fields=instagram_business_account{id,username,name}`.
-   * Copy the `instagram_business_account.id` (e.g. `17841441536072453`).
+   * Copy the `instagram_business_account.id` (e.g. `17841400000000000`).
 5. **Generate 60-Day Long-Lived Token (`IG_ACCESS_TOKEN`)**:
    * Generate a User Token in the Explorer.
    * Exchange it for a long-lived token via:

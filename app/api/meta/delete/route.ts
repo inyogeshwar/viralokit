@@ -4,6 +4,7 @@ import { deleteInstagramMedia, bulkDeleteInstagramMedia } from "@/lib/meta/delet
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
+import { isAuthorizedUser } from "@/lib/config";
 
 const deleteSchema = z.object({
   mediaId: z.string().optional(),
@@ -13,6 +14,20 @@ const deleteSchema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required to delete posts.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    if (!isAuthorizedUser(user)) {
+      return NextResponse.json(
+        { error: "You are not authorized to delete media from this account.", code: "FORBIDDEN" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const validated = deleteSchema.safeParse(body);
 

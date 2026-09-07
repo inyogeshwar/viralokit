@@ -3,6 +3,7 @@ import { z } from "zod";
 import { publishSingleImage, publishCarousel } from "@/lib/meta/publishing";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db";
+import { isAuthorizedUser } from "@/lib/config";
 
 const publishSchema = z.object({
   mediaType: z.enum(["IMAGE", "CAROUSEL"]),
@@ -16,6 +17,20 @@ export const maxDuration = 60;
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required to publish to Instagram.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    if (!isAuthorizedUser(user)) {
+      return NextResponse.json(
+        { error: "You are not authorized to publish to this Instagram account.", code: "FORBIDDEN" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const validated = publishSchema.safeParse(body);
 

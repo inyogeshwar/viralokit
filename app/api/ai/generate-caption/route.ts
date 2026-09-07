@@ -18,6 +18,13 @@ const captionSchema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required to generate captions.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const validated = captionSchema.safeParse(body);
 

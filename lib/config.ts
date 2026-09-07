@@ -37,7 +37,28 @@ export const config = {
     openRouterKey: clean(process.env.OPENROUTER_API_KEY),
     geminiKey: clean(process.env.GEMINI_API_KEY),
   },
+  auth: {
+    // Comma-separated list of authorized WorkOS user IDs or emails.
+    // If left blank/unset, all authenticated WorkOS users can manage the studio.
+    adminUserIds: clean(process.env.ADMIN_WORKOS_USER_IDS)
+      ? clean(process.env.ADMIN_WORKOS_USER_IDS)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+  },
 };
+
+/**
+ * Checks if a given WorkOS user is authorized to perform privileged Meta operations.
+ * If ADMIN_WORKOS_USER_IDS is configured, user must match one of the allowed IDs or emails.
+ */
+export function isAuthorizedUser(user: { workosUserId: string; email?: string } | null): boolean {
+  if (!user) return false;
+  const admins = config.auth.adminUserIds;
+  if (admins.length === 0) return true; // Open to all authenticated users if no restriction set
+  return admins.includes(user.workosUserId) || (user.email ? admins.includes(user.email) : false);
+}
 
 export function getMetaGraphVersion(): string {
   return process.env.META_GRAPH_API_VERSION || "v23.0";
@@ -47,4 +68,28 @@ export function getMetaGraphUrl(endpoint: string): string {
   const version = getMetaGraphVersion();
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
   return `https://graph.facebook.com/${version}/${cleanEndpoint}`;
+}
+
+/**
+ * Validates critical environment variables in production.
+ * Fails fast if mandatory security configurations are missing without leaking values.
+ */
+export function validateProductionEnvironment(): { valid: boolean; missing: string[] } {
+  if (process.env.NODE_ENV !== "production") {
+    return { valid: true, missing: [] };
+  }
+
+  const required = [
+    "WORKOS_API_KEY",
+    "WORKOS_CLIENT_ID",
+    "WORKOS_COOKIE_PASSWORD",
+    "IG_USER_ID",
+    "IG_ACCESS_TOKEN",
+  ];
+
+  const missing = required.filter((key) => !process.env[key] || !process.env[key]?.trim());
+  return {
+    valid: missing.length === 0,
+    missing,
+  };
 }

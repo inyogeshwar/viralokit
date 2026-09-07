@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { refreshLongLivedAccessToken } from "@/lib/meta/token";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { isAuthorizedUser } from "@/lib/config";
 
 export async function POST() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: "Authentication required.", code: "UNAUTHORIZED" },
+      { status: 401 }
+    );
+  }
+
+  if (!isAuthorizedUser(user)) {
+    return NextResponse.json(
+      { error: "You are not authorized to refresh the Instagram access token.", code: "FORBIDDEN" },
+      { status: 403 }
+    );
+  }
+
   try {
     const result = await refreshLongLivedAccessToken();
     // Return sanitized status without exposing secret token value directly

@@ -13,6 +13,13 @@ const requestSchema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required to analyze images.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const validated = requestSchema.safeParse(body);
 

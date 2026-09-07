@@ -31,7 +31,7 @@ async function postMeta(path: string, body: Record<string, string>, accessToken:
   if (!response.ok || data.error) {
     const err = data.error || {};
     const errMsg = err.error_user_msg || err.message || `Meta API error on ${path}`;
-    console.error(`[postMeta] Error on ${path}:`, err);
+    console.error(`[postMeta] Error on ${path}: code=${err.code}, subcode=${err.error_subcode}, message=${errMsg}`);
     throw new MetaApiError(
       errMsg,
       err.code,

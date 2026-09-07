@@ -14,6 +14,13 @@ const auditSchema = z.object({
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required to run account audit.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
     const rawBody = await request.json().catch(() => ({}));
     const validated = auditSchema.safeParse(rawBody);
     const { modelId, enableGeminiFallback, language } = validated.success
