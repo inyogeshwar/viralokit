@@ -5,10 +5,11 @@ import * as schema from "./schema";
 let dbInstance: NeonHttpDatabase<typeof schema> | null = null;
 
 export function getDb() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
+  const rawUrl = process.env.DATABASE_URL;
+  if (!rawUrl) {
     return null;
   }
+  const databaseUrl = rawUrl.trim().replace(/^["']|["']$/g, "");
 
   if (!dbInstance) {
     try {
@@ -24,7 +25,8 @@ export function getDb() {
 }
 
 export function isDatabaseConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("postgres"));
+  const url = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "");
+  return Boolean(url && url.startsWith("postgres"));
 }
 
 export { schema };
