@@ -34,6 +34,14 @@ export const metadata: Metadata = {
       "Publish multi-slide carousels, schedule posts, audit live Meta Graph API analytics, and craft viral captions with AI.",
     url: "https://viralokit.vercel.app",
     siteName: "ViraloKit",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ViraloKit — Professional Instagram Creator Studio",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
@@ -42,6 +50,12 @@ export const metadata: Metadata = {
     title: "ViraloKit — Professional Instagram Creator Studio",
     description:
       "Publish single & carousel posts to Instagram, analyze performance with official Meta insights, and generate viral captions with AI.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/apple-touch-icon.png",
   },
   robots: {
     index: true,

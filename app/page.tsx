@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Instagram,
   Sparkles,
@@ -213,6 +214,65 @@ export default function LandingPage() {
             <div className="p-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm">
               <p className="text-xs text-zinc-400">Media CDN Storage</p>
               <p className="text-sm font-bold text-blue-400 font-mono">25 GB Isolated</p>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* HERO DASHBOARD SCREENSHOT SHOWCASE */}
+          {/* ========================================================================= */}
+          <div className="relative w-full max-w-5xl mt-8 pt-2">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-zinc-950/80 shadow-2xl shadow-pink-500/10 backdrop-blur-xl group">
+              {/* macOS-style Window Frame Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block shadow-sm" />
+                  <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block shadow-sm" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block shadow-sm" />
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400 bg-zinc-950/70 px-3 py-1 rounded-md border border-white/5">
+                  <Lock className="w-3 h-3 text-pink-400" />
+                  <span>viralokit.vercel.app/dashboard</span>
+                </div>
+                <Badge variant="outline" className="hidden sm:inline-flex text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                  Live Meta Graph API v23.0
+                </Badge>
+              </div>
+
+              {/* High-Definition Dashboard Screenshot */}
+              <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-zinc-950">
+                <Image
+                  src="/landing/hero-mockup.png"
+                  alt="ViraloKit Creator Dashboard Live Interface"
+                  fill
+                  sizes="(max-width: 1200px) 100vw, 1200px"
+                  priority
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.01]"
+                />
+                {/* Subtle Ambient Bottom Fade */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#050507] via-[#050507]/60 to-transparent pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Floating Card 1: AI Caption Generator */}
+            <div className="absolute -left-2 sm:-left-6 top-1/4 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/90 border border-pink-500/30 shadow-2xl shadow-pink-500/20 backdrop-blur-xl">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-md">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-white leading-tight">AI Caption Generated</p>
+                <p className="text-[10px] text-pink-300">Tone: High-Engagement Creator</p>
+              </div>
+            </div>
+
+            {/* Floating Card 2: Meta Graph API 100% Verified */}
+            <div className="absolute -right-2 sm:-right-6 bottom-1/4 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 backdrop-blur-xl">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-white leading-tight">Meta Graph API v23.0</p>
+                <p className="text-[10px] text-emerald-300">Zero Scraping • 100% Verified</p>
+              </div>
             </div>
           </div>
         </section>
