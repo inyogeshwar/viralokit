@@ -2,57 +2,7 @@ import { NextResponse } from "next/server";
 import { uploadImageBuffer, uploadImageFromUrl } from "@/lib/cloudinary/upload";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserCloudinaryFolder } from "@/lib/cloudinary/user-folder";
-
-/**
- * Validates that an external image URL is safe from SSRF attacks.
- * Rejects private IPs, loopbacks, link-local addresses, and cloud metadata services.
- */
-function isSafePublicImageUrl(urlString: string): boolean {
-  try {
-    const parsed = new URL(urlString);
-    // 1. Enforce HTTPS only
-    if (parsed.protocol !== "https:") {
-      return false;
-    }
-
-    const hostname = parsed.hostname.toLowerCase();
-
-    // 2. Reject localhost and loopback names
-    if (
-      hostname === "localhost" ||
-      hostname.endsWith(".localhost") ||
-      hostname.endsWith(".local") ||
-      hostname.endsWith(".internal")
-    ) {
-      return false;
-    }
-
-    // 3. Reject IPv4 loopbacks, private networks, and link-local addresses
-    // 127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 (AWS/GCP metadata)
-    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-    const match = hostname.match(ipv4Regex);
-    if (match) {
-      const octet1 = parseInt(match[1], 10);
-      const octet2 = parseInt(match[2], 10);
-
-      if (octet1 === 127) return false; // Loopback
-      if (octet1 === 10) return false; // Private 10.0.0.0/8
-      if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) return false; // Private 172.16.0.0/12
-      if (octet1 === 192 && octet2 === 168) return false; // Private 192.168.0.0/16
-      if (octet1 === 169 && octet2 === 254) return false; // Link-local / Cloud metadata (169.254.169.254)
-      if (octet1 === 0) return false; // 0.0.0.0
-    }
-
-    // 4. Reject IPv6 loopbacks and private addresses
-    if (hostname.includes(":") || hostname === "[::1]") {
-      return false;
-    }
-
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { isSafePublicUrl, sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 export async function POST(request: Request) {
   try {
@@ -80,7 +30,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing image URL in request body." }, { status: 400 });
       }
 
-      if (!isSafePublicImageUrl(url)) {
+      if (!isSafePublicUrl(url)) {
         return NextResponse.json(
           { error: "Invalid or restricted image URL. Only public HTTPS image URLs are permitted." },
           { status: 400 }
@@ -140,7 +90,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Cloudinary upload API error:", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to upload media to Cloudinary." },
+      { error: sanitizeErrorMessage(err, "Failed to upload media to Cloudinary.") },
       { status: 500 }
     );
   }

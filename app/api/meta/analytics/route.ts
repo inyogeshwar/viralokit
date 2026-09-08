@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { fetchAccountAnalytics } from "@/lib/meta/insights";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -22,7 +24,7 @@ export async function GET() {
     return NextResponse.json(analytics);
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message || "Failed to fetch Instagram analytics." },
+      { error: sanitizeErrorMessage(err, "Failed to fetch Instagram analytics.") },
       { status: 500 }
     );
   }

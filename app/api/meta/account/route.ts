@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { detectAccountCapabilities } from "@/lib/meta/capabilities";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -18,7 +20,7 @@ export async function GET() {
     return NextResponse.json(
       {
         connected: false,
-        reason: err?.message || "Failed to detect Instagram capabilities.",
+        reason: sanitizeErrorMessage(err, "Failed to detect Instagram capabilities."),
       },
       { status: 500 }
     );

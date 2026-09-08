@@ -21,7 +21,13 @@ export async function generateWithGemini(
   }
 
   try {
-    const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = client.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        maxOutputTokens: 1200,
+        temperature: 0.7,
+      },
+    });
     const parts: any[] = [prompt];
 
     if (imageBuffer) {

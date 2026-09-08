@@ -5,10 +5,12 @@ import { generateAccountAnalysisWithAi } from "@/lib/ai/account-analysis";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 const auditSchema = z.object({
-  modelId: z.string().default("openrouter/free"),
+  modelId: z.string().max(100).default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
-  language: z.string().default("English"),
+  language: z.enum(["English", "Hinglish", "Hindi"]).default("English"),
 });
 
 export async function POST(request: Request) {
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
     const validated = auditSchema.safeParse(rawBody);
     const { modelId, enableGeminiFallback, language } = validated.success
       ? validated.data
-      : { modelId: "openrouter/free", enableGeminiFallback: true, language: "English" };
+      : { modelId: "openrouter/free", enableGeminiFallback: true, language: "English" as const };
 
     // 1. Fetch real Meta analytics
     const analytics = await fetchAccountAnalytics();
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Account audit API error:", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to generate AI account analysis." },
+      { error: sanitizeErrorMessage(err, "Failed to generate AI account analysis.") },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserCloudinaryFolder, validateFolderOwnership } from "@/lib/cloudinary/user-folder";
 import { deleteUserFolderAssets, deleteCloudinaryAsset } from "@/lib/cloudinary/delete";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 /**
  * DELETE /api/cloudinary/cleanup
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Cloudinary cleanup API error:", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to execute Cloudinary cleanup." },
+      { error: sanitizeErrorMessage(err, "Failed to execute Cloudinary cleanup.") },
       { status: 500 }
     );
   }

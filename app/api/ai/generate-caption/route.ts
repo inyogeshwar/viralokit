@@ -4,14 +4,16 @@ import { generateCaptionWithAi, CaptionTone, CaptionAction } from "@/lib/ai/capt
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db";
 
+import { sanitizePromptInput, sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 const captionSchema = z.object({
-  context: z.string().default(""),
+  context: z.string().max(1000).default(""),
   tone: z
     .enum(["Professional", "Aesthetic", "Casual", "Minimal", "Creator", "Hinglish", "Hindi", "English"])
     .default("Creator"),
   action: z.enum(["generate", "shorten", "improve", "add_cta", "add_hashtags"]).default("generate"),
-  currentCaption: z.string().default(""),
-  modelId: z.string().default("openrouter/free"),
+  currentCaption: z.string().max(2200).default(""),
+  modelId: z.string().max(100).default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
 });
 
@@ -29,16 +31,20 @@ export async function POST(request: Request) {
     const validated = captionSchema.safeParse(body);
 
     if (!validated.success) {
-      return NextResponse.json({ error: "Invalid request parameters" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid request parameters", details: validated.error.flatten() }, { status: 400 });
     }
 
     const { context, tone, action, currentCaption, modelId, enableGeminiFallback } = validated.data;
 
+    // Sanitize user inputs to neutralize prompt injection attacks
+    const sanitizedContext = sanitizePromptInput(context, 1000);
+    const sanitizedCaption = sanitizePromptInput(currentCaption, 2200);
+
     const result = await generateCaptionWithAi({
-      context,
+      context: sanitizedContext,
       tone: tone as CaptionTone,
       action: action as CaptionAction,
-      currentCaption,
+      currentCaption: sanitizedCaption,
       modelId,
       enableGeminiFallback,
     });
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
           provider: result.provider,
           model: result.model,
           generationType: "caption",
-          inputMetadata: { tone, action, contextLength: context.length },
+          inputMetadata: { tone, action, contextLength: sanitizedContext.length },
           output: JSON.stringify(result),
         });
       } catch (err) {
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Caption generation error:", err);
     return NextResponse.json(
-      { error: err?.message || "AI caption generator temporarily unavailable." },
+      { error: sanitizeErrorMessage(err, "AI caption generator is temporarily unavailable.") },
       { status: 500 }
     );
   }

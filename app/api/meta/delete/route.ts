@@ -6,9 +6,11 @@ import { getDb, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 import { isAuthorizedUser } from "@/lib/config";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 const deleteSchema = z.object({
-  mediaId: z.string().optional(),
-  mediaIds: z.array(z.string()).optional(),
+  mediaId: z.string().regex(/^[0-9_]+$/, "Invalid Instagram media ID format").max(50).optional(),
+  mediaIds: z.array(z.string().regex(/^[0-9_]+$/, "Invalid Instagram media ID format").max(50)).max(50).optional(),
 });
 
 export async function POST(request: Request) {
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
     const validated = deleteSchema.safeParse(body);
 
     if (!validated.success) {
-      return NextResponse.json({ error: "Invalid request parameters" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid request parameters", details: validated.error.flatten() }, { status: 400 });
     }
 
     const { mediaId, mediaIds } = validated.data;
@@ -112,7 +114,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Deletion API error:", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to process deletion." },
+      { error: sanitizeErrorMessage(err, "Failed to process deletion.") },
       { status: 500 }
     );
   }

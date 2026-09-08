@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { fetchFreeModels } from "@/lib/ai/models";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 export async function GET(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
@@ -21,7 +23,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         error: "Unable to load AI models. Please try again.",
-        details: err?.message,
+        details: sanitizeErrorMessage(err, "Failed to connect to model catalog."),
       },
       { status: 500 }
     );

@@ -5,10 +5,12 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db";
 import { isAuthorizedUser } from "@/lib/config";
 
+import { isSafePublicUrl, sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 const publishSchema = z.object({
   mediaType: z.enum(["IMAGE", "CAROUSEL"]),
   caption: z.string().max(2200).default(""),
-  imageUrls: z.array(z.string().url()).min(1),
+  imageUrls: z.array(z.string().url().max(2000)).min(1).max(10),
 });
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,16 @@ export async function POST(request: Request) {
     }
 
     const { mediaType, caption, imageUrls } = validated.data;
+
+    // Security Problem #3 & #8: SSRF validation for all image URLs
+    for (const url of imageUrls) {
+      if (!isSafePublicUrl(url)) {
+        return NextResponse.json(
+          { error: "One or more image URLs are invalid or restricted. Only public HTTPS URLs are permitted." },
+          { status: 400 }
+        );
+      }
+    }
 
     let result;
     if (mediaType === "IMAGE") {
@@ -100,7 +112,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: err?.message || "Failed to publish media to Instagram.",
+        error: sanitizeErrorMessage(err, "Failed to publish media to Instagram."),
         status: "failed",
       },
       { status: 500 }

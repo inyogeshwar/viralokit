@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserCloudinaryFolder } from "@/lib/cloudinary/user-folder";
 import { getUserStorageStats } from "@/lib/cloudinary/delete";
 
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
+
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -30,7 +32,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     console.error("Cloudinary storage API error:", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to fetch Cloudinary storage status." },
+      { error: sanitizeErrorMessage(err, "Failed to fetch Cloudinary storage status.") },
       { status: 500 }
     );
   }

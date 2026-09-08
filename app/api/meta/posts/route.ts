@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchRecentMedia } from "@/lib/meta/insights";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -17,6 +18,7 @@ export async function GET(request: Request) {
 
   try {
     const posts = await fetchRecentMedia(limit);
+
     return NextResponse.json({
       posts,
       total: posts.length,
@@ -24,7 +26,7 @@ export async function GET(request: Request) {
     });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message || "Failed to fetch Instagram posts." },
+      { error: sanitizeErrorMessage(err, "Failed to fetch Instagram posts.") },
       { status: 500 }
     );
   }

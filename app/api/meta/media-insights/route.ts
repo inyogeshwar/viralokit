@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { fetchMediaInsights } from "@/lib/meta/insights";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,9 +16,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const mediaId = searchParams.get("mediaId");
 
-    if (!mediaId) {
+    if (!mediaId || !/^[0-9_]+$/.test(mediaId)) {
       return NextResponse.json(
-        { error: "mediaId is required", code: "INVALID_REQUEST" },
+        { error: "Valid numeric mediaId is required", code: "INVALID_REQUEST" },
         { status: 400 }
       );
     }
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error("Error in /api/meta/media-insights:", error?.message || "Internal error");
     return NextResponse.json(
-      { error: "Failed to fetch media insights", code: "META_INSIGHTS_ERROR" },
+      { error: sanitizeErrorMessage(error, "Failed to fetch media insights"), code: "META_INSIGHTS_ERROR" },
       { status: 500 }
     );
   }
