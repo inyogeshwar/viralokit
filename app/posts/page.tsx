@@ -149,21 +149,27 @@ export default function PostsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="flex min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
         <Header />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
           {/* Header & Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                Published Instagram Posts
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full">
+                  Media Vault
+                </span>
+                <span className="text-[11px] text-zinc-500">• Official Graph Feed</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline flex items-center gap-2">
+                Published Posts
               </h1>
-              <p className="text-xs text-zinc-400">
-                Official media feed from Meta Graph API. Select posts for bulk management or deletion.
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                Official media feed from Meta Graph API v23.0. Inspect telemetry or manage published items.
               </p>
             </div>
 
@@ -174,42 +180,42 @@ export default function PostsPage() {
                   variant="outline"
                   size="sm"
                   onClick={selectAll}
-                  className="text-xs gap-1.5 h-8 border-zinc-800 text-zinc-300"
+                  className="text-xs gap-2 h-9 px-3 rounded-xl border-white/[0.1] bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] cursor-pointer"
                 >
                   {selectedIds.length === posts.length ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-pink-400" />
+                    <CheckSquare className="w-4 h-4 text-pink-400" />
                   ) : (
-                    <Square className="w-3.5 h-3.5" />
+                    <Square className="w-4 h-4" />
                   )}
                   <span>{selectedIds.length === posts.length ? "Deselect All" : "Select All"}</span>
                 </Button>
               )}
 
               {/* Grid / List Switcher */}
-              <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg">
+              <div className="flex items-center bg-black/60 border border-white/[0.1] p-1 rounded-xl">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-1.5 rounded-md text-xs transition-colors ${
-                    viewMode === "grid" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+                  className={`p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
+                    viewMode === "grid" ? "bg-white/[0.12] text-white" : "text-zinc-400 hover:text-white"
                   }`}
                   title="Grid View"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-1.5 rounded-md text-xs transition-colors ${
-                    viewMode === "list" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+                  className={`p-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
+                    viewMode === "list" ? "bg-white/[0.12] text-white" : "text-zinc-400 hover:text-white"
                   }`}
                   title="List View"
                 >
-                  <List className="w-3.5 h-3.5" />
+                  <List className="w-4 h-4" />
                 </button>
               </div>
 
               <Link href="/create">
-                <Button size="sm" className="text-xs gap-1.5 h-8">
-                  <Plus className="w-3.5 h-3.5" />
+                <Button size="sm" className="text-xs gap-2 h-9 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-md shadow-pink-500/20 cursor-pointer">
+                  <Plus className="w-4 h-4" />
                   <span>New Post</span>
                 </Button>
               </Link>
@@ -218,26 +224,26 @@ export default function PostsPage() {
 
           {/* Posts Feed */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div
                   key={i}
-                  className="aspect-square bg-zinc-900/60 rounded-2xl border border-zinc-800 animate-pulse"
+                  className="aspect-square bg-[#0C0C0C] rounded-2xl border border-white/[0.08] animate-pulse"
                 />
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <Card className="p-12 text-center bg-zinc-900/40 border-dashed border-zinc-800">
-              <p className="text-zinc-400 text-sm mb-2">No published posts found on this Instagram account.</p>
-              <p className="text-xs text-zinc-500 mb-4">
-                Upload images and publish your first post through PostGram to get started.
+            <div className="p-12 text-center bg-[#0C0C0C] rounded-3xl border border-dashed border-white/[0.1] space-y-4">
+              <p className="text-zinc-300 font-semibold text-base font-headline">No published posts found on this Instagram account.</p>
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                Upload images and publish your first post through ViraloKit to get started.
               </p>
               <Link href="/create">
-                <Button size="sm" className="text-xs">
+                <Button size="sm" className="text-xs bg-pink-500 hover:bg-pink-600 text-white cursor-pointer">
                   Create Post
                 </Button>
               </Link>
-            </Card>
+            </div>
           ) : viewMode === "grid" ? (
             /* Grid View */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -247,14 +253,14 @@ export default function PostsPage() {
                   <div
                     key={post.id}
                     onClick={() => setSelectedPostForInsights(post)}
-                    className={`group relative rounded-2xl overflow-hidden bg-zinc-900/60 border transition-all duration-200 flex flex-col cursor-pointer ${
+                    className={`group relative rounded-3xl overflow-hidden bg-[#0C0C0C] border transition-all duration-300 flex flex-col cursor-pointer ${
                       isSelected
-                        ? "border-pink-500 ring-2 ring-pink-500/30 shadow-lg shadow-pink-500/10"
-                        : "border-zinc-800 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/50"
+                        ? "border-pink-500 ring-2 ring-pink-500/40 shadow-xl shadow-pink-500/15"
+                        : "border-white/[0.08] hover:border-pink-500/50 hover:shadow-2xl hover:shadow-black/80"
                     }`}
                   >
                     {/* Media Thumbnail */}
-                    <div className="relative aspect-square bg-zinc-950 overflow-hidden">
+                    <div className="relative aspect-square bg-[#050505] overflow-hidden">
                       <img
                         src={post.media_url || post.thumbnail_url}
                         alt={post.caption || "Instagram post"}
@@ -456,20 +462,20 @@ export default function PostsPage() {
 
       {/* Floating Bulk Action Bar */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-zinc-900/95 backdrop-blur-xl border border-pink-500/40 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-pink-500 animate-ping" />
-            <span className="text-xs font-semibold text-white">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#0C0C0C]/90 backdrop-blur-2xl border border-pink-500/50 shadow-2xl shadow-pink-500/20 rounded-2xl px-6 py-3.5 flex items-center gap-5 animate-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-ping" />
+            <span className="text-xs font-bold text-white font-headline">
               {selectedIds.length} post{selectedIds.length > 1 ? "s" : ""} selected
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedIds([])}
-              className="text-xs text-zinc-400 hover:text-white h-8"
+              className="text-xs text-zinc-400 hover:text-white h-9 px-3 rounded-xl cursor-pointer"
             >
               Cancel
             </Button>
@@ -477,7 +483,7 @@ export default function PostsPage() {
               variant="destructive"
               size="sm"
               onClick={() => setIsBulkDeleteModalOpen(true)}
-              className="text-xs gap-1.5 h-8 bg-red-600 hover:bg-red-500 font-semibold"
+              className="text-xs gap-2 h-9 px-4 rounded-xl bg-red-600 hover:bg-red-500 font-bold shadow-lg shadow-red-600/20 cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete Selected</span>
@@ -488,28 +494,31 @@ export default function PostsPage() {
 
       {/* Single Post Delete Confirmation Modal */}
       {postToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0C0C0C] border border-white/[0.1] rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl">
+            <div className="flex items-center gap-3.5 text-red-400">
+              <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/25 flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="font-semibold text-base text-white">Delete Instagram Post?</h3>
+              <div>
+                <h3 className="font-bold text-base text-white font-headline">Delete Instagram Post?</h3>
+                <p className="text-[11px] text-zinc-400">Meta Graph API v23.0 Target</p>
+              </div>
             </div>
 
             <p className="text-xs text-zinc-300 leading-relaxed">
-              This action will send a permanent <code className="text-pink-400 font-mono">DELETE</code> request
-              to the official Meta Graph API. If your connected account permissions allow it, the post will be
+              This action will send a permanent <code className="text-pink-400 font-mono bg-pink-500/10 px-1.5 py-0.5 rounded">DELETE</code> request
+              to the official Meta Graph API. If your connected account permissions permit deletion, the post will be
               removed from Instagram.
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setPostToDelete(null)}
                 disabled={singleDeleteMutation.isPending}
-                className="text-xs text-zinc-400"
+                className="text-xs text-zinc-400 hover:text-white rounded-xl h-9 cursor-pointer"
               >
                 Cancel
               </Button>
@@ -518,7 +527,7 @@ export default function PostsPage() {
                 size="sm"
                 onClick={() => singleDeleteMutation.mutate(postToDelete.id)}
                 disabled={singleDeleteMutation.isPending}
-                className="text-xs gap-1.5 bg-red-600 hover:bg-red-500"
+                className="text-xs gap-2 bg-red-600 hover:bg-red-500 rounded-xl h-9 px-4 font-bold shadow-lg shadow-red-600/20 cursor-pointer"
               >
                 {singleDeleteMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Delete Post</span>

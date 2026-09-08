@@ -418,30 +418,30 @@ export default function CreatePostPage() {
   const suggestedTags = ["#growth", "#creatorlife", "#instatips", "#aesthetic", "#reelstrending", "#foryou"];
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="flex min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
         <Header
           accountUsername={accountData?.username}
           isConnected={accountData?.connected}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
           {/* Top Bar: Title & Primary Actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-full">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full">
                   Post Studio
                 </span>
-                <span className="text-[11px] text-zinc-500">• Lumina Engine</span>
+                <span className="text-[11px] text-zinc-500">• Meta Graph v23.0 Verified</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-                Create Post
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline flex items-center gap-2">
+                Create & Publish
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-                Craft, analyze, and schedule content across your Instagram channels.
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                Craft, analyze, and publish high-definition carousels and posts to @{accountData?.username || "Instagram"}.
               </p>
             </div>
 
@@ -494,31 +494,31 @@ export default function CreatePostPage() {
             {/* Left Column: Media Upload & AI Studio (7 Cols) */}
             <div className="lg:col-span-7 space-y-6">
               {/* Media Assets Section */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-6 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
                   <div>
-                    <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <h2 className="text-base font-bold text-white font-headline flex items-center gap-2">
                       <UploadCloud className="w-4 h-4 text-pink-400" />
                       <span>Media Assets</span>
                       {images.length > 0 && (
-                        <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-pink-500/10 text-pink-300 border-pink-500/20">
-                          {images.length} {postType === "CAROUSEL" ? "/ 10" : "selected"}
+                        <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-pink-500/10 text-pink-300 border-pink-500/20">
+                          {images.length} {postType === "CAROUSEL" ? "/ 10 slides" : "selected"}
                         </Badge>
                       )}
                     </h2>
-                    <p className="text-xs text-zinc-400 mt-0.5">Upload high-resolution images or reels</p>
+                    <p className="text-xs text-zinc-400 mt-1">Upload high-resolution images or carousels (25 GB isolated CDN)</p>
                   </div>
 
                   {/* Post Type Selector (Single Image vs Carousel) */}
-                  <div className="flex items-center gap-1 p-1 bg-zinc-950/80 border border-zinc-800/80 rounded-xl self-start sm:self-auto">
+                  <div className="flex items-center gap-1 p-1 bg-black/60 border border-white/[0.1] rounded-xl self-start sm:self-auto">
                     <button
                       onClick={() => {
                         setPostType("IMAGE");
                         if (images.length > 1) setImages([images[0]]);
                       }}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "IMAGE"
-                          ? "primary-gradient-bg text-white shadow-sm font-semibold"
+                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -528,9 +528,9 @@ export default function CreatePostPage() {
 
                     <button
                       onClick={() => setPostType("CAROUSEL")}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "CAROUSEL"
-                          ? "primary-gradient-bg text-white shadow-sm font-semibold"
+                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -546,15 +546,15 @@ export default function CreatePostPage() {
                     <Sliders className="w-3.5 h-3.5 text-zinc-500" />
                     Preview Aspect Ratio:
                   </span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {(["1:1", "4:5", "9:16"] as const).map((ratio) => (
                       <button
                         key={ratio}
                         onClick={() => setAspectRatio(ratio)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all ${
                           aspectRatio === ratio
-                            ? "bg-pink-500/20 text-pink-300 border border-pink-500/40 font-semibold"
-                            : "bg-zinc-950/60 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                            ? "bg-pink-500/20 text-pink-300 border border-pink-500/50 shadow-sm font-semibold"
+                            : "bg-[#141414] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:border-white/20"
                         }`}
                       >
                         {ratio === "1:1" && "1:1 Square"}
@@ -787,13 +787,13 @@ export default function CreatePostPage() {
               )}
 
               {/* AI Caption & Details Studio */}
-              <div className="glass-panel rounded-2xl p-5 sm:p-6 space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-800/80">
+              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-6 shadow-xl">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <h2 className="text-sm font-semibold text-white">Caption & Details</h2>
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-purple-500/10 text-purple-300 border-purple-500/20">
-                      AI Powered
+                    <h2 className="text-base font-bold text-white font-headline">Caption & AI Engine</h2>
+                    <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-purple-500/10 text-purple-300 border-purple-500/20">
+                      Multi-Model Ready
                     </Badge>
                   </div>
 
@@ -803,9 +803,9 @@ export default function CreatePostPage() {
                     <select
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
-                      className="bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-200 focus:outline-none focus:border-pink-500"
+                      className="bg-black/60 border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
                     >
-                      <option value="openrouter/free">Auto — Intelligent Router</option>
+                      <option value="openrouter/free">Auto — Intelligent Free Router</option>
                       {modelsData?.freeTextModels?.map((m: any) => (
                         <option key={m.id} value={m.id}>
                           {m.name.replace(/\s*\(free\)/gi, "")}
@@ -816,17 +816,17 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Tone Picker */}
-                <div className="space-y-1.5">
-                  <label className="text-xs text-zinc-400 font-medium">Caption Tone:</label>
+                <div className="space-y-2">
+                  <label className="text-xs text-zinc-400 font-medium">Caption Tone & Style:</label>
                   <div className="flex flex-wrap gap-1.5">
                     {tones.map((t) => (
                       <button
                         key={t}
                         onClick={() => setSelectedTone(t)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all ${
                           selectedTone === t
-                            ? "primary-gradient-bg text-white font-semibold shadow-sm"
-                            : "bg-zinc-950/60 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                            ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-md"
+                            : "bg-[#141414] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:border-white/20"
                         }`}
                       >
                         {t}
@@ -836,9 +836,9 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Caption Textarea with Character Progress */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs text-zinc-400">
-                    <span>Caption Editor</span>
+                    <span className="font-medium">Caption Editor</span>
                     <span className={caption.length > 2200 ? "text-red-400 font-bold" : "text-zinc-400"}>
                       {caption.length} / 2,200 characters
                     </span>
@@ -848,7 +848,7 @@ export default function CreatePostPage() {
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Write your Instagram caption here or click Generate with AI..."
                     rows={5}
-                    className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl p-3.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500/50 resize-y leading-relaxed transition-all"
+                    className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-4 text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-pink-500/80 focus:ring-2 focus:ring-pink-500/20 resize-y leading-relaxed transition-all"
                   />
                 </div>
 
@@ -858,7 +858,7 @@ export default function CreatePostPage() {
                     size="sm"
                     onClick={() => handleGenerateCaption("generate")}
                     disabled={isGeneratingCaption}
-                    className="primary-gradient-bg text-white text-xs h-8 gap-1.5 border-0 hover:opacity-95"
+                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs h-9 px-4 rounded-xl gap-2 font-medium cursor-pointer shadow-md shadow-pink-500/20"
                   >
                     {isGeneratingCaption ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -873,7 +873,7 @@ export default function CreatePostPage() {
                     variant="secondary"
                     onClick={() => handleGenerateCaption("shorten")}
                     disabled={isGeneratingCaption || !caption}
-                    className="text-xs h-8 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-200"
+                    className="text-xs h-9 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-zinc-200 cursor-pointer"
                   >
                     Shorten
                   </Button>
@@ -883,7 +883,7 @@ export default function CreatePostPage() {
                     variant="secondary"
                     onClick={() => handleGenerateCaption("improve")}
                     disabled={isGeneratingCaption || !caption}
-                    className="text-xs h-8 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-200"
+                    className="text-xs h-9 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-zinc-200 cursor-pointer"
                   >
                     Improve
                   </Button>
@@ -893,7 +893,7 @@ export default function CreatePostPage() {
                     variant="secondary"
                     onClick={() => handleGenerateCaption("add_cta")}
                     disabled={isGeneratingCaption || !caption}
-                    className="text-xs h-8 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-200"
+                    className="text-xs h-9 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-zinc-200 cursor-pointer"
                   >
                     Add CTA
                   </Button>
@@ -903,15 +903,15 @@ export default function CreatePostPage() {
                     variant="secondary"
                     onClick={() => handleGenerateCaption("add_hashtags")}
                     disabled={isGeneratingCaption}
-                    className="text-xs h-8 gap-1 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-200"
+                    className="text-xs h-9 px-3 rounded-xl gap-1 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-zinc-200 cursor-pointer"
                   >
                     <Hash className="w-3 h-3 text-pink-400" />
                     AI Hashtags
                   </Button>
                 </div>
 
-                {/* Interactive Hashtag Manager (Stitch Screen Match) */}
-                <div className="space-y-2.5 pt-3 border-t border-zinc-800/80">
+                {/* Interactive Hashtag Manager */}
+                <div className="space-y-3 pt-4 border-t border-white/[0.08]">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-zinc-300 flex items-center gap-1.5">
                       <Hash className="w-3.5 h-3.5 text-pink-400" />
@@ -920,7 +920,7 @@ export default function CreatePostPage() {
                     {hashtags.length > 0 && (
                       <button
                         onClick={() => setHashtags([])}
-                        className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors"
+                        className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                       >
                         Clear tags
                       </button>
@@ -928,17 +928,17 @@ export default function CreatePostPage() {
                   </div>
 
                   {/* Interactive Chip List */}
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     {hashtags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-pink-300 group hover:border-pink-500/40 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141414] border border-white/[0.1] text-xs text-pink-300 group hover:border-pink-500/40 transition-colors"
                       >
                         <span>{tag}</span>
                         <button
                           type="button"
                           onClick={() => removeHashtag(tag)}
-                          className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+                          className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.1] transition-colors cursor-pointer"
                           title="Remove hashtag"
                         >
                           <X className="w-2.5 h-2.5" />
@@ -947,7 +947,7 @@ export default function CreatePostPage() {
                     ))}
 
                     {/* Quick Add Tag Input */}
-                    <div className="inline-flex items-center gap-1">
+                    <div className="inline-flex items-center gap-1.5">
                       <input
                         type="text"
                         value={customTagInput}
@@ -958,14 +958,14 @@ export default function CreatePostPage() {
                             addHashtag(customTagInput);
                           }
                         }}
-                        placeholder="+ Add hashtag..."
-                        className="bg-zinc-950 border border-zinc-800 rounded-full px-3 py-1 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 w-32"
+                        placeholder="+ Add tag..."
+                        className="bg-black/60 border border-white/[0.1] rounded-full px-3.5 py-1 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 w-32"
                       />
                       {customTagInput.trim() && (
                         <button
                           type="button"
                           onClick={() => addHashtag(customTagInput)}
-                          className="p-1 rounded-full bg-pink-600 hover:bg-pink-500 text-white"
+                          className="p-1 rounded-full bg-pink-600 hover:bg-pink-500 text-white cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -974,14 +974,14 @@ export default function CreatePostPage() {
                   </div>
 
                   {/* Suggestion Chips */}
-                  <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] text-zinc-500">
+                  <div className="flex items-center gap-2 flex-wrap pt-1 text-[11px] text-zinc-500">
                     <span>Suggested:</span>
                     {suggestedTags.map((t) => (
                       <button
                         key={t}
                         type="button"
                         onClick={() => addHashtag(t)}
-                        className="hover:text-pink-400 transition-colors"
+                        className="hover:text-pink-400 transition-colors cursor-pointer"
                       >
                         {t}
                       </button>
@@ -994,13 +994,13 @@ export default function CreatePostPage() {
             {/* Right Column: Live Instagram Preview & Publishing (5 Cols) */}
             <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
               {/* Device Preview Card */}
-              <div className="glass-panel rounded-2xl p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 space-y-4 shadow-xl">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <h3 className="text-sm font-semibold text-white">Live Instagram Preview</h3>
+                    <h3 className="text-sm font-bold text-white font-headline">Live Phone Preview</h3>
                   </div>
-                  <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-zinc-900 text-zinc-400 border-zinc-800">
+                  <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-black/60 text-zinc-400 border border-white/[0.1]">
                     {aspectRatio}
                   </Badge>
                 </div>
@@ -1019,9 +1019,9 @@ export default function CreatePostPage() {
               </div>
 
               {/* Publish Control Card */}
-              <div className="glass-panel rounded-2xl p-5 space-y-4">
+              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 space-y-4 shadow-xl">
                 {publishStatus !== "idle" && (
-                  <div className="p-3.5 bg-zinc-950/80 rounded-xl border border-zinc-800 text-xs space-y-2">
+                  <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] text-xs space-y-2.5">
                     <div className="flex items-center gap-2 font-medium">
                       {publishStatus === "published" ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -1046,9 +1046,9 @@ export default function CreatePostPage() {
                     </div>
 
                     {/* Step Progress Bar */}
-                    <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-[#141414] rounded-full h-2 overflow-hidden border border-white/[0.05]">
                       <div
-                        className="primary-gradient-bg h-full transition-all duration-500 rounded-full"
+                        className="bg-gradient-to-r from-pink-500 to-purple-600 h-full transition-all duration-500 rounded-full"
                         style={{
                           width:
                             publishStatus === "uploading"
@@ -1076,7 +1076,7 @@ export default function CreatePostPage() {
                     (postType === "CAROUSEL" && images.length < 2) ||
                     (publishStatus !== "idle" && publishStatus !== "failed")
                   }
-                  className="w-full primary-gradient-bg glow-primary text-white font-semibold text-sm gap-2 h-12 rounded-xl border-0 hover:opacity-95 shadow-lg transition-all"
+                  className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-95 text-white font-bold text-sm gap-2 h-12 rounded-xl shadow-xl shadow-pink-500/20 transition-all cursor-pointer"
                 >
                   {publishStatus === "creating_container" ||
                   publishStatus === "processing" ||
@@ -1093,7 +1093,7 @@ export default function CreatePostPage() {
                 </Button>
 
                 <p className="text-[11px] text-zinc-500 text-center">
-                  Uses official Meta Container Publishing API • Rate-limit compliant
+                  Official Meta Graph API v23.0 • Direct server-side token connection
                 </p>
               </div>
             </div>

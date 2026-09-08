@@ -9,26 +9,26 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#000000] text-zinc-300 py-16 px-4 sm:px-6 lg:px-8 font-sans selection:bg-pink-500 selection:text-white">
       <div className="max-w-3xl mx-auto space-y-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white px-3.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to ViraloKit
         </Link>
 
-        <div className="border-b border-zinc-800 pb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400">
+        <div className="border-b border-white/[0.08] pb-6 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Privacy Policy</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-headline">Privacy Policy</h1>
           </div>
-          <p className="text-xs text-zinc-500">Last updated: September 8, 2026</p>
+          <p className="text-xs text-zinc-500">Last updated: September 8, 2026 • Meta Graph v23.0 Compliant</p>
         </div>
 
-        <div className="space-y-6 text-sm leading-relaxed text-zinc-300">
+        <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-8 space-y-6 text-sm leading-relaxed text-zinc-300 shadow-xl">
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-white">1. Overview</h2>
             <p>
