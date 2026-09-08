@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Analytics } from "@vercel/analytics/next";
+import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 
 export const metadata: Metadata = {
   title: {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | ViraloKit Creator Studio",
   },
   description:
-    "The all-in-one studio for Instagram creators and brands. Create & publish multi-slide carousels, preview realistic feeds, analyze verified Meta Graph API insights, and supercharge captions with AI.",
+    "Publish Instagram carousels with AI captions, 100% verified Meta Graph API insights, and 25 GB isolated cloud storage — free forever.",
   keywords: [
     "Instagram Creator Studio",
     "Instagram Scheduler",
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "ViraloKit Engineering Team" }],
   creator: "ViraloKit",
+  publisher: "ViraloKit",
   metadataBase: new URL("https://viralokit.vercel.app"),
   alternates: {
     canonical: "/",
@@ -68,6 +70,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  other: {
+    "article:author": "ViraloKit Engineering Team",
+    "article:publisher": "ViraloKit",
+  },
 };
 
 
@@ -79,7 +85,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="bg-zinc-950 text-zinc-100 antialiased min-h-screen">
-        <Providers>{children}</Providers>
+        <Providers>
+          <AuthKitProvider>{children}</AuthKitProvider>
+        </Providers>
         <Analytics />
       </body>
     </html>

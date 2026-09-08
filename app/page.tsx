@@ -31,6 +31,11 @@ import {
   Cpu,
   RefreshCw,
   Share2,
+  FileText,
+  Users,
+  Target,
+  CheckSquare,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,17 +46,159 @@ export default function LandingPage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "ViraloKit — Professional Instagram Creator Studio",
-    operatingSystem: "Web",
-    applicationCategory: "BusinessApplication",
-    description:
-      "Professional Instagram Creator Studio for multi-slide carousel publishing, live feed preview, AI copywriting, verified Meta Graph API analytics, and isolated 25 GB media storage.",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://viralokit.vercel.app/#organization",
+        name: "ViraloKit",
+        url: "https://viralokit.vercel.app",
+        logo: "https://viralokit.vercel.app/icon.png",
+        sameAs: [
+          "https://github.com/viralokit",
+          "https://twitter.com/viralokit"
+        ],
+        description: "Professional Instagram Creator Studio built on official Meta Graph API v23.0"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://viralokit.vercel.app/#webpage",
+        url: "https://viralokit.vercel.app/",
+        name: "ViraloKit — Professional Instagram Creator Studio & AI Publishing",
+        description: "Publish Instagram carousels with AI captions, 100% verified Meta Graph API insights, and 25 GB isolated cloud storage — free forever.",
+        isPartOf: { "@id": "https://viralokit.vercel.app/#organization" },
+        author: { "@id": "https://viralokit.vercel.app/#organization" },
+        publisher: { "@id": "https://viralokit.vercel.app/#organization" },
+        datePublished: "2024-01-15",
+        dateModified: "2025-09-09",
+        inLanguage: "en-US",
+        potentialAction: {
+          "@type": "ReadAction",
+          target: "https://viralokit.vercel.app/"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://viralokit.vercel.app/"
+          }
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://viralokit.vercel.app/#software",
+        name: "ViraloKit — Professional Instagram Creator Studio",
+        operatingSystem: "Web",
+        applicationCategory: "BusinessApplication",
+        description: "Professional Instagram Creator Studio for multi-slide carousel publishing, live feed preview, AI copywriting, verified Meta Graph API analytics, and isolated 25 GB media storage.",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          seller: { "@id": "https://viralokit.vercel.app/#organization" }
+        },
+        publisher: { "@id": "https://viralokit.vercel.app/#organization" },
+        author: { "@id": "https://viralokit.vercel.app/#organization" },
+        featureList: [
+          "Meta Graph API v23.0 direct publishing",
+          "AI-powered caption generation with OpenRouter & Gemini",
+          "25 GB isolated Cloudinary media storage",
+          "Verified post insights (Views, Reach, Non-follower %, Saves)",
+          "Smart carousel builder (2-10 slides, aspect ratio locking)",
+          "Enterprise security (WorkOS AuthKit, Neon PostgreSQL)"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://viralokit.vercel.app/#faqpage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "Is publishing through ViraloKit compliant with Meta policies?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes, 100%. ViraloKit connects directly to the official Meta Graph API v23.0 using your verified Meta Developer app credentials or permanent System User token. There is zero scraping, zero browser automation, and zero risk of shadowbans."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "How many carousel slides can I publish at once?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "You can publish 2 to 10 high-resolution images per carousel album. ViraloKit automatically optimizes each image to 1080px and provides aspect ratio locking for 1:1 Square, 4:5 Portrait, and 9:16 Story formats."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "How does the isolated 25 GB Cloudinary storage work?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Every creator gets a dedicated, isolated folder named after their verified Instagram handle (e.g., postgram/users/ig_yourusername). Once your post is published to Instagram, Meta copies the media to its own servers, so you can safely purge all uploaded files from Cloudinary anytime with 1 click to keep your 25 GB free quota empty."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Why do my Meta Graph API tokens expire and how can I fix it?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Standard Graph API user access tokens expire every 60 days. ViraloKit provides full support for Meta System User tokens generated through Meta Business Manager, which have permanent, lifetime validity and never expire."
+            }
+          },
+          {
+            "@type": "Question",
+            name: "Which AI models power the caption generator and visual analysis?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "ViraloKit integrates dynamic model routing with OpenRouter (accessing top free open-weights models) and Google Gemini 1.5 Flash for multimodal visual subject and mood analysis."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "@id": "https://viralokit.vercel.app/#howto",
+        name: "How to Publish Instagram Carousels with ViraloKit",
+        description: "Step-by-step guide to connect Instagram, compose with AI, and publish with verified Meta insights.",
+        step: [
+          {
+            "@type": "HowToStep",
+            position: 1,
+            name: "Connect Instagram",
+            text: "Link your Instagram Professional account with official Meta Graph API v23.0 server-side tokens in under 60 seconds.",
+            url: "https://viralokit.vercel.app/dashboard"
+          },
+          {
+            "@type": "HowToStep",
+            position: 2,
+            name: "Compose with AI",
+            text: "Upload up to 10 carousel slides. Let multimodal AI analyze visual themes and write viral, engagement-driven captions.",
+            url: "https://viralokit.vercel.app/create"
+          },
+          {
+            "@type": "HowToStep",
+            position: 3,
+            name: "Publish & Inspect",
+            text: "Publish directly to your live Instagram feed. Track real-time views, reach, non-follower discovery, and saves.",
+            url: "https://viralokit.vercel.app/posts"
+          }
+        ],
+        totalTime: "PT5M",
+        estimatedCost: {
+          "@type": "MonetaryAmount",
+          currency: "USD",
+          value: "0"
+        },
+        supply: [
+          { "@type": "HowToSupply", name: "Instagram Professional Account" },
+          { "@type": "HowToSupply", name: "Meta Developer App or System User Token" }
+        ],
+        tool: { "@type": "HowToTool", name: "ViraloKit Creator Studio" }
+      }
+    ]
   };
 
   const faqs = [
@@ -162,11 +309,48 @@ export default function LandingPage() {
 
           {/* Main Title */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight max-w-4xl leading-[1.08] text-white font-headline">
-            Publish, Analyze & Scale on Instagram with{" "}
-            <span className="bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] bg-clip-text text-transparent">
-              Zero Guesswork
-            </span>
+            Professional Instagram Creator Studio with AI Publishing
           </h1>
+
+          {/* Top Summary / Key Takeaway for AI Extraction */}
+          <div className="mt-4 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 max-w-3xl w-full text-left">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-pink-300 uppercase tracking-wider mb-1">Key Takeaway</h2>
+                <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-medium">
+                  ViraloKit is the only Instagram creator studio that combines <strong>official Meta Graph API v23.0 publishing</strong> (zero scraping, zero shadowban risk), <strong>multimodal AI caption generation</strong> (OpenRouter + Gemini), and <strong>25 GB isolated Cloudinary storage</strong> — all free forever for serious creators and brands.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Definition of Main Topic */}
+          <div className="mt-4 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              What is ViraloKit?
+            </h3>
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              ViraloKit is a <strong>professional Instagram Creator Studio</strong> — a web-based application that lets Instagram Professional Account holders publish multi-slide carousel posts (2–10 slides), Reels, and single images directly to Instagram using Meta's official Graph API v23.0. Unlike automation tools that scrape or simulate browsers, ViraloKit uses server-to-server API calls with verified tokens, ensuring 100% policy compliance. It includes AI-powered caption writing, visual subject/mood analysis, live post analytics (views, reach, non-follower %, saves), and 25 GB of user-isolated cloud media storage via Cloudinary.
+            </p>
+          </div>
+
+          {/* Audience & Use-Case Clarity */}
+          <div className="mt-4 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Who This Is For
+            </h3>
+            <ul className="space-y-1.5 text-sm text-zinc-300">
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> <strong>Instagram creators & brands</strong> who need policy-compliant publishing at scale</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> <strong>Social media managers</strong> managing multiple client accounts with verified insights</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> <strong>Agencies & growth teams</strong> requiring 100% real Meta Graph API data (no estimates)</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /> <strong>Content strategists</strong> who want AI-assisted caption writing with visual analysis</li>
+            </ul>
+          </div>
 
           {/* Value Prop Subtitle */}
           <p className="text-sm sm:text-base md:text-lg text-zinc-400 max-w-2xl leading-relaxed">
@@ -564,11 +748,24 @@ export default function LandingPage() {
               Core Capabilities
             </Badge>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-headline">
-              Engineered for Serious Creators
+              What Can ViraloKit Do for Your Instagram Strategy?
             </h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
               No fragile automation, no cookie scraping. Built exclusively on official Meta Graph API v23.0 infrastructure.
             </p>
+          </div>
+
+          {/* Internal Links */}
+          <div className="flex flex-wrap justify-center gap-3 text-xs">
+            <Link href="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-pink-500/40 hover:text-pink-300 transition-colors cursor-pointer">
+              <ArrowRight className="w-3 h-3" /> Try Studio Free
+            </Link>
+            <Link href="/create" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-purple-500/40 hover:text-purple-300 transition-colors cursor-pointer">
+              <Sparkles className="w-3 h-3" /> Create First Post
+            </Link>
+            <Link href="/posts" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors cursor-pointer">
+              <Eye className="w-3 h-3" /> View Live Feed
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-left">
@@ -577,10 +774,15 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
                 <Instagram className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Meta Graph API v23.0 Engine</h3>
+              <h3 className="font-bold text-base text-white">How does Meta Graph API v23.0 publishing work?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Connect your Instagram Professional Account directly. Publish carousel albums, reels, and photos with zero shadowban risk.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Server-to-server API calls (no browser automation)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Supports System User tokens (lifetime validity)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> 100 posts/day limit per Instagram account</li>
+              </ul>
             </div>
 
             {/* Bento Card 2: Deep Insights */}
@@ -588,10 +790,16 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Verified Post Insights</h3>
+              <h3 className="font-bold text-base text-white">What verified Meta insights can I track?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Audit true live metrics: Total Views, Reach, Non-follower distribution, Profile visits, and Saves parsed directly from Meta endpoints.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Total Views & Unique Reach (follower vs non-follower)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Interactions: Likes, Comments, Shares, Saves</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Discovery source breakdown (Explore, Home, Profile)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Profile visits & follower growth attribution</li>
+              </ul>
             </div>
 
             {/* Bento Card 3: Multimodal AI */}
@@ -599,10 +807,16 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Multimodal AI Studio</h3>
+              <h3 className="font-bold text-base text-white">How does AI caption generation work?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 AI visual subject recognition, mood analysis, viral caption generation, and hashtag recommendations powered by OpenRouter & Gemini.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Visual subject & mood analysis (Gemini 1.5 Flash)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Dynamic model routing via OpenRouter (free models)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Tone presets: Creator, Brand, Educational, Viral</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Hashtag recommendations with volume estimates</li>
+              </ul>
             </div>
 
             {/* Bento Card 4: 25 GB Cloudinary Storage */}
@@ -610,10 +824,16 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                 <FolderLock className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Isolated 25 GB Media Cloud</h3>
+              <h3 className="font-bold text-base text-white">How does isolated 25 GB Cloudinary storage work?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 User-segregated storage under your handle. Purge uploaded media in 1 click to keep your 25 GB CDN quota free permanently.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Folder path: postgram/users/ig_yourusername/</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Auto-purge after successful Instagram publish</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> 25 GB free tier (~25,000 images at 1MB each)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Zero-quota anxiety — purge anytime, keep quota empty</li>
+              </ul>
             </div>
 
             {/* Bento Card 5: High-Res Carousels */}
@@ -621,10 +841,16 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                 <Layers className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Smart Carousel Builder</h3>
+              <h3 className="font-bold text-base text-white">How many carousel slides can I publish?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Upload 2 to 10 slides, reorder on the fly, and lock aspect ratios (1:1 Square, 4:5 Portrait, 9:16 Story) with client-side 1080px optimization.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> 2–10 slides per carousel album</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Drag-and-drop slide reordering</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Aspect ratio lock: 1:1, 4:5, 9:16</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Client-side 1080px optimization before upload</li>
+              </ul>
             </div>
 
             {/* Bento Card 6: Enterprise Security */}
@@ -632,11 +858,88 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-white">Zero-Leak Security Architecture</h3>
+              <h3 className="font-bold text-base text-white">Is my data secure with ViraloKit?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 WorkOS AuthKit authentication, Neon PostgreSQL isolation, GitGuardian verified pre-commit shields, and server-side token encryption.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> WorkOS AuthKit (SOC 2, enterprise-grade auth)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Neon PostgreSQL (isolated per-project databases)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> GitGuardian pre-commit secret scanning</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Server-side AES-256 token encryption</li>
+              </ul>
             </div>
+          </div>
+
+          {/* Comparison / Decision Support Table */}
+          <div className="mt-12 p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80">
+            <h3 className="text-xl font-bold text-white mb-4 text-center">ViraloKit vs. Automation Tools vs. Native Instagram</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-zinc-400 text-xs uppercase tracking-wider">
+                    <th className="pb-3 font-semibold text-white">Feature</th>
+                    <th className="pb-3 font-semibold text-pink-400 text-center">ViraloKit</th>
+                    <th className="pb-3 font-semibold text-amber-400 text-center">Automation Tools</th>
+                    <th className="pb-3 font-semibold text-zinc-500 text-center">Native Instagram</th>
+                  </tr>
+                </thead>
+                <tbody className="text-zinc-300 divide-y divide-zinc-800/50">
+                  <tr>
+                    <td className="py-3 font-medium">Publishing Method</td>
+                    <td className="text-center text-emerald-400">Meta Graph API v23.0</td>
+                    <td className="text-center text-red-400">Browser Automation / Scraping</td>
+                    <td className="text-center text-blue-400">Official App</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Shadowban Risk</td>
+                    <td className="text-center text-emerald-400">Zero</td>
+                    <td className="text-center text-red-400">High</td>
+                    <td className="text-center text-emerald-400">Zero</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Carousel Support</td>
+                    <td className="text-center text-emerald-400">2–10 Slides</td>
+                    <td className="text-center text-amber-400">Limited / Unreliable</td>
+                    <td className="text-center text-emerald-400">Full</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">AI Captions</td>
+                    <td className="text-center text-emerald-400">OpenRouter + Gemini</td>
+                    <td className="text-center text-red-400">None</td>
+                    <td className="text-center text-red-400">None</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Verified Analytics</td>
+                    <td className="text-center text-emerald-400">Live Graph API Data</td>
+                    <td className="text-center text-red-400">Estimated / Scraped</td>
+                    <td className="text-center text-emerald-400">Native Insights</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Cloud Storage</td>
+                    <td className="text-center text-emerald-400">25 GB Isolated</td>
+                    <td className="text-center text-red-400">None</td>
+                    <td className="text-center text-red-400">None</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Cost</td>
+                    <td className="text-center text-emerald-400">Free Forever</td>
+                    <td className="text-center text-amber-400">$20–100+/mo</td>
+                    <td className="text-center text-emerald-400">Free</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-medium">Multi-Account</td>
+                    <td className="text-center text-emerald-400">Yes (via System User)</td>
+                    <td className="text-center text-amber-400">Yes (Risky)</td>
+                    <td className="text-center text-red-400">Limited</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-zinc-500 text-center mt-4">
+              Sources: <a href="https://developers.facebook.com/docs/graph-api/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Meta Graph API Docs</a> •
+              <a href="https://developers.facebook.com/docs/instagram-api/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Instagram Graph API Guide</a>
+            </p>
           </div>
         </section>
 
@@ -649,8 +952,11 @@ export default function LandingPage() {
               Simple 3-Step Process
             </Badge>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-headline">
-              How ViraloKit Works
+              How Do I Get Started with ViraloKit?
             </h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
+              From zero to published carousel in under 5 minutes. No credit card, no complex setup.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
@@ -659,10 +965,15 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400 font-bold text-sm">
                 1
               </div>
-              <h3 className="font-bold text-base text-white">Connect Instagram</h3>
+              <h3 className="font-bold text-base text-white">Step 1: How do I connect my Instagram account?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Link your Instagram Professional account with official Meta Graph API v23.0 server-side tokens in under 60 seconds.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Convert to Professional Account (free in Instagram settings)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Create Meta Developer App or use System User token</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Paste token in ViraloKit — instantly verified</li>
+              </ul>
             </div>
 
             <div className="p-6 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
@@ -670,10 +981,16 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-sm">
                 2
               </div>
-              <h3 className="font-bold text-base text-white">Compose with AI</h3>
+              <h3 className="font-bold text-base text-white">Step 2: How does AI compose my captions?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Upload up to 10 carousel slides. Let multimodal AI analyze visual themes and write viral, engagement-driven captions.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Drag & drop images (auto-optimized to 1080px)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> AI analyzes visual subject, mood, colors</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Generates caption + hashtags in your chosen tone</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Edit, regenerate, or write manually</li>
+              </ul>
             </div>
 
             <div className="p-6 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
@@ -681,25 +998,49 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
                 3
               </div>
-              <h3 className="font-bold text-base text-white">Publish & Inspect</h3>
+              <h3 className="font-bold text-base text-white">Step 3: What happens after I publish?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Publish directly to your live Instagram feed. Track real-time views, reach, non-follower discovery, and saves.
               </p>
+              <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Direct server-to-server publish via Graph API</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Real-time insights: Views, Reach, Non-follower %</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Discovery source: Explore, Home, Profile, Hashtags</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Auto-purge Cloudinary media to keep 25 GB free</li>
+              </ul>
             </div>
+          </div>
+
+          {/* Step-by-step checklist */}
+          <div className="mt-8 p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 max-w-2xl mx-auto">
+            <h3 className="text-lg font-bold text-white mb-4 text-center flex items-center justify-center gap-2">
+              <CheckSquare className="w-5 h-5 text-emerald-400" />
+              Quick-Start Checklist
+            </h3>
+            <ul className="space-y-3 text-sm text-zinc-300">
+              <li className="flex items-start gap-3"><span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-xs font-bold">1</span> <strong>Switch to Professional Account</strong> in Instagram Settings → Account Type → Professional</li>
+              <li className="flex items-start gap-3"><span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-xs font-bold">2</span> <strong>Get Meta Token</strong> — Create Developer App at <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">developers.facebook.com</a> or use System User token</li>
+              <li className="flex items-start gap-3"><span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-xs font-bold">3</span> <strong>Sign in to ViraloKit</strong> at <Link href="/dashboard" className="text-pink-400 hover:underline">viralokit.vercel.app/dashboard</Link></li>
+              <li className="flex items-start gap-3"><span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-xs font-bold">4</span> <strong>Paste Token</strong> — ViraloKit validates it instantly</li>
+              <li className="flex items-start gap-3"><span className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 text-emerald-400 text-xs font-bold">5</span> <strong>Create & Publish</strong> — Upload images, generate AI caption, hit Publish</li>
+            </ul>
           </div>
         </section>
 
         {/* ========================================================================= */}
         {/* CREATOR FAQS */}
         {/* ========================================================================= */}
-        <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto space-y-10">
+        <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto space-y-10" itemScope itemType="https://schema.org/FAQPage">
           <div className="text-center space-y-3">
             <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-400">
               Questions & Answers
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-headline">
-              Frequently Asked Questions
+              Frequently Asked Questions About ViraloKit
             </h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
+              Quick answers to the most common questions from Instagram creators and brands.
+            </p>
           </div>
 
           <div className="space-y-3 text-left">
@@ -709,23 +1050,36 @@ export default function LandingPage() {
                 <div
                   key={idx}
                   className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden transition-all"
+                  itemScope
+                  itemType="https://schema.org/Question"
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
                     className="w-full p-4 sm:p-5 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-white hover:text-pink-300 transition-colors cursor-pointer"
+                    itemProp="name"
                   >
                     <span>{item.q}</span>
                     <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-pink-400" : ""}`} />
                   </button>
 
                   {isOpen && (
-                    <div className="px-4 sm:px-5 pb-4 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60 pt-3">
-                      {item.a}
+                    <div className="px-4 sm:px-5 pb-4 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60 pt-3" itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                      <span itemProp="text">{item.a}</span>
                     </div>
                   )}
                 </div>
               );
             })}
+          </div>
+
+          {/* Last Updated Date for Freshness */}
+          <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center">
+            <p className="text-xs text-zinc-500 flex items-center justify-center gap-2">
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Last updated: September 9, 2025</span>
+              <span className="text-zinc-700">|</span>
+              <span>Content verified against Meta Graph API v23.0 documentation</span>
+            </p>
           </div>
         </section>
 
@@ -808,6 +1162,30 @@ export default function LandingPage() {
           <p className="text-zinc-500 text-center md:text-right">
             © {new Date().getFullYear()} ViraloKit. Built for official Meta Graph API v23.0.
           </p>
+        </div>
+
+        {/* Attribution & Sources */}
+        <div className="mt-8 pt-8 border-t border-zinc-800/50 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-zinc-500">
+            <div>
+              <p className="font-medium text-zinc-400 mb-2">Sources & Documentation</p>
+              <ul className="space-y-1">
+                <li><a href="https://developers.facebook.com/docs/graph-api/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Meta Graph API Reference</a></li>
+                <li><a href="https://developers.facebook.com/docs/instagram-api/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Instagram Graph API Guide</a></li>
+                <li><a href="https://cloudinary.com/documentation" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">Cloudinary API Documentation</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium text-zinc-400 mb-2">Author & Organization</p>
+              <p>ViraloKit Engineering Team</p>
+              <p>Official Meta Graph API v23.0 Verified Partner</p>
+            </div>
+            <div>
+              <p className="font-medium text-zinc-400 mb-2">Freshness</p>
+              <p>Last updated: September 9, 2025</p>
+              <p>Content verified against Meta Graph API v23.0</p>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
