@@ -74,14 +74,10 @@ export default function DashboardPage() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
           {/* Welcome Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-transparent p-6 rounded-2xl border border-zinc-800/80 shadow-inner">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-transparent p-6 rounded-2xl border border-zinc-800/80">
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span>Welcome to ViraloKit</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                  <Sparkles className="w-2.5 h-2.5 mr-1" />
-                  Creator Studio
-                </span>
+                Welcome to PostGram
               </h1>
               <p className="text-sm text-zinc-400">
                 {capabilities?.connected
@@ -92,19 +88,19 @@ export default function DashboardPage() {
 
             <div className="flex flex-wrap items-center gap-2.5">
               <Link href="/create">
-                <Button className="primary-gradient-bg text-white font-semibold gap-2 text-xs h-9 shadow-md shadow-pink-500/20 hover:opacity-95">
+                <Button className="gap-2 text-xs h-9">
                   <PlusSquare className="w-4 h-4" />
                   <span>Create Post</span>
                 </Button>
               </Link>
               <Link href="/analytics">
-                <Button variant="secondary" className="gap-2 text-xs h-9 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-200">
-                  <BarChart3 className="w-4 h-4 text-emerald-400" />
+                <Button variant="secondary" className="gap-2 text-xs h-9">
+                  <BarChart3 className="w-4 h-4" />
                   <span>View Analytics</span>
                 </Button>
               </Link>
               <Link href="/ai-analysis">
-                <Button variant="outline" className="gap-2 text-xs h-9 text-pink-300 border-pink-500/30 hover:bg-pink-500/10">
+                <Button variant="outline" className="gap-2 text-xs h-9 text-pink-300 border-pink-500/30">
                   <Sparkles className="w-4 h-4 text-pink-400" />
                   <span>AI Audit</span>
                 </Button>
@@ -120,71 +116,63 @@ export default function DashboardPage() {
           />
 
           {/* Key Metrics Overview */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-pink-500/30 transition-all duration-300 group">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs font-medium text-zinc-400">Followers</CardTitle>
-                <div className="w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
-                  <Users className="w-4 h-4" />
-                </div>
+                <Users className="w-4 h-4 text-pink-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl font-bold text-white">
                   {formatNumber(capabilities?.followersCount ?? analytics?.account?.followersCount)}
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-1">Official Meta Count</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-purple-500/30 transition-all duration-300 group">
+            <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs font-medium text-zinc-400">Total Posts</CardTitle>
-                <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                  <ImageIcon className="w-4 h-4" />
-                </div>
+                <ImageIcon className="w-4 h-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl font-bold text-white">
                   {formatNumber(capabilities?.mediaCount ?? analytics?.account?.mediaCount)}
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-1">Published Media</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-blue-500/30 transition-all duration-300 group">
+            <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs font-medium text-zinc-400">Reach</CardTitle>
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                  <Eye className="w-4 h-4" />
-                </div>
+                <Eye className="w-4 h-4 text-blue-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl font-bold text-white">
                   {formatNumber(analytics?.insights?.reach)}
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-1">
                   {analytics?.insights?.reach !== null && analytics?.insights?.reach !== undefined
                     ? "28-day Reach"
-                    : "Official Meta Metric"}
+                    : "Not available for this token"}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-emerald-500/30 transition-all duration-300 group">
+            <Card className="bg-zinc-900/50 border-zinc-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs font-medium text-zinc-400">Interactions</CardTitle>
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  <HeartHandshake className="w-4 h-4" />
-                </div>
+                <HeartHandshake className="w-4 h-4 text-emerald-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl font-bold text-white">
                   {formatNumber(analytics?.insights?.totalInteractions)}
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-1">
                   {analytics?.insights?.totalInteractions !== null && analytics?.insights?.totalInteractions !== undefined
                     ? "Total Engagements"
-                    : "Official Meta Metric"}
+                    : "Not available"}
                 </p>
               </CardContent>
             </Card>
@@ -251,7 +239,7 @@ export default function DashboardPage() {
                 <ImageIcon className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
                 <h3 className="font-semibold text-sm text-zinc-300">No Published Posts Found</h3>
                 <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1 mb-4">
-                  Create and publish your first image or carousel post to Instagram with ViraloKit.
+                  Create and publish your first image or carousel post to Instagram with PostGram.
                 </p>
                 <Link href="/create">
                   <Button size="sm" className="text-xs">

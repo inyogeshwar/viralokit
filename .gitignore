@@ -37,3 +37,7 @@ Thumbs.db
 
 # Added by ggshield
 .cache_ggshield
+
+# Python
+__pycache__/
+*.pyc

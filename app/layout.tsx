@@ -1,16 +1,7 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Analytics } from "@vercel/analytics/next";
-
-export const viewport: Viewport = {
-  themeColor: "#09090b",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-};
 
 export const metadata: Metadata = {
   title: {
@@ -19,25 +10,7 @@ export const metadata: Metadata = {
   },
   description:
     "The all-in-one studio for Instagram creators and brands. Create & publish multi-slide carousels, preview realistic feeds, analyze verified Meta Graph API insights, and supercharge captions with AI.",
-  applicationName: "ViraloKit",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "ViraloKit",
-  },
-  manifest: "/manifest.webmanifest",
-  icons: {
-    icon: [
-      { url: "/icon.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    shortcut: "/icon.png",
-  },
   keywords: [
-    "ViraloKit",
     "Instagram Creator Studio",
     "Instagram Scheduler",
     "Instagram Carousel Publisher",
@@ -47,9 +20,9 @@ export const metadata: Metadata = {
     "AI Caption Generator",
     "Social Media Automation",
     "Instagram Growth Tool",
-    "PostGram",
+    "ViraloKit",
   ],
-  authors: [{ name: "ViraloKit Team" }],
+  authors: [{ name: "ViraloKit Engineering Team" }],
   creator: "ViraloKit",
   metadataBase: new URL("https://viralokit.vercel.app"),
   alternates: {
@@ -61,14 +34,6 @@ export const metadata: Metadata = {
       "Publish multi-slide carousels, schedule posts, audit live Meta Graph API analytics, and craft viral captions with AI.",
     url: "https://viralokit.vercel.app",
     siteName: "ViraloKit",
-    images: [
-      {
-        url: "/icon.png",
-        width: 1024,
-        height: 1024,
-        alt: "ViraloKit Creator Studio",
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
@@ -77,7 +42,6 @@ export const metadata: Metadata = {
     title: "ViraloKit — Professional Instagram Creator Studio",
     description:
       "Publish single & carousel posts to Instagram, analyze performance with official Meta insights, and generate viral captions with AI.",
-    images: ["/icon.png"],
   },
   robots: {
     index: true,
@@ -92,19 +56,15 @@ export const metadata: Metadata = {
   },
 };
 
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
-      <body className="bg-zinc-950 text-zinc-100 antialiased min-h-screen selection:bg-pink-500/30 selection:text-pink-200">
+    <html lang="en" className="dark">
+      <body className="bg-zinc-950 text-zinc-100 antialiased min-h-screen">
         <Providers>{children}</Providers>
         <Analytics />
       </body>

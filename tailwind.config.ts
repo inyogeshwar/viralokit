@@ -58,6 +58,10 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        headline: ["Archivo", "sans-serif"],
+        sans: ["Space Grotesk", "Inter", "sans-serif"],
+      },
       keyframes: {
         shimmer: {
           "100%": {
