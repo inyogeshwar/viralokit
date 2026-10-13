@@ -94,6 +94,7 @@ export default function CreatePostPage() {
 
   // AI & Upload States
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, "uploading" | "done" | "error">>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
@@ -137,51 +138,78 @@ export default function CreatePostPage() {
   // Client-side image optimizer to stay well below Vercel's 4.5MB limit
   const optimizeImageForUpload = async (file: File): Promise<File | Blob> => {
     if (file.size <= 1.2 * 1024 * 1024) return file;
+    if (!file.type.startsWith("image/") || file.type.includes("gif") || file.type.includes("svg")) return file;
 
-    if (!file.type.startsWith("image/")) return file;
     return new Promise((resolve) => {
+      let resolved = false;
+      let objectUrl = "";
+
+      const safeResolve = (res: File | Blob) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeoutId);
+          try {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+          } catch {}
+          resolve(res);
+        }
+      };
+
+      // 3.5s timeout safety: if canvas or image decoding hangs, don't stall upload
+      const timeoutId = setTimeout(() => {
+        safeResolve(file);
+      }, 3500);
+
+      try {
+        objectUrl = URL.createObjectURL(file);
+      } catch {
+        safeResolve(file);
+        return;
+      }
+
       const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-        const maxDimension = 1920;
-        let { width, height } = img;
+        try {
+          const maxDimension = 1920;
+          let { width, height } = img;
 
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
-          }
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(file);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob && blob.size < file.size) {
-              resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" }));
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
             } else {
-              resolve(file);
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
             }
-          },
-          "image/jpeg",
-          0.88
-        );
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            safeResolve(file);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob && blob.size < file.size) {
+                safeResolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" }));
+              } else {
+                safeResolve(file);
+              }
+            },
+            "image/jpeg",
+            0.88
+          );
+        } catch {
+          safeResolve(file);
+        }
       };
       img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        resolve(file);
+        safeResolve(file);
       };
       img.src = objectUrl;
     });
@@ -198,7 +226,7 @@ export default function CreatePostPage() {
     }
   }, []);
 
-  // Process files one-by-one to prevent Vercel 4.5MB request payload limit
+  // Process files with instant optimistic local preview + sequential CDN sync
   const processAndUploadFiles = async (files: FileList | File[]) => {
     const fileList = Array.from(files);
     if (fileList.length === 0) return;
@@ -218,52 +246,95 @@ export default function CreatePostPage() {
       return;
     }
 
+    // 1. INSTANT LOCAL PREVIEWS: Shows thumbnails in editor & Live Phone Preview IMMEDIATELY!
+    const localPreviews = fileList.map((file) => URL.createObjectURL(file));
+
+    if (postType === "IMAGE" || postType === "REELS" || postType === "STORIES") {
+      setImages([localPreviews[0]]);
+    } else {
+      setImages((prev) => [...prev, ...localPreviews].slice(0, 10));
+    }
+
+    // Mark newly selected previews as actively syncing to CDN
+    setUploadProgress((prev) => {
+      const next = { ...prev };
+      localPreviews.forEach((url) => {
+        next[url] = "uploading";
+      });
+      return next;
+    });
+
     setIsUploading(true);
-    const newUrls: string[] = [];
+    let successCount = 0;
 
     try {
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-        toast.loading(`Uploading slide ${i + 1} of ${fileList.length}...`, { id: "upload-toast" });
+        const localUrl = localPreviews[i];
 
-        const optimized = await optimizeImageForUpload(file);
-        const formData = new FormData();
-        formData.append("file", optimized);
+        toast.loading(`Uploading slide ${i + 1} of ${fileList.length} to Cloudinary...`, { id: "upload-toast" });
 
-        const res = await fetch("/api/cloudinary/upload", {
-          method: "POST",
-          body: formData,
-        });
+        try {
+          const optimized = await optimizeImageForUpload(file);
+          const formData = new FormData();
+          formData.append("file", optimized);
 
-        if (!res.ok) {
-          const rawText = await res.text();
-          let errText = `Upload failed for ${file.name}`;
-          try {
-            const parsed = JSON.parse(rawText);
-            errText = parsed.error || errText;
-          } catch {
-            if (rawText.includes("Request Entity Too Large") || res.status === 413) {
-              errText = `Image "${file.name}" is too large. Please select a smaller image.`;
+          const res = await fetch("/api/cloudinary/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            const rawText = await res.text();
+            let errText = `Upload failed for ${file.name}`;
+            try {
+              const parsed = JSON.parse(rawText);
+              errText = parsed.error || errText;
+            } catch {
+              if (rawText.includes("Request Entity Too Large") || res.status === 413) {
+                errText = `Image "${file.name}" is too large. Please select a smaller image.`;
+              }
             }
+            throw new Error(errText);
           }
-          throw new Error(errText);
-        }
 
-        const data = await res.json();
-        if (data.assets && data.assets.length > 0) {
-          for (const asset of data.assets) {
-            if (asset.secureUrl) newUrls.push(asset.secureUrl);
+          const data = await res.json();
+          const uploadedUrl = data.assets?.[0]?.secureUrl || data.asset?.secureUrl;
+          if (!uploadedUrl) {
+            throw new Error("No secure CDN URL returned from Cloudinary.");
           }
+
+          // Swap local preview URL with secure Cloudinary CDN URL immediately
+          setImages((prev) =>
+            prev.map((img) => (img === localUrl ? uploadedUrl : img))
+          );
+
+          setUploadProgress((prev) => ({
+            ...prev,
+            [localUrl]: "done",
+            [uploadedUrl]: "done",
+          }));
+
+          successCount++;
+        } catch (slideErr: any) {
+          console.error(`Slide ${i + 1} upload failed:`, slideErr);
+          setUploadProgress((prev) => ({
+            ...prev,
+            [localUrl]: "error",
+          }));
+          toast.error(`Slide ${i + 1} upload failed: ${slideErr?.message || "CDN error"}`, {
+            id: `upload-err-${i}`,
+          });
         }
       }
 
-      if (postType === "IMAGE" || postType === "REELS" || postType === "STORIES") {
-        setImages([newUrls[0]]);
+      if (successCount === fileList.length) {
+        toast.success(`Successfully uploaded all ${successCount} slide(s) to Cloudinary CDN!`, { id: "upload-toast" });
+      } else if (successCount > 0) {
+        toast.info(`${successCount} of ${fileList.length} slide(s) uploaded. Remove failed slides before publishing.`, { id: "upload-toast" });
       } else {
-        setImages((prev) => [...prev, ...newUrls].slice(0, 10));
+        toast.error("Failed to upload slides to CDN. Please check connection and try again.", { id: "upload-toast" });
       }
-
-      toast.success(`Successfully uploaded ${newUrls.length} image(s)!`, { id: "upload-toast" });
     } catch (err: any) {
       toast.error(err?.message || "Failed to upload images.", { id: "upload-toast" });
     } finally {
@@ -307,7 +378,20 @@ export default function CreatePostPage() {
   };
 
   const removeImage = (index: number) => {
+    const target = images[index];
+    if (target && target.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(target);
+      } catch {}
+    }
     setImages((prev) => prev.filter((_, i) => i !== index));
+    if (target) {
+      setUploadProgress((prev) => {
+        const copy = { ...prev };
+        delete copy[target];
+        return copy;
+      });
+    }
   };
 
   const handlePurgeFromCloudinary = async () => {
@@ -334,6 +418,11 @@ export default function CreatePostPage() {
   const handleAnalyzeImage = async () => {
     if (images.length === 0) {
       toast.error("Please upload an image first to analyze.");
+      return;
+    }
+
+    if (isUploading || images[0].startsWith("blob:")) {
+      toast.info("Please wait a moment for the image to finish syncing to CDN before AI analysis.");
       return;
     }
 
@@ -434,6 +523,16 @@ export default function CreatePostPage() {
   const handlePublish = async () => {
     if (images.length === 0) {
       toast.error("Please upload at least one image before publishing.");
+      return;
+    }
+
+    if (isUploading) {
+      toast.error("Please wait for all images to finish syncing to Cloudinary CDN.");
+      return;
+    }
+
+    if (images.some((img) => img.startsWith("blob:"))) {
+      toast.error("Some slides haven't finished uploading to CDN. Please wait or remove failed slides.");
       return;
     }
 
@@ -592,19 +691,29 @@ export default function CreatePostPage() {
                 onClick={handlePublish}
                 disabled={
                   images.length === 0 ||
+                  isUploading ||
+                  images.some((img) => img.startsWith("blob:")) ||
                   (postType === "CAROUSEL" && images.length < 2) ||
                   (publishStatus !== "idle" && publishStatus !== "failed")
                 }
                 className="primary-gradient-bg glow-primary text-white text-xs font-semibold gap-1.5 border-0 hover:opacity-95 shadow-lg transition-all"
               >
-                {publishStatus === "creating_container" ||
+                {isUploading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : publishStatus === "creating_container" ||
                 publishStatus === "processing" ||
                 publishStatus === "publishing" ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <Send className="w-3.5 h-3.5" />
                 )}
-                <span>{scheduledFor ? "Schedule Post" : "Publish Now"}</span>
+                <span>
+                  {isUploading
+                    ? "Syncing CDN..."
+                    : scheduledFor
+                    ? "Schedule Post"
+                    : "Publish Now"}
+                </span>
               </Button>
             </div>
           </div>
@@ -753,7 +862,11 @@ export default function CreatePostPage() {
                     )}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-zinc-200">
-                    {isUploading ? "Uploading to Cloudinary CDN..." : "Drag and drop your media here"}
+                    {isUploading
+                      ? "Syncing slides to Cloudinary CDN..."
+                      : images.length > 0
+                      ? "Add more slides (Drag & Drop or Browse)"
+                      : "Drag and drop your media here"}
                   </p>
                   <p className="text-[11px] text-zinc-400 mt-1">
                     Supports JPG, PNG, WEBP, MP4
@@ -814,8 +927,14 @@ export default function CreatePostPage() {
                 {images.length > 0 && (
                   <div className="space-y-2 pt-2 border-t border-zinc-800/80">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-zinc-400">
-                        {postType === "CAROUSEL" ? "Reorder or remove slides:" : "Selected Image:"}
+                      <span className="font-medium text-zinc-400 flex items-center gap-2">
+                        <span>{postType === "CAROUSEL" ? "Slides:" : "Selected Image:"}</span>
+                        {isUploading && (
+                          <span className="text-[10px] text-pink-400 font-normal animate-pulse flex items-center gap-1">
+                            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                            Syncing to CDN...
+                          </span>
+                        )}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <Button
@@ -826,7 +945,7 @@ export default function CreatePostPage() {
                           title="Permanently delete uploaded images from Cloudinary to keep 25 GB CDN storage free"
                         >
                           <Trash2 className="w-3 h-3 text-zinc-500 hover:text-red-400" />
-                          <span>Purge from Cloudinary</span>
+                          <span>Purge CDN</span>
                         </Button>
                         <Button
                           variant="ghost"
@@ -843,7 +962,13 @@ export default function CreatePostPage() {
                       {images.map((img, idx) => (
                         <div
                           key={idx}
-                          className="relative group rounded-xl overflow-hidden border border-zinc-700 bg-zinc-900 aspect-square shadow-md"
+                          className={`relative group rounded-xl overflow-hidden border aspect-square shadow-md transition-all ${
+                            uploadProgress[img] === "uploading" || img.startsWith("blob:")
+                              ? "border-pink-500/80 shadow-[0_0_12px_rgba(236,72,153,0.3)] bg-pink-950/20"
+                              : uploadProgress[img] === "error"
+                              ? "border-red-500/80 bg-red-950/20"
+                              : "border-zinc-700 hover:border-zinc-500 bg-zinc-900"
+                          }`}
                         >
                           {img.toLowerCase().endsWith(".mp4") || img.toLowerCase().endsWith(".mov") ? (
                             <video src={img} className="w-full h-full object-cover" autoPlay muted loop playsInline />
@@ -851,9 +976,33 @@ export default function CreatePostPage() {
                             <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
                           )}
 
-                          <span className="absolute top-1 left-1 bg-black/75 backdrop-blur-sm rounded px-1.5 text-[10px] font-bold text-white">
+                          <span className="absolute top-1 left-1 bg-black/75 backdrop-blur-sm rounded px-1.5 text-[10px] font-bold text-white z-10">
                             #{idx + 1}
                           </span>
+
+                          {/* CDN Upload Status Indicator Badge */}
+                          {uploadProgress[img] === "uploading" || img.startsWith("blob:") ? (
+                            <div
+                              className="absolute top-1 right-1 bg-black/80 backdrop-blur-sm rounded-full p-1 border border-pink-500/60 z-10 flex items-center justify-center"
+                              title="Syncing to Cloudinary CDN..."
+                            >
+                              <Loader2 className="w-3 h-3 text-pink-400 animate-spin" />
+                            </div>
+                          ) : uploadProgress[img] === "error" ? (
+                            <div
+                              className="absolute top-1 right-1 bg-red-950/90 backdrop-blur-sm rounded px-1 text-[9px] text-red-400 font-bold border border-red-500/50 z-10"
+                              title="Failed to upload to CDN"
+                            >
+                              Err
+                            </div>
+                          ) : (
+                            <div
+                              className="absolute top-1 right-1 bg-emerald-950/80 backdrop-blur-sm rounded-full p-0.5 text-emerald-400 border border-emerald-500/30 z-10 flex items-center justify-center"
+                              title="Ready on Cloudinary CDN"
+                            >
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            </div>
+                          )}
 
                           {/* Hover overlay controls */}
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity">
@@ -1471,12 +1620,16 @@ export default function CreatePostPage() {
                   onClick={handlePublish}
                   disabled={
                     images.length === 0 ||
+                    isUploading ||
+                    images.some((img) => img.startsWith("blob:")) ||
                     (postType === "CAROUSEL" && images.length < 2) ||
                     (publishStatus !== "idle" && publishStatus !== "failed")
                   }
                   className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-95 text-white font-bold text-sm gap-2 h-12 rounded-xl shadow-2xl shadow-pink-500/20 transition-all cursor-pointer"
                 >
-                  {publishStatus === "creating_container" ||
+                  {isUploading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  ) : publishStatus === "creating_container" ||
                   publishStatus === "processing" ||
                   publishStatus === "publishing" ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -1484,7 +1637,9 @@ export default function CreatePostPage() {
                     <Send className="w-4 h-4" />
                   )}
                   <span>
-                    {postType === "CAROUSEL"
+                    {isUploading
+                      ? "Syncing Slides to Cloudinary CDN..."
+                      : postType === "CAROUSEL"
                       ? scheduledFor ? `Schedule Carousel (${images.length} slides)` : `Publish Carousel (${images.length} slides)`
                       : scheduledFor ? "Schedule to Instagram" : "Publish to Instagram"}
                   </span>

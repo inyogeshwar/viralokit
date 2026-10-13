@@ -27,6 +27,14 @@ export async function uploadImageBuffer(
   }
 
   return new Promise((resolve, reject) => {
+    let finished = false;
+    const timer = setTimeout(() => {
+      if (!finished) {
+        finished = true;
+        reject(new Error("Cloudinary upload timed out after 30 seconds."));
+      }
+    }, 30000);
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder,
@@ -34,6 +42,10 @@ export async function uploadImageBuffer(
         transformation: [{ quality: "auto:eco" }, { fetch_format: "auto" }],
       },
       (error, result) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+
         if (error || !result) {
           reject(new Error(error?.message || "Failed to upload image to Cloudinary"));
         } else {
