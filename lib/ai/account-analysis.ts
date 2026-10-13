@@ -67,6 +67,162 @@ export interface AccountAuditResult {
   model: string;
 }
 
+interface DetectedNiche {
+  category: string;
+  focusKeywords: string[];
+  audience: string;
+  suggestedName: string;
+  bioLine1: string;
+  bioLine2: string;
+  bioLine3: string;
+  linkCta: string;
+  sampleTitles: string[];
+}
+
+function detectAccountNiche(
+  captions: string[],
+  baseName: string,
+  reach: number | null,
+  language: string
+): DetectedNiche {
+  const allText = captions.join(" ").toLowerCase();
+  const isHinglish = language.toLowerCase().includes("hinglish");
+  const isHindi = language.toLowerCase().includes("hindi");
+
+  const reachFormatted = reach && reach > 1000 ? `${(reach / 1000).toFixed(0)}K+` : "30K+";
+
+  // Check for Aesthetic DP, Vector Art, Wallpaper, Matching PFP
+  if (/dp\b|pfp|aesthetic|matching|vector|art|illustration|wallpaper|pinterest|vibe|faceless|girl|boy|couple/i.test(allText)) {
+    if (isHinglish) {
+      return {
+        category: "Aesthetic DPs, Vector Art & Visual Curation",
+        focusKeywords: ["Aesthetic DP", "Matching PFP", "Vector Art", "Wallpapers"],
+        audience: "Audience looking for aesthetic profile pictures, vector art & feed vibes",
+        suggestedName: `${baseName} | Aesthetic DPs & Art Drops`,
+        bioLine1: "✨ Aesthetic DPs, matching PFPs & vector art for your profile vibe",
+        bioLine2: `🔥 ${reachFormatted} monthly reach • Daily fresh aesthetic drops`,
+        bioLine3: "👇 Full HD DPs & wallpaper pack download karein:",
+        linkCta: "Download HD DPs & Wallpapers",
+        sampleTitles: [
+          "Top 9 Aesthetic Couple PFPs Drop (Save before it's gone)",
+          "Vector Art Transformation in 30 Seconds",
+          "Classy vs Trendy Aesthetic DPs — Which One Is Yours?",
+        ],
+      };
+    }
+    if (isHindi) {
+      return {
+        category: "एस्थेटिक डीपी और वेक्टर आर्ट",
+        focusKeywords: ["Aesthetic DP", "Matching PFP", "Vector Art"],
+        audience: "एस्थेटिक डीपी और आकर्षक वॉलपेपर के दर्शक",
+        suggestedName: `${baseName} | एस्थेटिक डीपी और आर्ट`,
+        bioLine1: "✨ आपके प्रोफ़ाइल के लिए प्रीमियम एस्थेटिक डीपी और वेक्टर आर्ट",
+        bioLine2: `🔥 ${reachFormatted} मासिक रीच • रोज़ नए विज़ुअल ड्रॉप्स`,
+        bioLine3: "👇 एचडी डीपी और वॉलपेपर अभी डाउनलोड करें:",
+        linkCta: "एचडी पैक देखें",
+        sampleTitles: [
+          "शीर्ष 9 एस्थेटिक डीपी संग्रह",
+          "वेक्टर आर्ट क्रिएशन प्रोसेस",
+          "आपके प्रोफ़ाइल के लिए सर्वश्रेष्ठ वॉलपेपर",
+        ],
+      };
+    }
+    return {
+      category: "Aesthetic DPs, Matching PFPs & Visual Art",
+      focusKeywords: ["Aesthetic DP", "Matching PFP", "Vector Art", "Wallpapers"],
+      audience: "Curated aesthetic profile pictures, wallpapers & matching PFPs",
+      suggestedName: `${baseName} | Aesthetic DPs & Art Drops`,
+      bioLine1: "✨ Aesthetic DPs, matching PFPs & vector art curated for your feed",
+      bioLine2: `🔥 ${reachFormatted} monthly reach • Daily aesthetic drops`,
+      bioLine3: "👇 Download full HD DPs & wallpapers pack below:",
+      linkCta: "Download HD Wallpaper & DP Pack",
+      sampleTitles: [
+        "Top 9 Aesthetic Matching PFPs Drop",
+        "Vector Art Reel: From Sketch to Feed Drop",
+        "Curated Aesthetic Wallpaper Vault",
+      ],
+    };
+  }
+
+  // Fitness
+  if (/fitness|gym|workout|fat loss|muscle|diet|health/i.test(allText)) {
+    return {
+      category: "Fitness & Body Transformation",
+      focusKeywords: ["Fitness Coach", "Fat Loss", "Workouts"],
+      audience: "People looking to transform their health and physique",
+      suggestedName: `${baseName} | Fitness & Transformation`,
+      bioLine1: isHinglish
+        ? "💪 Busy logon ko sustainable fat loss aur muscle building me help karta hoon"
+        : "Helping ambitious individuals build their best physique without extreme diets",
+      bioLine2: `📊 ${reachFormatted} reached • Proven workout systems`,
+      bioLine3: "👇 Free workout & meal plan blueprint:",
+      linkCta: "Get Free Blueprint",
+      sampleTitles: [
+        "3 Gym Mistakes Keeping You Skinny-Fat",
+        "15-Minute Home Workout Routine",
+        "Complete High-Protein Meal Prep Vault",
+      ],
+    };
+  }
+
+  // Tech / AI / Coding
+  if (/tech|coding|developer|code|python|software|ai tool/i.test(allText)) {
+    return {
+      category: "Tech & AI Systems",
+      focusKeywords: ["Tech", "AI Tools", "Developer"],
+      audience: "Engineers and creators building with AI",
+      suggestedName: `${baseName} | AI Tools & Tech Systems`,
+      bioLine1: "⚡ Practical AI workflows & tech systems that save 10+ hours a week",
+      bioLine2: `📈 ${reachFormatted} reach • Tested systems & blueprints`,
+      bioLine3: "👇 Access free AI prompts & toolkit vault:",
+      linkCta: "Access Free Vault",
+      sampleTitles: [
+        "5 Free AI Tools Replacing Expensive Subscriptions",
+        "Automate Your Workflow in 3 Minutes",
+        "The Ultimate Developer Tech Stack",
+      ],
+    };
+  }
+
+  // Photography / Video / Filmmaking
+  if (/photo|camera|cinematic|video|film|lens|portrait/i.test(allText)) {
+    return {
+      category: "Visual Storytelling & Photography",
+      focusKeywords: ["Photography", "Cinematic", "Portraits"],
+      audience: "Lovers of visual aesthetics and cinematography",
+      suggestedName: `${baseName} | Photography & Visuals`,
+      bioLine1: "📸 Capturing raw emotions & cinematic frames behind the lens",
+      bioLine2: `✨ ${reachFormatted} visual impressions • Presets & tutorials`,
+      bioLine3: "👇 Grab my Lightroom presets & mobile settings:",
+      linkCta: "Get Lightroom Presets",
+      sampleTitles: [
+        "3 Camera Settings Every Creator Gets Wrong",
+        "Cinematic Color Grading in 20 Seconds",
+        "The Raw vs Graded Portrait Breakdown",
+      ],
+    };
+  }
+
+  // Default Visual & Creative Drops
+  return {
+    category: "Visual Curation & Creative Drops",
+    focusKeywords: ["Curator", "Aesthetic", "Visuals"],
+    audience: "Audience seeking high-vibe creative inspiration",
+    suggestedName: `${baseName} | Visual Curation & Drops`,
+    bioLine1: isHinglish
+      ? "✨ Daily high-vibe visual curation & aesthetic drops for your feed"
+      : "Daily curated high-vibe visuals and inspiration for creators",
+    bioLine2: `📈 ${reachFormatted} monthly reach • Daily original curation`,
+    bioLine3: "👇 Access curated resources & links below:",
+    linkCta: "Explore Full Collection",
+    sampleTitles: [
+      "Top Visual Trends You Need to Know",
+      "Behind the Scenes: Daily Creative Workflow",
+      "Curated Asset Vault for Creators",
+    ],
+  };
+}
+
 function calculateMedian(numbers: number[]): number {
   if (numbers.length === 0) return 0;
   const sorted = [...numbers].sort((a, b) => a - b);
@@ -113,6 +269,14 @@ export async function generateAccountAnalysisWithAi(
     .sort((a, b) => b.multiplier - a.multiplier)
     .slice(0, 3);
 
+  // Detect exact account niche from real post captions
+  const detectedNiche = detectAccountNiche(
+    postMetrics.map((p) => p.caption),
+    effectiveName,
+    analytics.insights.reach,
+    language
+  );
+
   const prompt = `
 You are an elite Instagram growth auditor and creator strategist following the 12-part creator audit rubric.
 Analyze this Instagram creator profile and real performance metrics:
@@ -128,6 +292,12 @@ CREATOR IDENTITY:
 - 28-day Reach: ${analytics.insights.reach ?? "N/A"}
 - Total 28-day Interactions: ${analytics.insights.totalInteractions ?? "N/A"}
 - Median Interactions per Post: ${calculatedMedian}
+
+DETECTED ACCOUNT CONTENT NICHE:
+- Primary Niche Category: "${detectedNiche.category}"
+- Focus Keywords: ${JSON.stringify(detectedNiche.focusKeywords)}
+- Target Audience: "${detectedNiche.audience}"
+(CRITICAL: Tailor all findings, bio rewrites, and post recommendations specifically to this niche. DO NOT output generic SaaS or coaching advice if this account posts visual art/DPs/fashion/etc.)
 
 RECENT POSTS SAMPLE (Top & Recent):
 ${JSON.stringify(
@@ -165,11 +335,11 @@ You MUST output all analysis, findings, actions, and blueprints in the requested
 ANTI-SLOP CRITICAL RULES:
 - NO generic fluff ("elevate your presence", "in today's digital landscape").
 - Present findings in FIX-FIRST ORDER (what hurts the profile most goes first).
-- Provide an exact 3-line Bio rewrite ready to copy-paste.
+- Provide an exact 3-line Bio rewrite ready to copy-paste strictly tailored to "${detectedNiche.category}".
 - Output ONLY valid JSON matching this schema:
 
 {
-  "overallScore": 74,
+  "overallScore": 75,
   "grade": "B",
   "summary": "2-3 sentences concise diagnosis of current growth bottleneck and momentum in ${language}",
   "criticalFixes": [
@@ -305,8 +475,8 @@ ANTI-SLOP CRITICAL RULES:
       "name": "Funnel & Conversion Friction",
       "category": "Distribution & Strategy",
       "maxScore": 5,
-      "score": 2,
-      "status": "fail",
+      "score": 3,
+      "status": "warning",
       "finding": "Observation in ${language}",
       "fix": "Fix in ${language}"
     }
@@ -329,41 +499,41 @@ ANTI-SLOP CRITICAL RULES:
   },
   "bioTeardown": {
     "currentIssues": ["Issue 1 in ${language}", "Issue 2 in ${language}"],
-    "suggestedName": "Optimized Name with niche keywords",
+    "suggestedName": "${detectedNiche.suggestedName}",
     "suggestedBioLines": [
-      "Line 1 (Target Audience + Outcome)",
-      "Line 2 (Proof / Metric / Track Record)",
-      "Line 3 (Direct CTA with emoji pointing down 👇)"
+      "${detectedNiche.bioLine1}",
+      "${detectedNiche.bioLine2}",
+      "${detectedNiche.bioLine3}"
     ],
-    "suggestedLinkCta": "Clear link text or DM keyword"
+    "suggestedLinkCta": "${detectedNiche.linkCta}"
   },
   "recommendedPosts": [
     {
       "type": "Carousel",
-      "formulaName": "Counterintuitive Truth",
-      "targetStage": "Nurture",
-      "title": "Title in ${language}",
-      "hookLine": "Hook line under 125 chars in ${language}",
-      "structure": ["Slide 1 hook", "Slide 2 mistake", "Slide 3 shift", "Slide 4 solution", "Slide 5 CTA"],
-      "whyItConverts": "Why this builds high save rate and authority"
+      "formulaName": "Curated Vault",
+      "targetStage": "Attract",
+      "title": "${detectedNiche.sampleTitles[0]}",
+      "hookLine": "Save this drop before it's gone: Top picks for your feed",
+      "structure": ["Slide 1 title card", "Slide 2-8 curated assets", "Slide 9 save & comment CTA"],
+      "whyItConverts": "Maximizes saves and shares which triggers feed explore distribution"
     },
     {
       "type": "Reels",
-      "formulaName": "Speed & Time Compression",
-      "targetStage": "Attract",
-      "title": "Title in ${language}",
-      "hookLine": "Hook line in ${language}",
-      "structure": ["0-2s visual interrupt", "3-8s problem", "9-25s rapid demo", "26-30s loop & CTA"],
+      "formulaName": "Speed & Visual Demo",
+      "targetStage": "Nurture",
+      "title": "${detectedNiche.sampleTitles[1]}",
+      "hookLine": "How to get this exact look in under 30 seconds:",
+      "structure": ["0-2s visual hook", "3-15s creation process", "16-25s final result", "26-30s CTA"],
       "whyItConverts": "High retention watch time"
     },
     {
       "type": "Carousel",
-      "formulaName": "Curated Toolkit / Resource",
+      "formulaName": "Choice Contrast",
       "targetStage": "Convert",
-      "title": "Title in ${language}",
-      "hookLine": "Hook line in ${language}",
-      "structure": ["Slide 1 offer hook", "Slide 2-4 breakdown", "Slide 5 DM trigger CTA"],
-      "whyItConverts": "Drives comments and direct inbound inquiries"
+      "title": "${detectedNiche.sampleTitles[2]}",
+      "hookLine": "1 to 9: which one matches your vibe the most?",
+      "structure": ["Slide 1 comparison grid", "Slide 2-9 detailed showcases", "Slide 10 link in bio CTA"],
+      "whyItConverts": "Drives comments and direct engagement"
     }
   ]
 }
@@ -373,12 +543,12 @@ ANTI-SLOP CRITICAL RULES:
   let chosenProvider = "OpenRouter";
   let chosenModel = modelId;
 
-  // 1. OpenRouter
+  // 1. OpenRouter (15s timeout)
   if (config.ai.openRouterKey) {
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(15000),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${config.ai.openRouterKey}`,
@@ -403,12 +573,12 @@ ANTI-SLOP CRITICAL RULES:
     }
   }
 
-  // 2. Gemini Fallback
+  // 2. Gemini Fallback with 2500 maxOutputTokens
   if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
     try {
       chosenProvider = "Gemini Flash Engine";
       chosenModel = "gemini-1.5-flash";
-      jsonText = await generateWithGemini(prompt);
+      jsonText = await generateWithGemini(prompt, undefined, { maxOutputTokens: 2500, temperature: 0.4 });
     } catch (err) {
       console.warn("Gemini account audit failed:", err);
     }
@@ -432,7 +602,7 @@ ANTI-SLOP CRITICAL RULES:
         criticalFixes: Array.isArray(parsed.criticalFixes) ? parsed.criticalFixes : [],
         highLeverageTweaks: Array.isArray(parsed.highLeverageTweaks) ? parsed.highLeverageTweaks : [],
         winningTraits: Array.isArray(parsed.winningTraits) ? parsed.winningTraits : [],
-        rubric: Array.isArray(parsed.rubric) ? parsed.rubric : buildFallbackRubric(analytics, language),
+        rubric: Array.isArray(parsed.rubric) ? parsed.rubric : buildFallbackRubric(analytics, detectedNiche, language),
         outlierAnalysis: parsed.outlierAnalysis || {
           medianInteractions: calculatedMedian,
           outliersFound: realOutliers.map((o) => ({
@@ -447,7 +617,7 @@ ANTI-SLOP CRITICAL RULES:
           })),
           replicationStrategy: "Double down on formats that hit over 1.5x of your account median.",
         },
-        bioTeardown: parsed.bioTeardown || buildFallbackBioTeardown(analytics, language),
+        bioTeardown: parsed.bioTeardown || buildFallbackBioTeardown(detectedNiche, language),
         recommendedPosts: Array.isArray(parsed.recommendedPosts) ? parsed.recommendedPosts : [],
         provider: chosenProvider,
         model: chosenModel,
@@ -457,17 +627,21 @@ ANTI-SLOP CRITICAL RULES:
     }
   }
 
-  // 3. Robust Heuristic Engine
-  return buildHeuristicAudit(analytics, calculatedMedian, realOutliers, language);
+  // 3. Robust Heuristic Engine powered by detected niche
+  return buildHeuristicAudit(analytics, detectedNiche, calculatedMedian, realOutliers, language);
 }
 
-function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: string): RubricItem[] {
+function buildFallbackRubric(
+  analytics: NormalizedAccountAnalytics,
+  detectedNiche: DetectedNiche,
+  language: string
+): RubricItem[] {
   const isHinglish = language.toLowerCase().includes("hinglish");
   const isHindi = language.toLowerCase().includes("hindi");
 
   const bio = (analytics.account.biography || "").trim();
   const hasBio = bio.length > 0;
-  const hasCta = /link|click|dm|comment|check|👇|🔗|guide|free/i.test(bio);
+  const hasCta = /link|click|dm|comment|check|👇|🔗|guide|free|download|pack/i.test(bio);
   const nameHasKeyword = (analytics.account.name || "").includes("|") || (analytics.account.name || "").includes("-");
 
   return [
@@ -479,33 +653,27 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
       score: hasBio ? 7 : 3,
       status: hasBio ? "pass" : "fail",
       finding: isHinglish
-        ? "Line 1 clear honi chahiye ki page kiske liye hai aur kya fayda milega."
+        ? `Line 1 me clear hona chahiye ki aapka account "${detectedNiche.category}" ke liye hai.`
         : isHindi
-        ? "पहली पंक्ति में स्पष्ट होना चाहिए कि यह खाता किसके लिए है।"
-        : "Line 1 must clarify who this account serves in under 3 seconds.",
+        ? `पहली पंक्ति में स्पष्ट होना चाहिए कि यह खाता किसके लिए है।`
+        : `Line 1 must clarify that your account focuses on ${detectedNiche.category}.`,
       fix: isHinglish
-        ? "Add: 'Helping [Audience] achieve [Result] without [Pain Point]'"
-        : isHindi
-        ? "जोड़ें: '[दर्शकों] को [परिणाम] प्राप्त करने में मदद'"
-        : "Clarify your core transformation proposition immediately.",
+        ? `Adopt: "${detectedNiche.bioLine1}"`
+        : `Update line 1 to: "${detectedNiche.bioLine1}"`,
     },
     {
       id: "bioLine2",
       name: "Proof & Credibility Anchor",
       category: "Bio & Identity",
       maxScore: 10,
-      score: /\d|\+|creator|founder|certified/i.test(bio) ? 8 : 4,
-      status: /\d|\+|creator|founder|certified/i.test(bio) ? "pass" : "warning",
+      score: /\d|\+|creator|founder|certified|drops|k\+/i.test(bio) ? 8 : 4,
+      status: /\d|\+|creator|founder|certified|drops|k\+/i.test(bio) ? "pass" : "warning",
       finding: isHinglish
-        ? "Credibility metrics (numbers, results, experience) trust build karte hain."
-        : isHindi
-        ? "प्रामाणिकता के आंकड़े विश्वास जगाते हैं।"
+        ? "Credibility metrics (monthly reach, drop count, track record) visitors ka trust boost karte hain."
         : "Proof elements anchor instant authority for new visitors.",
       fix: isHinglish
-        ? "Add a metric or credential (e.g. '5+ yrs building | 50K+ served')."
-        : isHindi
-        ? "कोई ठोस उपलब्धि या अनुभव जोड़ें।"
-        : "Insert a quantifiable milestone or credential into line 2.",
+        ? `Add: "${detectedNiche.bioLine2}"`
+        : `Insert: "${detectedNiche.bioLine2}"`,
     },
     {
       id: "bioLine3",
@@ -515,13 +683,11 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
       score: hasCta ? 9 : 4,
       status: hasCta ? "pass" : "warning",
       finding: isHinglish
-        ? hasCta ? "Direct call to action present hai." : "Bio me clear single-link CTA missing hai."
+        ? hasCta ? "Direct call to action present hai." : "Bio me single-link clear directive CTA missing hai."
         : hasCta ? "Clear action directive found." : "No explicit link command found in bio.",
       fix: isHinglish
-        ? "Add a strong directive: '👇 Free templates & guide below'"
-        : isHindi
-        ? "सीधा निर्देश जोड़ें: '👇 मुफ़्त रिसोर्स नीचे लिंक पर'"
-        : "Point visitors directly to one single high-value resource.",
+        ? `Add: "${detectedNiche.bioLine3}"`
+        : `Update to: "${detectedNiche.bioLine3}"`,
     },
     {
       id: "nameFieldSeo",
@@ -534,8 +700,8 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
         ? "Instagram search me Name field index hota hai."
         : "Instagram searches rank the Name field alongside your handle.",
       fix: isHinglish
-        ? `Change display name to: '${analytics.account.name || "YourName"} | Niche & Focus'`
-        : `Update Name to: '${analytics.account.name || "Name"} | Primary Niche Keyword'`,
+        ? `Change display name to: '${detectedNiche.suggestedName}'`
+        : `Update Name to: '${detectedNiche.suggestedName}'`,
     },
     {
       id: "avatarContrast",
@@ -558,8 +724,8 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
         ? "Highlights aapke profile ka automated sales/trust funnel hain."
         : "Highlights function as an automated landing page for profile visitors.",
       fix: isHinglish
-        ? "Create 3 essential highlights: 1) Start Here 2) Proof / Results 3) Free Resources."
-        : "Structure 3-4 highlights: 'Start Here', 'Case Studies/Proof', 'Free Tool', 'About'.",
+        ? "Create 3 essential highlights: 1) Best Drops 2) Wallpapers/Presets 3) About / Proof."
+        : "Structure 3-4 highlights: 'Top Drops', 'Free Assets', 'About'.",
     },
     {
       id: "threePinRule",
@@ -569,7 +735,7 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
       score: 6,
       status: "warning",
       finding: "Top 3 pins determine whether a visitor follows within 5 seconds.",
-      fix: "Pin 1: Who I Am / Mission. Pin 2: Biggest Outlier / Viral Proof. Pin 3: Core Free Resource.",
+      fix: "Pin 1: Top aesthetic collection. Pin 2: Greatest viral hit. Pin 3: Direct resource link post.",
     },
     {
       id: "outlierMultiplier",
@@ -602,7 +768,7 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
         ? "First 125 characters decide whether user taps '...more' or keeps scrolling."
         : "Users decide to tap '...more' within the first 125 characters.",
       fix: isHinglish
-        ? "Place the strongest conflict or unexpected hook inside the first sentence before line 2."
+        ? "First sentence me curiosity ya interactive question rakhein (e.g. '1-9 which is your vibe?')."
         : "Front-load curiosity or tension before the fold cutoff point.",
     },
     {
@@ -612,7 +778,7 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
       maxScore: 5,
       score: 4,
       status: "pass",
-      finding: "Attract (Reels) vs Nurture (Carousels) vs Convert balance.",
+      finding: "Attract (Reels) vs Nurture (Carousels) balance.",
       fix: "Maintain 50% Carousels for bookmark saves and 50% Reels for top-of-funnel reach.",
     },
     {
@@ -623,98 +789,98 @@ function buildFallbackRubric(analytics: NormalizedAccountAnalytics, language: st
       score: 3,
       status: "warning",
       finding: "Clear next step for profile visitors.",
-      fix: "Use keyword DM automations ('Comment BUILD to get the PDF') to capture active leads.",
+      fix: "Use keyword DM calls ('Comment LINK for 4K download') to convert viewers into followers.",
     },
   ];
 }
 
-function buildFallbackBioTeardown(analytics: NormalizedAccountAnalytics, language: string): BioTeardown {
+function buildFallbackBioTeardown(detectedNiche: DetectedNiche, language: string): BioTeardown {
   const isHinglish = language.toLowerCase().includes("hinglish");
   const isHindi = language.toLowerCase().includes("hindi");
-  const baseName = analytics.account.name || analytics.account.username || "Creator";
 
   if (isHinglish) {
     return {
       currentIssues: [
-        "Bio me target audience aur specific outcome clear nahi hai",
-        "Social proof ya credibility milestone missing hai",
-        "Link par click karwane ke liye clear instruction nahi hai",
+        "Bio me primary niche aur exact offer highlight nahi hai",
+        "Recent monthly reach ka proof anchor missing hai",
+        "Bio link par tap karne ke liye specific call-to-action directive nahi hai",
       ],
-      suggestedName: `${baseName} | Creator & Growth Systems`,
+      suggestedName: detectedNiche.suggestedName,
       suggestedBioLines: [
-        "🚀 Creators ko viral content & workflows build karne me help karta hoon",
-        "📈 100K+ reach generated • Weekly practical breakdowns",
-        "👇 Free creator cheat sheet & templates grab karein:",
+        detectedNiche.bioLine1,
+        detectedNiche.bioLine2,
+        detectedNiche.bioLine3,
       ],
-      suggestedLinkCta: "Claim Free Kit & Workflows",
+      suggestedLinkCta: detectedNiche.linkCta,
     };
   }
 
   if (isHindi) {
     return {
       currentIssues: [
-        "बायो में मुख्य उद्देश्य और दर्शकों का विवरण स्पष्ट नहीं है",
-        "विश्वसनीयता और अनुभव के आंकड़े नहीं दिए गए हैं",
-        "लिंक पर जाने के लिए स्पष्ट निर्देश की कमी है",
+        "बायो में मुख्य श्रेणी और पेशकश स्पष्ट नहीं है",
+        "मासिक रीच और आंकड़ों का उल्लेख नहीं है",
+        "लिंक पर क्लिक करने के लिए सीधे निर्देश की कमी है",
       ],
-      suggestedName: `${baseName} | क्रिएटर और ग्रोथ`,
+      suggestedName: detectedNiche.suggestedName,
       suggestedBioLines: [
-        "🎯 नए क्रिएटर्स को इंस्टाग्राम पर तेज़ी से बढ़ने में मदद",
-        "📊 सत्यापित रणनीतियां और आसान वर्कफ़्लो",
-        "👇 मुफ़्त क्रिएटर गाइड डाउनलोड करें:",
+        detectedNiche.bioLine1,
+        detectedNiche.bioLine2,
+        detectedNiche.bioLine3,
       ],
-      suggestedLinkCta: "मुफ़्त रिसोर्स देखें",
+      suggestedLinkCta: detectedNiche.linkCta,
     };
   }
 
   return {
     currentIssues: [
-      "Current bio lacks a definitive target audience callout",
-      "No measurable proof or credibility anchor to build immediate trust",
-      "No direct verb or downward directive prompting link clicks",
+      "Current bio lacks a definitive focus keyword for search discoverability",
+      "No measurable proof anchor or monthly reach milestone to build trust",
+      "No direct verb or downward directive prompting link taps",
     ],
-    suggestedName: `${baseName} | Content Strategy & Growth`,
+    suggestedName: detectedNiche.suggestedName,
     suggestedBioLines: [
-      "Helping ambitious creators build high-converting content & systems",
-      "Proven framework tested across 500+ pieces of content",
-      "👇 Grab the free creator toolkit & viral breakdown:",
+      detectedNiche.bioLine1,
+      detectedNiche.bioLine2,
+      detectedNiche.bioLine3,
     ],
-    suggestedLinkCta: "Get Free Toolkit",
+    suggestedLinkCta: detectedNiche.linkCta,
   };
 }
 
 function buildHeuristicAudit(
   analytics: NormalizedAccountAnalytics,
+  detectedNiche: DetectedNiche,
   calculatedMedian: number,
   realOutliers: any[],
   language: string
 ): AccountAuditResult {
   const isHinglish = language.toLowerCase().includes("hinglish");
-  const rubric = buildFallbackRubric(analytics, language);
+  const rubric = buildFallbackRubric(analytics, detectedNiche, language);
   const totalScore = rubric.reduce((acc, r) => acc + r.score, 0);
   const grade =
     totalScore >= 90 ? "A+" : totalScore >= 80 ? "A" : totalScore >= 70 ? "B" : totalScore >= 55 ? "C" : "Needs Work";
 
   const criticalFixes = [
     {
-      title: isHinglish ? "Bio Line 3 Call-To-Action Add Karein" : "Add Direct Bio Call-To-Action",
+      title: isHinglish ? "Bio Line 3 me Directive Call-To-Action Add Karein" : "Add Direct Bio Call-To-Action",
       action: isHinglish
-        ? "Bio ke aakhri line me emoji '👇' ke sath ek specific offer ya free resource mention karein."
-        : "Replace passive bio closing with an active directive with a downward arrow pointing to your link.",
+        ? `Bio ke aakhri line me emoji '👇' ke sath ek specific offer rakhein: "${detectedNiche.bioLine3}".`
+        : `Replace passive bio closing with an active directive: "${detectedNiche.bioLine3}".`,
       impact: "+25% to +40% increase in profile link clicks and inbound inquiries",
     },
     {
-      title: isHinglish ? "Name Field me Niche Keywords Add Karein" : "Optimize Name Field for Search SEO",
+      title: isHinglish ? "Name Field me Search Keywords Add Karein" : "Optimize Name Field for Search SEO",
       action: isHinglish
-        ? `Edit profile me Name ko '${analytics.account.name || "Name"} | [Your Niche]' me update karein.`
-        : `Update your display Name field to include primary searchable keywords alongside your name.`,
+        ? `Edit profile me Name ko '${detectedNiche.suggestedName}' me update karein taaki search me rank ho.`
+        : `Update your display Name field to '${detectedNiche.suggestedName}'.`,
       impact: "Appears in Instagram search for high-intent niche queries",
     },
     {
       title: isHinglish ? "Top 3 Pinned Posts Strategy Implement Karein" : "Enforce the 3-Pinned-Post Rule",
       action: isHinglish
-        ? "Grid par 3 posts pin karein: 1) Who I Am / Mission, 2) Highest Outlier, 3) Best Free Offer."
-        : "Pin 1 identity piece, 1 high-outlier proof reel/carousel, and 1 direct lead magnet post.",
+        ? "Grid par 3 posts pin karein: 1) Best Performing Drop, 2) Highest Outlier Carousel, 3) Free Resource/Link post."
+        : "Pin your top 3 highest-resonance pieces to capture incoming profile visitors.",
       impact: "+30% higher profile-to-follower conversion rate for new visitors",
     },
   ];
@@ -723,14 +889,14 @@ function buildHeuristicAudit(
     {
       title: isHinglish ? "First 125-Character Caption Hooks Ko Frontload Karein" : "Frontload Caption Hooks (<125 Chars)",
       action: isHinglish
-        ? "Pehle sentence me hi curiosity ya counterintuitive statement rakhein taaki audience '...more' dabaye."
-        : "Place the core hook and intrigue entirely before the mobile feed cutoff line.",
+        ? "Pehle sentence me hi interactive line rakhein (jaise '1-9 which is your style?') taaki user '...more' dabaye."
+        : "Place the core hook and interaction prompt before the mobile feed cutoff line.",
       impact: "Significantly higher dwell time and bookmark save rate",
     },
     {
       title: isHinglish ? "Outlier Formats Ko Weekly Replicate Karein" : "Systematically Duplicate Outlier Formats",
       action: isHinglish
-        ? "Jo posts median se 1.5x zyada engagement la rahe hain unki layout aur structure ko repeat karein."
+        ? "Jo posts median se 1.5x zyada engagement la rahe hain unke visual layout ko repeat karein."
         : "Extract the exact template of your top performing post and produce variations weekly.",
       impact: "Consistent reach without relying on algorithmic luck",
     },
@@ -738,11 +904,11 @@ function buildHeuristicAudit(
 
   const winningTraits = [
     isHinglish
-      ? `Aapke account par consistent visual aesthetics aur regular publication flow maintain ho raha hai.`
+      ? `Aapke account par aesthetic visual framing aur regular drops maintain ho rahe hain.`
       : `Clean visual presentation and active publication rhythm maintained across recent posts.`,
     isHinglish
-      ? `Carousels aur visual breakdown posts par median engagement strong hai.`
-      : `Educational formats generate healthy dwell time and steady interaction.`,
+      ? `Multi-image DPs aur vector art showcase par audience dwell time aur saves strong hain.`
+      : `Curated showcase carousels generate healthy dwell time and steady interaction.`,
   ];
 
   const outlierData = {
@@ -750,7 +916,7 @@ function buildHeuristicAudit(
     outliersFound: (realOutliers.length > 0 ? realOutliers : [
       {
         id: "sample_top",
-        caption: "Top performing recent visual showcase",
+        caption: "Top aesthetic DP and vector art showcase",
         multiplier: 2.1,
         likes: calculatedMedian * 2,
         comments: Math.max(5, Math.round(calculatedMedian * 0.3)),
@@ -764,11 +930,11 @@ function buildHeuristicAudit(
       comments: o.comments,
       type: o.type,
       whyItWorked: isHinglish
-        ? "Strong visual packaging aur direct value proposition ki wajah se dwell time peak hua."
-        : "High visual contrast and immediate value promise maximized watch and swipe completion.",
+        ? "Strong visual packaging aur interactive question ('1-9 which is you?') ki wajah se dwell time peak hua."
+        : "High visual contrast and immediate relatable hook maximized swipe completion.",
       howToReplicate: isHinglish
-        ? "Is post ke hook style ko pick karke agle hafte ek related new problem solve karein."
-        : "Reuse the opening slide structure with a fresh high-utility problem.",
+        ? "Is post ke 1-9 selection format ko pick karke agle hafte ek naya matching theme drop karein."
+        : "Reuse the opening slide structure with a fresh high-utility asset stack.",
     })),
     replicationStrategy: isHinglish
       ? "Outliers ko one-off fluke mat samjhein — unke hook pattern aur visual styling ko recurring series banayein."
@@ -778,53 +944,49 @@ function buildHeuristicAudit(
   const recommendedPosts: RecommendedPostBlueprint[] = [
     {
       type: "Carousel",
-      formulaName: "The Counterintuitive Truth",
-      targetStage: "Nurture",
-      title: isHinglish ? "Industry Myth Buster Breakdown" : "Counterintuitive Industry Truth",
+      formulaName: "Curated Vault",
+      targetStage: "Attract",
+      title: detectedNiche.sampleTitles[0],
       hookLine: isHinglish
-        ? "Stop doing this common mistake if you want real growth this month."
-        : "Most creators think they need more followers. What you actually need is this:",
+        ? "Save this before it's gone: Top aesthetic picks curated for your feed"
+        : "Save this before it's gone: Curated aesthetic collection for your feed",
       structure: [
-        "Slide 1: Bold controversial statement that stops scrolling",
-        "Slide 2: Why the standard advice fails in practice",
-        "Slide 3: The 3-step modern alternative that works",
-        "Slide 4: Real-world example & proof",
-        "Slide 5: Save this post & comment GUIDE for the complete checklist",
+        "Slide 1: High-contrast cover with aesthetic title card",
+        "Slide 2-8: 1-9 Curated choices with clean framing",
+        "Slide 9: Double tap if you saved this & comment your favorite",
       ],
-      whyItConverts: "Builds deep trust, generates high save rates, and positions you as an authoritative practitioner.",
+      whyItConverts: "Generates massive saves and shares which triggers Instagram explore distribution.",
     },
     {
       type: "Reels",
-      formulaName: "Speed & Time Compression",
-      targetStage: "Attract",
-      title: isHinglish ? "30-Second Workflow Hack" : "High-Velocity Workflow Blueprint",
+      formulaName: "Speed & Visual Demo",
+      targetStage: "Nurture",
+      title: detectedNiche.sampleTitles[1],
       hookLine: isHinglish
-        ? "This simple workflow saved me 10 hours every week — here is the exact breakdown:"
-        : "I stopped spending 4 hours on this and switched to this 5-minute setup:",
+        ? "How I vectorize aesthetic DPs in 30 seconds (full breakdown):"
+        : "Watch this transformation from raw photo to aesthetic vector art in 30 seconds:",
       structure: [
-        "0-2s: Visual proof / side-by-side contrast",
-        "3-10s: The friction point most people struggle with",
-        "11-22s: Fast screen demonstration of the solution",
-        "23-28s: Clear key takeaway and loop",
+        "0-2s: Visual before/after shock contrast",
+        "3-15s: Fast-paced creation process",
+        "16-25s: Full screen finished aesthetic drop",
+        "26-30s: Comment 'HD' for the download link",
       ],
-      whyItConverts: "Rapid pacing triggers high completion rates which triggers Instagram algorithmic distribution.",
+      whyItConverts: "Rapid pacing triggers high completion rates and algorithmic recommendations.",
     },
     {
       type: "Carousel",
-      formulaName: "Curated Resource / Vault",
+      formulaName: "Choice Contrast",
       targetStage: "Convert",
-      title: isHinglish ? "Ultimate Resource / Toolkit Vault" : "Curated High-Value Resource Stack",
+      title: detectedNiche.sampleTitles[2],
       hookLine: isHinglish
-        ? "Don't start your next project from scratch. Use this curated toolkit instead:"
-        : "The complete toolkit I use every single day (saved me over $1,000 this year):",
+        ? "1 to 9: which one matches your aesthetic vibe the most? Drop your number 👇"
+        : "1 to 9: which style matches your aesthetic feed? Comment your pick below 👇",
       structure: [
-        "Slide 1: High-contrast title card with clear asset stack",
-        "Slide 2: Tool #1 for ideation & viral hooks",
-        "Slide 3: Tool #2 for design & visual pacing",
-        "Slide 4: Tool #3 for publishing & analytics",
-        "Slide 5: Comment 'VAULT' below and I'll DM you the instant link",
+        "Slide 1: High-contrast grid showing all options",
+        "Slide 2-9: Individual HD showcases with theme numbers",
+        "Slide 10: Link in bio for 4K wallpaper & DP pack",
       ],
-      whyItConverts: "Drives massive comment triggers and high-intent DM conversations ready for conversion.",
+      whyItConverts: "Drives comments and direct inbound profile traffic.",
     },
   ];
 
@@ -833,14 +995,14 @@ function buildHeuristicAudit(
     overallScore: totalScore,
     grade,
     summary: isHinglish
-      ? `@${analytics.account.username} profile me strong baseline potential hai. Lekin Bio Call-to-action, Name SEO, aur 3 Pinned Posts improve karne se profile-to-follower conversion rate 2x se zyada ho sakta hai.`
-      : `Account @${analytics.account.username} maintains a solid foundation. However, optimizing your bio funnel, search keywords, and pinned posts will substantially elevate profile visitor conversion.`,
+      ? `@${analytics.account.username} profile me strong visual potential aur ${analytics.insights.reach ? Math.round(analytics.insights.reach / 1000) + 'K+' : '30K+'} reach hai. Bio CTA, Name Field SEO (${detectedNiche.focusKeywords[0]}), aur Top 3 Pinned Posts optimize karne se follower conversion 2x ho jayega.`
+      : `Account @${analytics.account.username} maintains a solid visual presence with high reach. Optimizing your bio funnel for ${detectedNiche.category} and enforcing search keywords will sharply elevate profile conversion.`,
     criticalFixes,
     highLeverageTweaks,
     winningTraits,
     rubric,
     outlierAnalysis: outlierData,
-    bioTeardown: buildFallbackBioTeardown(analytics, language),
+    bioTeardown: buildFallbackBioTeardown(detectedNiche, language),
     recommendedPosts,
     provider: "ViraloKit Creator Engine",
     model: "Heuristic Strategic Rubric",

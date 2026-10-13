@@ -13,7 +13,8 @@ export function getGeminiClient(): GoogleGenerativeAI | null {
 
 export async function generateWithGemini(
   prompt: string,
-  imageBuffer?: { data: string; mimeType: string }
+  imageBuffer?: { data: string; mimeType: string },
+  options?: { maxOutputTokens?: number; temperature?: number }
 ): Promise<string> {
   const client = getGeminiClient();
   if (!client) {
@@ -24,8 +25,8 @@ export async function generateWithGemini(
     const model = client.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
-        maxOutputTokens: 1200,
-        temperature: 0.7,
+        maxOutputTokens: options?.maxOutputTokens ?? 2500,
+        temperature: options?.temperature ?? 0.5,
       },
     });
     const parts: any[] = [prompt];
