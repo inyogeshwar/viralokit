@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 const auditSchema = z.object({
-  modelId: z.string().max(100).default("gemini-1.5-flash"),
+  modelId: z.string().max(100).default("gemini-3.5-flash"),
   apiKey: z.string().max(250).optional(),
   language: z.enum(["English", "Hinglish", "Hindi", "Spanish"]).default("English"),
   customBioOverride: z.string().max(500).optional(),

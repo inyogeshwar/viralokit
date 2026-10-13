@@ -84,7 +84,11 @@ export default function CreatePostPage() {
       const savedKey = localStorage.getItem("viralokit_gemini_api_key");
       if (savedKey) setUserGeminiKey(savedKey);
       const savedModel = localStorage.getItem("viralokit_gemini_model");
-      if (savedModel) setSelectedModel(savedModel);
+      if (savedModel && savedModel !== "gemini-1.5-flash" && savedModel !== "openrouter/free") {
+        setSelectedModel(savedModel);
+      } else {
+        setSelectedModel("gemini-3.5-flash");
+      }
     }
   }, []);
 
@@ -94,7 +98,7 @@ export default function CreatePostPage() {
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
   const [selectedTone, setSelectedTone] = useState("Creator");
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
   const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedHookFormulaId, setSelectedHookFormulaId] = useState<number | null>(3); // Default to #3 "Nobody Tells You"
   const [showFeedInspector, setShowFeedInspector] = useState(true);

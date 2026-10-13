@@ -232,7 +232,7 @@ function calculateMedian(numbers: number[]): number {
 
 export async function generateAccountAnalysisWithAi(
   analytics: NormalizedAccountAnalytics,
-  modelId = "gemini-1.5-flash",
+  modelId = "gemini-3.5-flash",
   apiKey?: string,
   language = "English",
   customBioOverride?: string
@@ -541,7 +541,7 @@ ANTI-SLOP CRITICAL RULES:
 
   let jsonText = "";
   const chosenProvider = "Google Gemini";
-  const chosenModel = modelId || "gemini-1.5-flash";
+  const chosenModel = modelId || "gemini-3.5-flash";
 
   // Use Google Gemini directly
   try {

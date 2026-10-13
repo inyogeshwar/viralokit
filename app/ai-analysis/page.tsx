@@ -37,7 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { AccountAuditResult, RubricItem } from "@/lib/ai/account-analysis";
 
 export default function AiAnalysisPage() {
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
   const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState("Hinglish");
   const [customBio, setCustomBio] = useState("");
@@ -53,7 +53,11 @@ export default function AiAnalysisPage() {
       const savedKey = localStorage.getItem("viralokit_gemini_api_key");
       if (savedKey) setUserGeminiKey(savedKey);
       const savedModel = localStorage.getItem("viralokit_gemini_model");
-      if (savedModel) setSelectedModel(savedModel);
+      if (savedModel && savedModel !== "gemini-1.5-flash" && savedModel !== "openrouter/free") {
+        setSelectedModel(savedModel);
+      } else {
+        setSelectedModel("gemini-3.5-flash");
+      }
     }
   }, []);
 

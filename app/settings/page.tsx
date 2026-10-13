@@ -33,7 +33,7 @@ export default function SettingsPage() {
   const [showKey, setShowKey] = useState(false);
   const [isTestingKey, setIsTestingKey] = useState(false);
   const [keyTestedStatus, setKeyTestedStatus] = useState<"idle" | "valid" | "invalid">("idle");
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
   const [creatorTheme, setCreatorTheme] = useState("Aesthetic DPs, Matching PFPs, Vector Art & Wallpapers");
   const [isRefreshingToken, setIsRefreshingToken] = useState(false);
 
@@ -46,7 +46,12 @@ export default function SettingsPage() {
       if (savedTheme) setCreatorTheme(savedTheme);
 
       const savedModel = localStorage.getItem("viralokit_gemini_model");
-      if (savedModel) setSelectedModel(savedModel);
+      if (savedModel && savedModel !== "gemini-1.5-flash" && savedModel !== "openrouter/free") {
+        setSelectedModel(savedModel);
+      } else {
+        setSelectedModel("gemini-3.5-flash");
+        localStorage.setItem("viralokit_gemini_model", "gemini-3.5-flash");
+      }
     }
   }, []);
 

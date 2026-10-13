@@ -12,7 +12,7 @@ const captionSchema = z.object({
     .default("Creator"),
   action: z.enum(["generate", "shorten", "improve", "add_cta", "add_hashtags"]).default("generate"),
   currentCaption: z.string().max(2200).default(""),
-  modelId: z.string().max(100).default("gemini-1.5-flash"),
+  modelId: z.string().max(100).default("gemini-3.5-flash"),
   apiKey: z.string().max(250).optional(),
   hookFormulaId: z.number().optional(),
   imageUrl: z.string().url().max(2000).optional(),

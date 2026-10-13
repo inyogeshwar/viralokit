@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       undefined,
       {
         apiKey,
-        model: "gemini-1.5-flash",
+        model: "gemini-3.5-flash",
         maxOutputTokens: 10,
         temperature: 0.1,
       }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         message: "Google Gemini API key verified successfully! (Free Tier 15 RPM active)",
-        model: "gemini-1.5-flash",
+        model: "gemini-3.5-flash",
       });
     }
 

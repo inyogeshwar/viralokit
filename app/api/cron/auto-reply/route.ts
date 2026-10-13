@@ -77,7 +77,7 @@ Context of the post caption: "${post.caption}"`;
               const replyText = (await generateWithGemini(fullPrompt, undefined, {
                 maxOutputTokens: 150,
                 temperature: 0.6,
-                model: "gemini-1.5-flash",
+                model: "gemini-3.5-flash",
               })).trim();
 
               if (!replyText) throw new Error("Empty AI response");
