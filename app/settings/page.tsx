@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Settings,
@@ -8,28 +8,31 @@ import {
   Sparkles,
   User,
   ShieldCheck,
-  Zap,
   RefreshCw,
   LogOut,
-  CheckCircle2,
-  AlertCircle,
-  Database,
-  Cloud,
+  Palette,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Header } from "@/components/layout/header";
 import { CapabilityBadges } from "@/components/instagram/capability-badges";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CloudinaryStorageManager } from "@/components/settings/cloudinary-storage-manager";
 
 export default function SettingsPage() {
   const [selectedModel, setSelectedModel] = useState("openrouter/free");
   const [geminiFallbackEnabled, setGeminiFallbackEnabled] = useState(true);
+  const [creatorTheme, setCreatorTheme] = useState("Aesthetic DPs, Matching PFPs, Vector Art & Wallpapers");
   const [isRefreshingToken, setIsRefreshingToken] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("viralokit_creator_theme");
+      if (savedTheme) setCreatorTheme(savedTheme);
+    }
+  }, []);
 
   // 1. Fetch system & user status
   const { data: authData } = useQuery({
@@ -54,7 +57,7 @@ export default function SettingsPage() {
   });
 
   // 3. Fetch Free AI Models
-  const { data: modelsData, isLoading: isModelsLoading } = useQuery({
+  const { data: modelsData } = useQuery({
     queryKey: ["ai-models"],
     queryFn: async () => {
       const res = await fetch("/api/ai/models");
@@ -91,7 +94,7 @@ export default function SettingsPage() {
       } else {
         toast.error(data.error || "Failed to disconnect");
       }
-    } catch (err: any) {
+    } catch {
       toast.error("Network error disconnecting account");
     }
   };
@@ -101,7 +104,10 @@ export default function SettingsPage() {
   };
 
   const handleSavePreferences = () => {
-    toast.success("AI and provider preferences updated!");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("viralokit_creator_theme", creatorTheme);
+    }
+    toast.success("Creator preferences & default theme saved!");
   };
 
   return (
@@ -115,19 +121,19 @@ export default function SettingsPage() {
           isConnected={capabilities?.connected}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-8">
           <div className="border-b border-white/[0.08] pb-6">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full">
-                Infrastructure & Auth
+                Creator Settings
               </span>
-              <span className="text-[11px] text-zinc-500">• Zero-Cost Stack</span>
+              <span className="text-[11px] text-zinc-500">• Profile & AI Engine</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline flex items-center gap-2">
-              Settings & Integrations
+              Settings & Account
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              Manage your connected Instagram professional credentials, multi-model AI routing, and 25 GB Cloudinary storage.
+              Manage your connected Instagram professional account and custom AI caption preferences.
             </p>
           </div>
 
@@ -140,11 +146,11 @@ export default function SettingsPage() {
                   <span>Instagram Professional Account</span>
                 </h3>
                 <p className="text-xs text-zinc-400">
-                  Connected directly to Meta Graph API v23.0 with server-side encrypted token security.
+                  Connected directly to Meta Graph API v23.0 for publishing and insights.
                 </p>
               </div>
               <Badge variant={capabilities?.connected ? "success" : "warning"} className="text-[10px] py-1 px-3">
-                {capabilities?.connected ? "Active & Authorized" : "Not Connected"}
+                {capabilities?.connected ? "Active & Connected" : "Not Connected"}
               </Badge>
             </div>
 
@@ -154,21 +160,10 @@ export default function SettingsPage() {
               onRefresh={() => refetchCap()}
             />
 
-            <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] text-xs text-zinc-400 space-y-2">
-              <div className="flex justify-between">
-                <span>Target API Version:</span>
-                <span className="font-mono text-pink-400 font-bold">{authData?.systemStatus?.apiVersion || "v23.0"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Server Token Protection:</span>
-                <span className="text-emerald-400 font-semibold">Encrypted / Server-Side Only (Never Exposed to Browser)</span>
-              </div>
-            </div>
-
             {capabilities?.connected ? (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-black/60 rounded-2xl border border-white/[0.08]">
                 <div className="text-xs">
-                  <p className="text-zinc-200 font-bold font-headline">Manage Connection</p>
+                  <p className="text-zinc-200 font-bold font-headline">Connection Actions</p>
                   <p className="text-[11px] text-zinc-400 mt-0.5">Extend your 60-day token or disconnect your account.</p>
                 </div>
                 <div className="flex gap-2">
@@ -200,7 +195,7 @@ export default function SettingsPage() {
                 </div>
                 <Button
                   onClick={handleConnect}
-                  className="h-9 px-4 rounded-xl text-xs gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer"
+                  className="h-9 px-4 rounded-xl text-xs gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer font-bold"
                 >
                   <Instagram className="w-4 h-4" />
                   Connect Account
@@ -209,116 +204,60 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* Dynamic AI Models Configuration */}
+          {/* Creator Theme & AI Preferences */}
           <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
             <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
               <div>
                 <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span>AI Engine & Model Routing</span>
+                  <Palette className="w-5 h-5 text-purple-400" />
+                  <span>Default Page Theme & AI Caption Tone</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  High-speed multi-model AI routing with multimodal vision support for creative copy & accounts auditing.
+                  Set your page&apos;s primary theme so AI captions automatically match your visual aesthetic.
                 </p>
               </div>
-              <Badge variant="default" className="text-[10px] py-0.5 px-2.5 bg-purple-500/10 text-purple-300 border-purple-500/20">
-                Lumina Engine
-              </Badge>
             </div>
 
             <div className="space-y-4 text-xs">
+              {/* Custom Theme Prompt */}
               <div className="space-y-2">
-                <label className="text-xs text-zinc-300 font-medium">Active AI Model:</label>
+                <label className="text-xs text-zinc-200 font-bold">Your Account Content Theme / Niche:</label>
+                <input
+                  type="text"
+                  value={creatorTheme}
+                  onChange={(e) => setCreatorTheme(e.target.value)}
+                  placeholder="e.g. Aesthetic DPs, Matching PFPs, Vector Art, Wallpapers"
+                  className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-3.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-pink-500 font-sans"
+                />
+                <p className="text-[11px] text-zinc-500">
+                  When you generate captions in Studio, Google Gemini will tailor hooks and hashtags to this exact niche.
+                </p>
+              </div>
+
+              {/* Active AI Model */}
+              <div className="space-y-2">
+                <label className="text-xs text-zinc-300 font-medium">Default AI Model:</label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-3.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
                 >
-                  <option value="openrouter/free">Auto — Intelligent Smart Router (Recommended)</option>
+                  <option value="openrouter/free">Auto — Google Gemini Vision & Smart Router (Recommended)</option>
                   {modelsData?.freeTextModels?.map((m: any) => (
                     <option key={m.id} value={m.id} className="bg-zinc-950">
                       {m.name.replace(/\s*\(free\)/gi, "")} {m.supportsVision ? "• Vision Supported" : ""}
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-zinc-500">
-                  {modelsData?.totalAvailable
-                    ? `${modelsData.totalAvailable} high-performance AI models available for captioning and visual analysis.`
-                    : "Fetching available models..."}
-                </p>
               </div>
 
-              {/* Gemini Fallback Toggle */}
-              <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] flex items-center justify-between">
-                <div>
-                  <h4 className="font-bold text-white text-xs font-headline">Multimodal Failover (Google Gemini)</h4>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    Automatic failover routing to ensure 99.9% uptime for AI captions and visual media analysis.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={geminiFallbackEnabled}
-                  onChange={(e) => setGeminiFallbackEnabled(e.target.checked)}
-                  className="w-4 h-4 accent-pink-600 rounded cursor-pointer"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button size="sm" onClick={handleSavePreferences} className="text-xs h-9 px-4 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-medium cursor-pointer">
+              <div className="flex justify-end pt-2">
+                <Button size="sm" onClick={handleSavePreferences} className="text-xs h-9 px-5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold cursor-pointer">
                   Save Preferences
                 </Button>
               </div>
             </div>
           </div>
-
-          {/* Cloud Infrastructure Overview */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-            <div className="pb-4 border-b border-white/[0.08]">
-              <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
-                <Zap className="w-5 h-5 text-amber-400" />
-                <span>Cloud & System Integrations</span>
-              </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Connected production services and live backend health status.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-headline">Supabase Auth</span>
-                  <Badge variant={authData?.systemStatus?.authKitConfigured ? "success" : "secondary"} className="text-[9px] py-0">
-                    {authData?.systemStatus?.authKitConfigured ? "Connected" : "Active"}
-                  </Badge>
-                </div>
-                <p className="text-[11px] text-zinc-400">Secure User Sessions & OAuth</p>
-              </div>
-
-              <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-headline">Supabase Database</span>
-                  <Badge variant={authData?.systemStatus?.databaseConfigured ? "success" : "secondary"} className="text-[9px] py-0">
-                    {authData?.systemStatus?.databaseConfigured ? "Connected" : "Active"}
-                  </Badge>
-                </div>
-                <p className="text-[11px] text-zinc-400">PostgreSQL with Row Level Security</p>
-              </div>
-
-              <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-headline">Cloudinary CDN</span>
-                  <Badge variant={authData?.systemStatus?.cloudinaryConfigured ? "success" : "secondary"} className="text-[9px] py-0">
-                    {authData?.systemStatus?.cloudinaryConfigured ? "Connected" : "Pending"}
-                  </Badge>
-                </div>
-                <p className="text-[11px] text-zinc-400">Optimized Global Media CDN (25 GB)</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Cloudinary CDN Quota & User Directory Storage Manager */}
-          <CloudinaryStorageManager />
 
           {/* Current User Session Profile */}
           <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-4 shadow-xl">

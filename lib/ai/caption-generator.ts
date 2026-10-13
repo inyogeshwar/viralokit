@@ -35,167 +35,197 @@ export interface CaptionGenerationResult {
 }
 
 export async function generateCaptionWithAi({
-  context,
+  context = "",
   tone = "Creator",
   action = "generate",
   currentCaption = "",
   modelId = "openrouter/free",
   enableGeminiFallback = true,
   hookFormulaId,
+  imageUrl,
+  customPrompt = "",
 }: {
-  context: string;
+  context?: string;
   tone?: CaptionTone;
   action?: CaptionAction;
   currentCaption?: string;
   modelId?: string;
   enableGeminiFallback?: boolean;
   hookFormulaId?: number;
+  imageUrl?: string;
+  customPrompt?: string;
 }): Promise<CaptionGenerationResult> {
-  const selectedFormula: HookFormula | undefined = hookFormulaId
-    ? HOOK_FORMULAS.find((f) => f.id === hookFormulaId)
-    : undefined;
+  let jsonText = "";
+  let chosenProvider = "Gemini Flash Vision";
+  let chosenModel = "gemini-1.5-flash";
 
-  const hookInstruction = selectedFormula
-    ? `
-MANDATORY HOOK FORMULA TO USE FOR LINE 1:
-- Formula Name: "${selectedFormula.name}" (${selectedFormula.category})
-- Formula Structure: "${selectedFormula.template}"
-- Formula Example: "${selectedFormula.example}"
-- Why it works: "${selectedFormula.bestFor}"
-- Trap to avoid: "${selectedFormula.trap}"
-Craft Line 1 strictly based on this formula.`
-    : `
-HOOK INSTRUCTION FOR LINE 1:
-Select one high-retention hook angle (e.g. Cost Confession, Nobody Tells You, The Replacement, The Receipt, Negative Command). Line 1 MUST be concrete, have high stakes or open a curiosity loop, and fit inside 125 characters.`;
+  // 1. If Image is provided, try direct Google Gemini Multimodal Vision first!
+  if (imageUrl && config.ai.geminiKey) {
+    try {
+      const imgRes = await fetch(imageUrl);
+      if (imgRes.ok) {
+        const imgBuffer = await imgRes.arrayBuffer();
+        const base64Data = Buffer.from(imgBuffer).toString("base64");
+        const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
 
-  const prompt = `
-You are a top 1% Instagram creator copywriter and growth engineer.
-You follow strict creator psychology: The caption's primary goal is to pass the 125-character visible feed cutoff, deliver immediate value, and trigger a single high-converting action.
+        const visionPrompt = `
+You are an expert Instagram creator. Look closely at this image.
+Write a clean, aesthetic, high-engagement Instagram caption matching this exact visual and vibe.
+
+CREATOR CUSTOM THEME / INSTRUCTIONS:
+"${customPrompt || context || "Generate a natural, high-engagement aesthetic caption tailored to this photo."}"
 
 TONE: ${tone}
-ACTION: ${action}
-CONTENT CONTEXT / TOPIC / IMAGE DETAILS: ${context || "None provided"}
-${currentCaption ? `EXISTING DRAFT TO REFINE: "${currentCaption}"` : ""}
-${hookInstruction}
+${currentCaption ? `CURRENT DRAFT: "${currentCaption}"` : ""}
 
-CORE ARCHITECTURAL RULES (CRITICAL):
-1. THE 125-CHARACTER VISIBLE FEED CUTOFF RULE:
-   - Line 1 is what strangers see before Instagram cuts it off with "... more".
-   - Line 1 MUST be under 125 characters.
-   - Line 1 must NEVER start with a greeting ("Hey guys"), an emoji as the first character, or generic fluff ("Stop scrolling", "Are you ready").
-   - Line 1 must end on a natural curiosity cliffhanger or punchy complete statement, NOT cut mid-word.
+CRITICAL RULES:
+1. Write like a real creator, NOT a robot. Keep it simple, natural, punchy.
+2. If this is an aesthetic DP, wallpaper, vector art, or matching PFP:
+   - Make it aesthetic and relatable (e.g., "Faceless but priceless 🤍✨ 1-9 which is your vibe?", "Upgrade your feed aesthetic 🍂").
+   - Include 1 simple interactive question or save prompt.
+3. NO generic robotic buzzwords ("delve", "elevate", "unlock", "testament", "tapestry", "game changer", "in today's digital world").
+4. Output 4 to 6 relevant hashtags.
 
-2. ZERO AI SLOP / HUMAN VOICE (MANDATORY):
-   - You MUST NOT use giveaway bot words: "delve", "testament", "tapestry", "elevate", "unlock", "seamless", "dive deep", "game changer", "beacon", "in today's fast-paced world", "harness", "leverage".
-   - DO NOT use em dashes ("—"). Use natural pauses, commas, or clean hyphens.
-   - Write like a human speaking out loud to a colleague or peer.
-
-3. THE BODY:
-   - 2 to 4 short, crisp paragraphs with clean blank line spacing between them.
-   - Include natural keywords that users search on Instagram Explore.
-
-4. THE ASK (EXACTLY ONE CTA):
-   - Exactly ONE call to action (e.g. "Save this before your next shoot", "Comment [KEYWORD] and I'll send you the link", "What's your biggest bottleneck?").
-   - NEVER ask for multiple actions at once.
-
-5. HASHTAGS (STRICT 3 TO 5 TAGS):
-   - Provide between 3 and 5 hyper-targeted niche keywords at the bottom.
-   - NEVER provide 10 or 30 hashtags (Instagram penalizes large hashtag spam).
-
-6. LANGUAGE BLEND:
-   - If TONE is "Hinglish", write natural conversational Hinglish using English alphabet (e.g. "Yeh 1 galti har creator karta hai...", "Save kar lo baad me kaam aayega").
-
-Return ONLY a valid JSON object matching this schema without markdown code blocks or commentary:
+Return ONLY a valid JSON object matching this schema without markdown:
 {
-  "caption": "Full formatted caption with line breaks and the single CTA",
-  "cta": "The single call to action sentence",
-  "hashtags": ["#keyword1", "#keyword2", "#keyword3", "#keyword4"]
+  "caption": "Your clean, aesthetic caption here",
+  "hashtags": ["#aesthetic", "#pfp", "#explorepage"],
+  "cta": "Single action prompt"
 }
 `;
 
-  let jsonText = "";
-  let chosenProvider = "OpenRouter";
-  let chosenModel = modelId;
-
-  // 1. Attempt OpenRouter Free
-  if (config.ai.openRouterKey) {
-    try {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.ai.openRouterKey}`,
-          "HTTP-Referer": config.app.url,
-          "X-Title": "ViraloKit Creator",
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          max_tokens: 1200,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (content) jsonText = content;
+        jsonText = await generateWithGemini(
+          visionPrompt,
+          { data: base64Data, mimeType },
+          { maxOutputTokens: 1000, temperature: 0.6 }
+        );
+        chosenProvider = "Google Gemini Vision";
+        chosenModel = "gemini-1.5-flash";
       }
-    } catch (err) {
-      console.warn("OpenRouter caption generation error:", err);
+    } catch (visionErr) {
+      console.warn("Direct Gemini Vision error, falling back to text prompt:", visionErr);
     }
   }
 
-  // 2. Gemini Fallback
-  if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
-    try {
-      chosenProvider = "Gemini Fallback";
-      chosenModel = "gemini-1.5-flash";
-      jsonText = await generateWithGemini(prompt);
-    } catch (err) {
-      console.warn("Gemini caption fallback error:", err);
+  // 2. Text-based prompt if vision not available or failed
+  if (!jsonText) {
+    const selectedFormula: HookFormula | undefined = hookFormulaId
+      ? HOOK_FORMULAS.find((f) => f.id === hookFormulaId)
+      : undefined;
+
+    const hookInstruction = selectedFormula
+      ? `Hook Formula to inspire Line 1: "${selectedFormula.name}" (${selectedFormula.template})`
+      : `Line 1 must be under 125 characters, punchy and stop the scroll.`;
+
+    const prompt = `
+You are an authentic Instagram creator copywriter.
+Generate a clean, high-engagement caption.
+
+CREATOR THEME / CUSTOM PROMPT:
+"${customPrompt || context || "Aesthetic creator post"}"
+
+TONE: ${tone}
+ACTION: ${action}
+${currentCaption ? `CURRENT DRAFT TO IMPROVE: "${currentCaption}"` : ""}
+${hookInstruction}
+
+RULES:
+1. Keep the caption simple, natural, and aesthetic. Avoid 5 paragraphs of corporate advice.
+2. First line must stop the scroll before 125 characters.
+3. NO generic AI buzzwords ("delve", "elevate", "tapestry", "beacon", "game changer", "harness").
+4. Provide 4-6 targeted niche hashtags.
+
+Return ONLY a valid JSON object:
+{
+  "caption": "Your caption here",
+  "hashtags": ["#aesthetic", "#creator"],
+  "cta": "Quick action prompt"
+}
+`;
+
+    // Attempt OpenRouter
+    if (config.ai.openRouterKey) {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          signal: AbortSignal.timeout(12000),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.ai.openRouterKey}`,
+            "HTTP-Referer": config.app.url,
+            "X-Title": "ViraloKit Creator",
+          },
+          body: JSON.stringify({
+            model: modelId,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.6,
+            max_tokens: 1000,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const content = data.choices?.[0]?.message?.content;
+          if (content) {
+            jsonText = content;
+            chosenProvider = "OpenRouter";
+            chosenModel = modelId;
+          }
+        }
+      } catch (err) {
+        console.warn("OpenRouter text caption error:", err);
+      }
+    }
+
+    // Gemini Fallback
+    if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
+      try {
+        chosenProvider = "Google Gemini";
+        chosenModel = "gemini-1.5-flash";
+        jsonText = await generateWithGemini(prompt, undefined, { maxOutputTokens: 1000, temperature: 0.6 });
+      } catch (err) {
+        console.warn("Gemini text caption error:", err);
+      }
     }
   }
 
   // 3. Heuristic Fallback if offline
   if (!jsonText) {
-    const defaultHook = selectedFormula
-      ? selectedFormula.example
-      : "Nobody tells you that your first 30 posts are supposed to feel like testing.";
-    const defaultBody = `${defaultHook}\n\nThe difference between accounts that grow and accounts that stall isn't luck. It's understanding that line 1 earns the tap.\n\nSave this for your next post checklist.`;
-    const defaultTags = ["#creatorgrowth", "#instagramtips", "#contentstrategy", "#viralokit"];
+    const isAesthetic = /dp|pfp|aesthetic|vector|art|wall|vibe|pinterest/i.test(customPrompt || context || "");
+    const defaultCaption = isAesthetic
+      ? "Faceless but priceless 🤍✨ 1-9 which is your vibe? dp collection drop 🍂\n\nSave this post before it's gone."
+      : `${customPrompt || "Clean creator post"}\n\nConsistency is built in the daily reps, not the highlight reel.\n\nSave this for your next post.`;
+    const defaultTags = isAesthetic
+      ? ["#aestheticdp", "#pfp", "#vectorart", "#matchingpfp", "#explorepage"]
+      : ["#creator", "#contentcreator", "#viralokit", "#aesthetic"];
 
-    const lint = lintInstagramCaption(defaultBody);
+    const lint = lintInstagramCaption(defaultCaption);
     return {
-      caption: defaultBody,
+      caption: defaultCaption,
       hashtags: defaultTags,
-      cta: "Save this for your next post checklist.",
-      charCount: defaultBody.length,
+      cta: "Save this post before it's gone.",
+      charCount: defaultCaption.length,
       hashtagCount: defaultTags.length,
       feedCutoffText: lint.feedVisibleWindow,
       hookScore: lint.hookScore,
       lintReport: lint,
-      provider: "Offline Engine",
-      model: "Heuristic Generator",
+      provider: "ViraloKit Engine",
+      model: "Aesthetic Smart Generator",
     };
   }
 
   // Parse and Humanize
   const parsed = parseAiCaptionResponse(jsonText, currentCaption);
-
-  // Apply Humanizer filter to strip AI buzzwords and em dashes
   const humanized = humanizeCaption(parsed.caption);
   const finalCaption = humanized.humanized;
-
-  // Lint the final caption
   const lintReport = lintInstagramCaption(finalCaption);
 
   return {
     caption: finalCaption,
-    hashtags: parsed.hashtags.slice(0, 5),
+    hashtags: parsed.hashtags.slice(0, 6),
     cta: parsed.cta,
     charCount: finalCaption.length,
-    hashtagCount: parsed.hashtags.slice(0, 5).length,
+    hashtagCount: parsed.hashtags.slice(0, 6).length,
     feedCutoffText: lintReport.feedVisibleWindow,
     hookScore: lintReport.hookScore,
     lintReport,
@@ -215,108 +245,32 @@ export function parseAiCaptionResponse(
   if (!rawText || !rawText.trim()) {
     return {
       caption: currentCaption || "Capturing moments that matter.",
-      hashtags: ["#creator", "#viralokit"],
+      hashtags: ["#aesthetic", "#creator", "#viralokit"],
       cta: "",
     };
   }
 
-  // Strip markdown code fences if present
-  let cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-
-  // 1. Try standard JSON.parse
   try {
+    const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
     const parsed = JSON.parse(cleaned);
-    if (parsed && typeof parsed === "object") {
-      const cap = typeof parsed.caption === "string" ? parsed.caption.trim() : "";
-      const cta = typeof parsed.cta === "string" ? parsed.cta.trim() : "";
-      let tags: string[] = [];
-      if (Array.isArray(parsed.hashtags)) {
-        tags = parsed.hashtags
-          .map((t: any) => String(t).trim())
-          .filter((t: string) => t.length > 0);
-      }
-      if (cap) {
-        return { caption: cap, hashtags: tags.slice(0, 5), cta };
-      }
-    }
+
+    return {
+      caption: parsed.caption || currentCaption || rawText,
+      hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : ["#aesthetic", "#creator"],
+      cta: parsed.cta || "",
+    };
   } catch {
-    // Proceed to robust extraction
-  }
-
-  // 2. Try parsing candidate between outermost braces { ... }
-  const firstBrace = cleaned.indexOf("{");
-  const lastBrace = cleaned.lastIndexOf("}");
-  if (firstBrace !== -1 && lastBrace > firstBrace) {
-    const candidate = cleaned.slice(firstBrace, lastBrace + 1);
-    try {
-      const parsed = JSON.parse(candidate);
-      if (parsed && typeof parsed === "object" && parsed.caption) {
-        return {
-          caption: String(parsed.caption).trim(),
-          hashtags: Array.isArray(parsed.hashtags)
-            ? parsed.hashtags.map(String).filter(Boolean).slice(0, 5)
-            : [],
-          cta: parsed.cta ? String(parsed.cta).trim() : "",
-        };
-      }
-    } catch {
-      // Continue to regex
-    }
-  }
-
-  // 3. Robust Regex Extraction
-  let extractedCaption = "";
-  let extractedCta = "";
-  const extractedTags: string[] = [];
-
-  const captionMatch = cleaned.match(
-    /"caption"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:cta|hashtags)"|"$|(?<!\\)")/
-  );
-  if (captionMatch && captionMatch[1]) {
-    extractedCaption = captionMatch[1]
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, "\\")
+    // If not valid JSON, extract clean text
+    const cleanLines = rawText
+      .split("\n")
+      .filter((l) => !l.startsWith("```") && !l.includes('"caption":'))
+      .join("\n")
       .trim();
-  }
 
-  const ctaMatch = cleaned.match(
-    /"cta"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:hashtags|caption)"|"$|(?<!\\)")/
-  );
-  if (ctaMatch && ctaMatch[1]) {
-    extractedCta = ctaMatch[1]
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, "\\")
-      .trim();
+    return {
+      caption: cleanLines || currentCaption,
+      hashtags: ["#aesthetic", "#explorepage", "#viralokit"],
+      cta: "",
+    };
   }
-
-  const tagMatches = cleaned.match(/#[a-zA-Z0-9_\u0900-\u097F]+/g);
-  if (tagMatches) {
-    for (const tag of tagMatches) {
-      if (!extractedTags.includes(tag) && extractedTags.length < 5) {
-        extractedTags.push(tag);
-      }
-    }
-  }
-
-  if (!extractedCaption) {
-    if (!cleaned.startsWith("{")) {
-      extractedCaption = cleaned;
-    } else {
-      extractedCaption = cleaned
-        .replace(/\{[\s\S]*?"caption"\s*:\s*"/, "")
-        .replace(/"\s*,\s*"cta"[\s\S]*$/, "")
-        .replace(/"\s*,\s*"hashtags"[\s\S]*$/, "")
-        .replace(/["}]/g, "")
-        .replace(/\\n/g, "\n")
-        .trim();
-    }
-  }
-
-  return {
-    caption: extractedCaption || currentCaption || "Capturing moments that matter.",
-    hashtags: extractedTags.length > 0 ? extractedTags : ["#creator", "#viralokit"],
-    cta: extractedCta,
-  };
 }

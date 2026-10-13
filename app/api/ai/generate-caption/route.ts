@@ -16,6 +16,8 @@ const captionSchema = z.object({
   modelId: z.string().max(100).default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
   hookFormulaId: z.number().optional(),
+  imageUrl: z.string().url().max(2000).optional(),
+  customPrompt: z.string().max(1000).optional(),
 });
 
 export async function POST(request: Request) {
@@ -35,11 +37,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request parameters", details: validated.error.flatten() }, { status: 400 });
     }
 
-    const { context, tone, action, currentCaption, modelId, enableGeminiFallback, hookFormulaId } = validated.data;
+    const {
+      context,
+      tone,
+      action,
+      currentCaption,
+      modelId,
+      enableGeminiFallback,
+      hookFormulaId,
+      imageUrl,
+      customPrompt,
+    } = validated.data;
 
     // Sanitize user inputs to neutralize prompt injection attacks
     const sanitizedContext = sanitizePromptInput(context, 1000);
     const sanitizedCaption = sanitizePromptInput(currentCaption, 2200);
+    const sanitizedCustomPrompt = customPrompt ? sanitizePromptInput(customPrompt, 1000) : undefined;
 
     const result = await generateCaptionWithAi({
       context: sanitizedContext,
@@ -49,6 +62,8 @@ export async function POST(request: Request) {
       modelId,
       enableGeminiFallback,
       hookFormulaId,
+      imageUrl,
+      customPrompt: sanitizedCustomPrompt,
     });
 
     // Record in DB if available

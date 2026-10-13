@@ -27,6 +27,8 @@ import {
   ShieldCheck,
   Eye,
   Info,
+  Clock,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -70,6 +72,17 @@ export default function CreatePostPage() {
   const [hashtags, setHashtags] = useState<string[]>(["#digitalmarketing", "#contentcreator"]);
   const [customTagInput, setCustomTagInput] = useState("");
   const [scheduledFor, setScheduledFor] = useState<string>("");
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [mediaUrlInput, setMediaUrlInput] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+
+  // Load saved creator theme from settings if available
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("viralokit_creator_theme");
+      if (saved) setCustomPrompt(saved);
+    }
+  }, []);
 
   // AI & Upload States
   const [isUploading, setIsUploading] = useState(false);
@@ -256,6 +269,23 @@ export default function CreatePostPage() {
     }
   };
 
+  const handleAddMediaUrl = () => {
+    const url = mediaUrlInput.trim();
+    if (!url) return;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      toast.error("Please enter a valid HTTP or HTTPS media URL.");
+      return;
+    }
+    if (postType === "IMAGE" && images.length >= 1) {
+      toast.info("Switched to Carousel mode for multiple images.");
+      setPostType("CAROUSEL");
+    }
+    setImages((prev) => [...prev, url].slice(0, 10));
+    setMediaUrlInput("");
+    setShowUrlInput(false);
+    toast.success("Media URL added to post!");
+  };
+
   // Reordering carousel slides
   const moveImage = (index: number, direction: "left" | "right") => {
     const newIndex = direction === "left" ? index - 1 : index + 1;
@@ -335,6 +365,8 @@ export default function CreatePostPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          imageUrl: images.length > 0 ? images[0] : undefined,
+          customPrompt: customPrompt.trim() || undefined,
           context,
           tone: selectedTone,
           action,
@@ -424,6 +456,15 @@ export default function CreatePostPage() {
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Publishing rejected by Meta Graph API");
+      }
+
+      if (data.status === "scheduled") {
+        setPublishStatus("idle");
+        toast.success(`Post successfully scheduled for ${new Date(scheduledFor).toLocaleString()}!`);
+        setTimeout(() => {
+          router.push("/posts");
+        }, 1200);
+        return;
       }
 
       setPublishStatus("published");
@@ -576,6 +617,7 @@ export default function CreatePostPage() {
                     <button
                       onClick={() => {
                         setPostType("IMAGE");
+                        setAspectRatio("4:5");
                         if (images.length > 1) setImages([images[0]]);
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
@@ -589,7 +631,10 @@ export default function CreatePostPage() {
                     </button>
 
                     <button
-                      onClick={() => setPostType("CAROUSEL")}
+                      onClick={() => {
+                        setPostType("CAROUSEL");
+                        setAspectRatio("4:5");
+                      }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "CAROUSEL"
                           ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
@@ -603,6 +648,7 @@ export default function CreatePostPage() {
                     <button
                       onClick={() => {
                         setPostType("REELS");
+                        setAspectRatio("9:16");
                         if (images.length > 1) setImages([images[0]]);
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
@@ -612,12 +658,13 @@ export default function CreatePostPage() {
                       }`}
                     >
                       <ImageIcon className="w-3.5 h-3.5" />
-                      <span>Reels</span>
+                      <span>Reels (9:16)</span>
                     </button>
 
                     <button
                       onClick={() => {
                         setPostType("STORIES");
+                        setAspectRatio("9:16");
                         if (images.length > 1) setImages([images[0]]);
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
@@ -627,7 +674,7 @@ export default function CreatePostPage() {
                       }`}
                     >
                       <ImageIcon className="w-3.5 h-3.5" />
-                      <span>Stories</span>
+                      <span>Stories (9:16)</span>
                     </button>
                   </div>
                 </div>
@@ -705,6 +752,45 @@ export default function CreatePostPage() {
                   >
                     Browse Files
                   </Button>
+                </div>
+
+                {/* Direct URL Input Toggle & Field */}
+                <div className="pt-1">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setShowUrlInput(!showUrlInput)}
+                      className="text-xs text-pink-400 hover:text-pink-300 flex items-center gap-1.5 font-medium cursor-pointer transition-colors"
+                    >
+                      <LinkIcon className="w-3.5 h-3.5" />
+                      <span>{showUrlInput ? "Hide Direct URL Input" : "Or paste image/video URL directly"}</span>
+                    </button>
+                  </div>
+                  {showUrlInput && (
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <input
+                        type="url"
+                        value={mediaUrlInput}
+                        onChange={(e) => setMediaUrlInput(e.target.value)}
+                        placeholder="https://example.com/image.jpg or CDN link..."
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddMediaUrl();
+                          }
+                        }}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-pink-500"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleAddMediaUrl}
+                        className="bg-pink-600 hover:bg-pink-500 text-white text-xs h-9 px-3.5 rounded-xl cursor-pointer"
+                      >
+                        Add URL
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Uploaded Thumbnails Carousel Manager */}
@@ -913,6 +999,29 @@ export default function CreatePostPage() {
                   </div>
                 </div>
 
+                {/* Page Theme / Custom Prompt for 1-Click Gemini Vision */}
+                <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/[0.08]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                      <Wand2 className="w-3.5 h-3.5 text-pink-400" />
+                      <span>Page Theme / Custom Prompt:</span>
+                    </label>
+                    <span className="text-[10px] text-zinc-500 font-mono">
+                      {images.length > 0 ? "Gemini Multimodal Active" : "Text Prompt"}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    placeholder="e.g. Aesthetic anime DP / matching PFP, minimal shayari, luxury travel..."
+                    className="w-full bg-[#121214] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-pink-500 transition-colors"
+                  />
+                  <p className="text-[10px] text-zinc-500">
+                    Gemini Vision directly scans your image + uses this theme to generate natural, relevant captions (no robotic boilerplate).
+                  </p>
+                </div>
+
                 {/* 26 Proven Hook Formulas (Jake Schincariol Creator Architecture) */}
                 <div className="space-y-2.5 p-4 rounded-2xl bg-black/40 border border-white/[0.08]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1064,7 +1173,7 @@ export default function CreatePostPage() {
                     ) : (
                       <Wand2 className="w-3.5 h-3.5" />
                     )}
-                    <span>Generate with AI</span>
+                    <span>{images.length > 0 ? "Generate with Gemini Vision" : "Generate with AI"}</span>
                   </Button>
 
                   <Button
@@ -1278,6 +1387,52 @@ export default function CreatePostPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Post Scheduling Controls */}
+                <div className="p-4 bg-black/40 rounded-2xl border border-white/[0.08] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-semibold text-white">Schedule for Later</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setScheduledFor(
+                          scheduledFor
+                            ? ""
+                            : new Date(Date.now() + 3600000).toISOString().slice(0, 16)
+                        )
+                      }
+                      className={`text-xs px-2.5 py-1 rounded-lg transition-all cursor-pointer font-medium ${
+                        scheduledFor
+                          ? "bg-purple-500/25 text-purple-300 border border-purple-500/50 shadow-sm"
+                          : "bg-white/5 text-zinc-400 hover:text-white border border-white/10"
+                      }`}
+                    >
+                      {scheduledFor ? "Scheduled" : "Publish Now"}
+                    </button>
+                  </div>
+
+                  {scheduledFor && (
+                    <div className="space-y-1.5 pt-1">
+                      <label className="text-[11px] text-zinc-400 flex items-center justify-between">
+                        <span>Select Date & Time:</span>
+                        <span className="text-[10px] text-purple-400">Auto-Cron every 15m</span>
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={scheduledFor}
+                        onChange={(e) => setScheduledFor(e.target.value)}
+                        min={new Date().toISOString().slice(0, 16)}
+                        className="w-full bg-[#121214] border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-purple-500"
+                      />
+                      <p className="text-[10px] text-zinc-500">
+                        Post will be added to your Scheduled Queue. You can cancel or publish immediately anytime in Posts.
+                      </p>
+                    </div>
+                  )}
+                </div>
 
                 <Button
                   size="lg"
