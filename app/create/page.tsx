@@ -165,6 +165,17 @@ export default function CreatePostPage() {
     });
   };
 
+  // Auto-populate hook from AI audit blueprint if passed in URL
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const incomingHook = params.get("hook");
+      if (incomingHook) {
+        setCaption((prev) => (prev ? prev : `${incomingHook}\n\n`));
+      }
+    }
+  }, []);
+
   // Process files one-by-one to prevent Vercel 4.5MB request payload limit
   const processAndUploadFiles = async (files: FileList | File[]) => {
     const fileList = Array.from(files);

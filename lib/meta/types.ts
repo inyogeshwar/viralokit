@@ -43,6 +43,8 @@ export interface NormalizedAccountAnalytics {
     id: string;
     username: string;
     name?: string;
+    biography?: string;
+    website?: string;
     followersCount: number | null;
     followsCount: number | null;
     mediaCount: number | null;

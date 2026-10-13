@@ -11,7 +11,8 @@ import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 const auditSchema = z.object({
   modelId: z.string().max(100).default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
-  language: z.enum(["English", "Hinglish", "Hindi"]).default("English"),
+  language: z.enum(["English", "Hinglish", "Hindi", "Spanish"]).default("English"),
+  customBioOverride: z.string().max(500).optional(),
 });
 
 export async function POST(request: Request) {
@@ -26,9 +27,9 @@ export async function POST(request: Request) {
 
     const rawBody = await request.json().catch(() => ({}));
     const validated = auditSchema.safeParse(rawBody);
-    const { modelId, enableGeminiFallback, language } = validated.success
+    const { modelId, enableGeminiFallback, language, customBioOverride } = validated.success
       ? validated.data
-      : { modelId: "openrouter/free", enableGeminiFallback: true, language: "English" as const };
+      : { modelId: "openrouter/free", enableGeminiFallback: true, language: "English" as const, customBioOverride: undefined };
 
     const credentials = await getUserInstagramCredentials(user.id);
     if (!credentials) {
@@ -47,7 +48,13 @@ export async function POST(request: Request) {
     }
 
     // 2. Run strategic AI audit with language preference
-    const audit = await generateAccountAnalysisWithAi(analytics, modelId, enableGeminiFallback, language);
+    const audit = await generateAccountAnalysisWithAi(
+      analytics,
+      modelId,
+      enableGeminiFallback,
+      language,
+      customBioOverride
+    );
 
     // 3. Save generation record
     const supabase = await createClient();

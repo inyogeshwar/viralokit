@@ -65,7 +65,7 @@ export async function fetchAccountAnalytics(
   try {
     // 1. Fetch Profile Data
     const targetUserEndpoint = accessToken.startsWith("IG") ? "me" : userId;
-    const userUrl = `${getMetaGraphUrl(targetUserEndpoint, accessToken)}?fields=id,username,name,followers_count,follows_count,media_count,profile_picture_url&access_token=${encodeURIComponent(accessToken)}`;
+    const userUrl = `${getMetaGraphUrl(targetUserEndpoint, accessToken)}?fields=id,username,name,biography,website,followers_count,follows_count,media_count,profile_picture_url&access_token=${encodeURIComponent(accessToken)}`;
     const userRes = await fetch(userUrl);
     const userData = await userRes.json();
 
@@ -155,6 +155,8 @@ export async function fetchAccountAnalytics(
         id: userData.id,
         username: userData.username || "Creator",
         name: userData.name || userData.username || "",
+        biography: userData.biography || "",
+        website: userData.website || "",
         followersCount: typeof userData.followers_count === "number" ? userData.followers_count : null,
         followsCount: typeof userData.follows_count === "number" ? userData.follows_count : null,
         mediaCount: typeof userData.media_count === "number" ? userData.media_count : null,
