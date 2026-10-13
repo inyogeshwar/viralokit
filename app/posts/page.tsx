@@ -50,7 +50,7 @@ export default function PostsPage() {
 
   const posts: InstagramMediaItem[] = publishedData?.posts || [];
 
-  // 2. Fetch Scheduled Posts Queue from Supabase
+  // 2. Fetch Scheduled Posts Queue from Supabase with 12s live polling
   const { data: scheduledData, isLoading: isScheduledLoading, refetch: refetchScheduled } = useQuery({
     queryKey: ["meta-scheduled-posts"],
     queryFn: async () => {
@@ -58,9 +58,35 @@ export default function PostsPage() {
       if (!res.ok) throw new Error("Failed to fetch scheduled posts");
       return res.json();
     },
+    refetchInterval: 12000, // Checks every 12 seconds so scheduled posts auto-publish on time
   });
 
   const scheduledPosts = scheduledData?.posts || [];
+
+  // Notify when a scheduled post was auto-published by the engine
+  React.useEffect(() => {
+    if (scheduledData?.newlyPublishedCount && scheduledData.newlyPublishedCount > 0) {
+      toast.success(
+        `🎉 ${scheduledData.newlyPublishedCount} scheduled post(s) automatically published to Instagram!`,
+        { duration: 5000 }
+      );
+      refetchPublished();
+      queryClient.invalidateQueries({ queryKey: ["meta-posts"] });
+    }
+  }, [scheduledData?.newlyPublishedCount]);
+
+  // Client-side auto-trigger fallback for due posts
+  React.useEffect(() => {
+    if (scheduledPosts.length > 0 && !publishingScheduledId) {
+      const now = new Date();
+      const overduePost = scheduledPosts.find(
+        (p: any) => p.scheduled_for && new Date(p.scheduled_for) <= now
+      );
+      if (overduePost) {
+        handlePublishNow(overduePost.id);
+      }
+    }
+  }, [scheduledPosts, publishingScheduledId]);
 
   // 3. Single Published Post Deletion
   const singleDeleteMutation = useMutation({
@@ -454,10 +480,17 @@ export default function PostsPage() {
 
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-[10px] text-amber-300 border-amber-500/30 bg-amber-500/10">
-                              <Clock className="w-2.5 h-2.5 mr-1" />
-                              Scheduled for: {new Date(post.scheduled_for).toLocaleString()}
-                            </Badge>
+                            {post.isDue || new Date(post.scheduled_for) <= new Date() ? (
+                              <Badge variant="outline" className="text-[10px] text-emerald-300 border-emerald-500/40 bg-emerald-500/15 animate-pulse">
+                                <Loader2 className="w-2.5 h-2.5 mr-1 animate-spin" />
+                                Due Now • Auto-Publishing...
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] text-amber-300 border-amber-500/30 bg-amber-500/10">
+                                <Clock className="w-2.5 h-2.5 mr-1" />
+                                Scheduled for: {new Date(post.scheduled_for).toLocaleString()}
+                              </Badge>
+                            )}
                             <Badge variant="secondary" className="text-[9px] py-0">
                               {post.media_type}
                             </Badge>
@@ -477,12 +510,16 @@ export default function PostsPage() {
                           disabled={publishingScheduledId === post.id}
                           className="text-xs h-8 px-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-medium cursor-pointer"
                         >
-                          {publishingScheduledId === post.id ? (
+                          {publishingScheduledId === post.id || post.isDue || new Date(post.scheduled_for) <= new Date() ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                           ) : (
                             <Send className="w-3.5 h-3.5 mr-1.5" />
                           )}
-                          <span>{publishingScheduledId === post.id ? "Publishing..." : "Publish Now"}</span>
+                          <span>
+                            {publishingScheduledId === post.id || post.isDue || new Date(post.scheduled_for) <= new Date()
+                              ? "Publishing..."
+                              : "Publish Now"}
+                          </span>
                         </Button>
 
                         <Button
