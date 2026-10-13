@@ -488,7 +488,17 @@ export default function PostsPage() {
                             ) : (
                               <Badge variant="outline" className="text-[10px] text-amber-300 border-amber-500/30 bg-amber-500/10">
                                 <Clock className="w-2.5 h-2.5 mr-1" />
-                                Scheduled for: {new Date(post.scheduled_for).toLocaleString()}
+                                Scheduled for:{" "}
+                                {new Date(post.scheduled_for).toLocaleString("en-IN", {
+                                  timeZone: "Asia/Kolkata",
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}{" "}
+                                (IST)
                               </Badge>
                             )}
                             <Badge variant="secondary" className="text-[9px] py-0">

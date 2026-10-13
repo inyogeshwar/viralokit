@@ -60,6 +60,93 @@ function sanitizeCaption(text: string): string {
   return text;
 }
 
+// Converts Date to local format "YYYY-MM-DDTHH:mm" for HTML5 datetime-local input
+function formatToLocalDateTimeInput(date: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Formats a local date-time string into Indian Standard Time (IST) 12-hour AM/PM format
+function formatIndianDateTime(isoOrLocalString: string): string {
+  if (!isoOrLocalString) return "";
+  try {
+    const d = new Date(isoOrLocalString);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return isoOrLocalString;
+  }
+}
+
+// Relative countdown in human-friendly format
+function getRelativeTimeIST(isoOrLocalString: string): string {
+  if (!isoOrLocalString) return "";
+  try {
+    const target = new Date(isoOrLocalString).getTime();
+    const diffMs = target - Date.now();
+    if (diffMs <= 0) return "Right now";
+    const diffMins = Math.round(diffMs / (60 * 1000));
+    if (diffMins < 60) return `in ${diffMins} min${diffMins > 1 ? "s" : ""}`;
+    const diffHours = Math.floor(diffMins / 60);
+    const remMins = diffMins % 60;
+    if (diffHours < 24) {
+      return `in ${diffHours}h ${remMins > 0 ? `${remMins}m` : ""}`;
+    }
+    const days = Math.floor(diffHours / 24);
+    return `in ${days} day${days > 1 ? "s" : ""}`;
+  } catch {
+    return "";
+  }
+}
+
+// Quick Indian Time presets generator
+function getPresetTime(type: "15m" | "30m" | "1h" | "tonight" | "tomorrow_morning" | "tomorrow_evening"): string {
+  const now = new Date();
+  if (type === "15m") {
+    return formatToLocalDateTimeInput(new Date(now.getTime() + 15 * 60 * 1000));
+  }
+  if (type === "30m") {
+    return formatToLocalDateTimeInput(new Date(now.getTime() + 30 * 60 * 1000));
+  }
+  if (type === "1h") {
+    return formatToLocalDateTimeInput(new Date(now.getTime() + 60 * 60 * 1000));
+  }
+  if (type === "tonight") {
+    const tonight = new Date();
+    tonight.setHours(21, 0, 0, 0); // 9:00 PM
+    if (tonight.getTime() <= now.getTime()) {
+      tonight.setHours(22, 0, 0, 0); // 10:00 PM
+    }
+    return formatToLocalDateTimeInput(tonight);
+  }
+  if (type === "tomorrow_morning") {
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    tmrw.setHours(9, 0, 0, 0); // 9:00 AM
+    return formatToLocalDateTimeInput(tmrw);
+  }
+  if (type === "tomorrow_evening") {
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    tmrw.setHours(19, 0, 0, 0); // 7:00 PM
+    return formatToLocalDateTimeInput(tmrw);
+  }
+  return formatToLocalDateTimeInput(new Date(now.getTime() + 60 * 60 * 1000));
+}
+
 export default function CreatePostPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -576,7 +663,7 @@ export default function CreatePostPage() {
 
       if (data.status === "scheduled") {
         setPublishStatus("idle");
-        toast.success(`Post successfully scheduled for ${new Date(scheduledFor).toLocaleString()}!`);
+        toast.success(`Post successfully scheduled for ${formatIndianDateTime(scheduledFor)} (IST)!`);
         setTimeout(() => {
           router.push("/posts");
         }, 1200);
@@ -675,15 +762,34 @@ export default function CreatePostPage() {
                 <span>Save Draft</span>
               </Button>
 
-              <div className="relative flex items-center group">
-                <input
-                  type="datetime-local"
-                  value={scheduledFor}
-                  onChange={(e) => setScheduledFor(e.target.value)}
-                  min={new Date().toISOString().slice(0, 16)}
-                  title="Schedule this post for later"
-                  className="glass-panel text-[11px] text-zinc-300 hover:text-white border-zinc-800 hover:border-zinc-700 bg-transparent px-3 py-1.5 h-8 rounded-md focus:outline-none focus:ring-1 focus:ring-pink-500 cursor-pointer w-40"
-                />
+              <div className="relative flex items-center">
+                {scheduledFor ? (
+                  <div className="flex items-center gap-1.5 bg-purple-950/40 border border-purple-500/40 px-2.5 py-1 rounded-lg text-xs">
+                    <Clock className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="text-purple-200 font-medium text-[11px]">
+                      🇮🇳 {formatIndianDateTime(scheduledFor)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setScheduledFor("")}
+                      className="text-zinc-400 hover:text-white ml-1 text-xs"
+                      title="Clear schedule (Publish immediately)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setScheduledFor(getPresetTime("1h"))}
+                    className="glass-panel text-xs gap-1.5 text-zinc-300 hover:text-white border-zinc-800 hover:border-zinc-700 h-8"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Schedule Post</span>
+                  </Button>
+                )}
               </div>
 
               <Button
@@ -1570,19 +1676,17 @@ export default function CreatePostPage() {
                 )}
 
                 {/* Post Scheduling Controls */}
-                <div className="p-4 bg-black/40 rounded-2xl border border-white/[0.08] space-y-3">
+                <div className="p-4 bg-black/40 rounded-2xl border border-white/[0.08] space-y-3.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs font-semibold text-white">Schedule for Later</span>
+                      <span className="text-xs font-semibold text-white">Schedule for Later (Indian Time IST)</span>
                     </div>
                     <button
                       type="button"
                       onClick={() =>
                         setScheduledFor(
-                          scheduledFor
-                            ? ""
-                            : new Date(Date.now() + 3600000).toISOString().slice(0, 16)
+                          scheduledFor ? "" : getPresetTime("1h")
                         )
                       }
                       className={`text-xs px-2.5 py-1 rounded-lg transition-all cursor-pointer font-medium ${
@@ -1591,26 +1695,99 @@ export default function CreatePostPage() {
                           : "bg-white/5 text-zinc-400 hover:text-white border border-white/10"
                       }`}
                     >
-                      {scheduledFor ? "Scheduled" : "Publish Now"}
+                      {scheduledFor ? "Schedule Active" : "Schedule Post"}
                     </button>
                   </div>
 
                   {scheduledFor && (
-                    <div className="space-y-1.5 pt-1">
-                      <label className="text-[11px] text-zinc-400 flex items-center justify-between">
-                        <span>Select Date & Time:</span>
-                        <span className="text-[10px] text-purple-400">Auto-Cron every 15m</span>
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={scheduledFor}
-                        onChange={(e) => setScheduledFor(e.target.value)}
-                        min={new Date().toISOString().slice(0, 16)}
-                        className="w-full bg-[#121214] border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-purple-500"
-                      />
-                      <p className="text-[10px] text-zinc-500">
-                        Post will be added to your Scheduled Queue. You can cancel or publish immediately anytime in Posts.
-                      </p>
+                    <div className="space-y-3 pt-1 border-t border-white/[0.05]">
+                      {/* One-Click Quick Presets for Indian Creators */}
+                      <div>
+                        <span className="text-[11px] font-medium text-zinc-400 mb-1.5 block">
+                          ⚡ 1-Tap Quick Presets:
+                        </span>
+                        <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("15m"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            +15 Mins
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("30m"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            +30 Mins
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("1h"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            +1 Hour
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("tonight"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            🌙 Tonight 9 PM
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("tomorrow_morning"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            🌅 Tomorrow 9 AM
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor(getPresetTime("tomorrow_evening"))}
+                            className="bg-white/5 hover:bg-purple-600/25 hover:border-purple-500/50 border border-white/10 rounded-lg py-1.5 px-2 text-zinc-300 text-center transition-all cursor-pointer active:scale-95"
+                          >
+                            🌇 Tomorrow 7 PM
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Custom DateTime Picker */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] text-zinc-400 flex items-center justify-between">
+                          <span>Or Pick Custom Date & Time:</span>
+                          <button
+                            type="button"
+                            onClick={() => setScheduledFor("")}
+                            className="text-[10px] text-red-400 hover:underline"
+                          >
+                            Clear (Publish Now)
+                          </button>
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={scheduledFor}
+                          onChange={(e) => setScheduledFor(e.target.value)}
+                          min={formatToLocalDateTimeInput(new Date())}
+                          className="w-full bg-[#121214] border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-purple-500"
+                        />
+                      </div>
+
+                      {/* Live Indian Time & Countdown Banner */}
+                      <div className="p-3 bg-gradient-to-r from-purple-950/40 to-pink-950/30 border border-purple-500/30 rounded-xl space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-purple-200 flex items-center gap-1.5">
+                            <span>🇮🇳 Indian Time (IST):</span>
+                            <span className="text-white font-bold">{formatIndianDateTime(scheduledFor)}</span>
+                          </span>
+                          <Badge className="bg-purple-500/20 text-purple-200 border-purple-500/40 text-[10px]">
+                            {getRelativeTimeIST(scheduledFor)}
+                          </Badge>
+                        </div>
+                        <p className="text-[10px] text-zinc-400">
+                          Automated scheduler will publish this post to Instagram live feed at exact Indian time.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
