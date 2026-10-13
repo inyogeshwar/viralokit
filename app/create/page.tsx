@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -23,6 +23,10 @@ import {
   Plus,
   X,
   Sliders,
+  Check,
+  ShieldCheck,
+  Eye,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -33,6 +37,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageAnalysisResult } from "@/lib/ai/image-analysis";
+import { HOOK_FORMULAS, scoreHook } from "@/lib/ai/hooks-data";
+import { humanizeCaption } from "@/lib/ai/humanizer";
+import { lintInstagramCaption } from "@/lib/ai/caption-linter";
 
 function sanitizeCaption(text: string): string {
   if (!text) return "";
@@ -71,9 +78,21 @@ export default function CreatePostPage() {
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
   const [selectedTone, setSelectedTone] = useState("Creator");
   const [selectedModel, setSelectedModel] = useState("openrouter/free");
+  const [selectedHookFormulaId, setSelectedHookFormulaId] = useState<number | null>(3); // Default to #3 "Nobody Tells You"
+  const [showFeedInspector, setShowFeedInspector] = useState(true);
   const [publishStatus, setPublishStatus] = useState<
     "idle" | "uploading" | "creating_container" | "processing" | "publishing" | "published" | "failed"
   >("idle");
+
+  // Real-time Hook Score & Caption Linter (Jake Schincariol 125-char algorithm logic)
+  const hookScore = useMemo(() => {
+    const firstLine = (caption || "").split("\n")[0] || "";
+    return scoreHook(firstLine);
+  }, [caption]);
+
+  const lintReport = useMemo(() => {
+    return lintInstagramCaption(caption || "");
+  }, [caption]);
 
   // Fetch Connected Account Info
   const { data: accountData } = useQuery({
@@ -310,6 +329,7 @@ export default function CreatePostPage() {
           action,
           currentCaption: caption,
           modelId: selectedModel,
+          hookFormulaId: selectedHookFormulaId || undefined,
         }),
       });
 
@@ -321,13 +341,32 @@ export default function CreatePostPage() {
       const cleanCaption = sanitizeCaption(data.caption);
       setCaption(cleanCaption);
       if (Array.isArray(data.hashtags) && data.hashtags.length > 0) {
-        setHashtags(data.hashtags);
+        setHashtags(data.hashtags.slice(0, 5));
       }
-      toast.success("Caption generated with AI!");
+      toast.success(
+        data.hookScore?.grade === "STRONG"
+          ? `Generated with Hook Score: ${data.hookScore.score}/100 (Strong)!`
+          : "Caption generated with AI!"
+      );
     } catch (err: any) {
       toast.error(err?.message || "Failed to generate caption.");
     } finally {
       setIsGeneratingCaption(false);
+    }
+  };
+
+  // Instant Anti-AI Slop Humanizer (Strips buzzwords & em dashes)
+  const handleHumanize = () => {
+    if (!caption) {
+      toast.error("Write or generate a caption first.");
+      return;
+    }
+    const res = humanizeCaption(caption);
+    setCaption(res.humanized);
+    if (res.flaggedWords.length > 0) {
+      toast.success(`Humanized! Cleaned AI words: ${res.flaggedWords.join(", ")}`);
+    } else {
+      toast.success("Caption is already 100% human-grade!");
     }
   };
 
@@ -863,24 +902,72 @@ export default function CreatePostPage() {
                   </div>
                 </div>
 
-                {/* Tone Picker */}
-                <div className="space-y-2">
-                  <label className="text-xs text-zinc-400 font-medium">Caption Tone & Style:</label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tones.map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setSelectedTone(t)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all ${
-                          selectedTone === t
-                            ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-md"
-                            : "bg-[#141414] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:border-white/20"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
+                {/* 26 Proven Hook Formulas (Jake Schincariol Creator Architecture) */}
+                <div className="space-y-2.5 p-4 rounded-2xl bg-black/40 border border-white/[0.08]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                      <span>26 Proven Hook Formulas:</span>
+                    </label>
+                    <span className="text-[10px] text-zinc-500 font-mono">
+                      Scored for First 125 Chars
+                    </span>
                   </div>
+
+                  {/* Formula Selector Dropdown */}
+                  <select
+                    value={selectedHookFormulaId || ""}
+                    onChange={(e) => setSelectedHookFormulaId(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full bg-[#121214] border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
+                  >
+                    <option value="">Auto Hook (AI chooses best formula)</option>
+                    {HOOK_FORMULAS.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        #{f.id} {f.name} ({f.category}) — e.g. "{f.onScreenText}"
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Popular Quick Pills */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {[3, 1, 4, 6, 2, 5, 8, 21].map((id) => {
+                      const f = HOOK_FORMULAS.find((item) => item.id === id);
+                      if (!f) return null;
+                      const isSelected = selectedHookFormulaId === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => setSelectedHookFormulaId(isSelected ? null : f.id)}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-pink-500/20 border-pink-500/60 text-pink-200 font-semibold shadow-sm"
+                              : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                          }`}
+                          title={f.example}
+                        >
+                          #{f.id} {f.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedHookFormulaId && (
+                    <div className="p-2.5 rounded-xl bg-pink-500/5 border border-pink-500/20 text-[11px] space-y-1">
+                      <div className="flex items-center justify-between text-pink-300 font-semibold">
+                        <span>Formula: {HOOK_FORMULAS.find((f) => f.id === selectedHookFormulaId)?.name}</span>
+                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-200">
+                          {HOOK_FORMULAS.find((f) => f.id === selectedHookFormulaId)?.category}
+                        </span>
+                      </div>
+                      <p className="text-zinc-300 font-mono text-[11px]">
+                        Template: {HOOK_FORMULAS.find((f) => f.id === selectedHookFormulaId)?.template}
+                      </p>
+                      <p className="text-zinc-400 text-[10px]">
+                        Example: "{HOOK_FORMULAS.find((f) => f.id === selectedHookFormulaId)?.example}"
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Caption Textarea with Character Progress */}
@@ -900,6 +987,59 @@ export default function CreatePostPage() {
                   />
                 </div>
 
+                {/* Real-Time 125-Character Feed Window & Hook Scorer */}
+                {caption.trim().length > 0 && (
+                  <div className="rounded-2xl p-4 bg-black/60 border border-white/[0.08] space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-white">
+                        <Eye className="w-3.5 h-3.5 text-pink-400" />
+                        <span>Feed Preview (Before "... more" cutoff):</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-mono text-zinc-400">
+                          {hookScore.feedCutoffText.length} / 125 chars
+                        </span>
+                        <Badge
+                          variant={
+                            hookScore.grade === "STRONG"
+                              ? "success"
+                              : hookScore.grade === "GOOD"
+                              ? "default"
+                              : "destructive"
+                          }
+                          className="text-[10px] py-0 px-2"
+                        >
+                          Hook Score: {hookScore.score}/100 • {hookScore.grade}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* The exact box representation */}
+                    <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/90 text-xs text-zinc-200 leading-relaxed font-sans">
+                      <span className="text-white font-medium">{hookScore.feedCutoffText}</span>
+                      <span className="text-zinc-500 font-normal"> ... more</span>
+                    </div>
+
+                    {/* Feedback and Warnings */}
+                    {hookScore.dealbreakers.length > 0 ? (
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                        <span>{hookScore.dealbreakers[0]}</span>
+                      </div>
+                    ) : hookScore.suggestions.length > 0 ? (
+                      <p className="text-[11px] text-zinc-400 flex items-center gap-1.5">
+                        <Info className="w-3 h-3 text-blue-400 shrink-0" />
+                        <span>Tip: {hookScore.suggestions[0]}</span>
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3 h-3 shrink-0" />
+                        <span>Hook is concrete and primed for high feed click-through!</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {/* Quick AI Action Modifiers */}
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
@@ -914,6 +1054,18 @@ export default function CreatePostPage() {
                       <Wand2 className="w-3.5 h-3.5" />
                     )}
                     <span>Generate with AI</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleHumanize}
+                    disabled={!caption}
+                    className="text-xs h-9 px-3.5 rounded-xl gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 cursor-pointer"
+                    title="Clean AI giveaway vocabulary (delve, elevate, tapestry) and em dashes"
+                  >
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <span>Humanize (Anti-Slop)</span>
                   </Button>
 
                   <Button

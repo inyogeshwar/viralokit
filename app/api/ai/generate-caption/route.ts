@@ -15,6 +15,7 @@ const captionSchema = z.object({
   currentCaption: z.string().max(2200).default(""),
   modelId: z.string().max(100).default("openrouter/free"),
   enableGeminiFallback: z.boolean().default(true),
+  hookFormulaId: z.number().optional(),
 });
 
 export async function POST(request: Request) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request parameters", details: validated.error.flatten() }, { status: 400 });
     }
 
-    const { context, tone, action, currentCaption, modelId, enableGeminiFallback } = validated.data;
+    const { context, tone, action, currentCaption, modelId, enableGeminiFallback, hookFormulaId } = validated.data;
 
     // Sanitize user inputs to neutralize prompt injection attacks
     const sanitizedContext = sanitizePromptInput(context, 1000);
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       currentCaption: sanitizedCaption,
       modelId,
       enableGeminiFallback,
+      hookFormulaId,
     });
 
     // Record in DB if available

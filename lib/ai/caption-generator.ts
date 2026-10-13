@@ -1,5 +1,8 @@
 import { config } from "@/lib/config";
 import { generateWithGemini } from "./gemini";
+import { HOOK_FORMULAS, HookFormula, HookScoreBreakdown, scoreHook } from "./hooks-data";
+import { humanizeCaption } from "./humanizer";
+import { lintInstagramCaption, CaptionLintReport } from "./caption-linter";
 
 export type CaptionTone =
   | "Professional"
@@ -24,6 +27,9 @@ export interface CaptionGenerationResult {
   cta: string;
   charCount: number;
   hashtagCount: number;
+  feedCutoffText: string;
+  hookScore: HookScoreBreakdown;
+  lintReport: CaptionLintReport;
   provider: string;
   model: string;
 }
@@ -35,6 +41,7 @@ export async function generateCaptionWithAi({
   currentCaption = "",
   modelId = "openrouter/free",
   enableGeminiFallback = true,
+  hookFormulaId,
 }: {
   context: string;
   tone?: CaptionTone;
@@ -42,29 +49,67 @@ export async function generateCaptionWithAi({
   currentCaption?: string;
   modelId?: string;
   enableGeminiFallback?: boolean;
+  hookFormulaId?: number;
 }): Promise<CaptionGenerationResult> {
+  const selectedFormula: HookFormula | undefined = hookFormulaId
+    ? HOOK_FORMULAS.find((f) => f.id === hookFormulaId)
+    : undefined;
+
+  const hookInstruction = selectedFormula
+    ? `
+MANDATORY HOOK FORMULA TO USE FOR LINE 1:
+- Formula Name: "${selectedFormula.name}" (${selectedFormula.category})
+- Formula Structure: "${selectedFormula.template}"
+- Formula Example: "${selectedFormula.example}"
+- Why it works: "${selectedFormula.bestFor}"
+- Trap to avoid: "${selectedFormula.trap}"
+Craft Line 1 strictly based on this formula.`
+    : `
+HOOK INSTRUCTION FOR LINE 1:
+Select one high-retention hook angle (e.g. Cost Confession, Nobody Tells You, The Replacement, The Receipt, Negative Command). Line 1 MUST be concrete, have high stakes or open a curiosity loop, and fit inside 125 characters.`;
+
   const prompt = `
-You are a world-class Instagram copywriter and social media strategist.
-Create or optimize an Instagram post caption based on these instructions:
+You are a top 1% Instagram creator copywriter and growth engineer.
+You follow strict creator psychology: The caption's primary goal is to pass the 125-character visible feed cutoff, deliver immediate value, and trigger a single high-converting action.
 
 TONE: ${tone}
-ACTION REQUESTED: ${action}
-ADDITIONAL CONTEXT / KEYWORDS / IMAGE INFO: ${context || "None provided"}
-${currentCaption ? `EXISTING CAPTION TO MODIFY: "${currentCaption}"` : ""}
+ACTION: ${action}
+CONTENT CONTEXT / TOPIC / IMAGE DETAILS: ${context || "None provided"}
+${currentCaption ? `EXISTING DRAFT TO REFINE: "${currentCaption}"` : ""}
+${hookInstruction}
 
-CRITICAL RULES:
-1. Instagram captions have a maximum limit of 2,200 characters. Keep it well within limits.
-2. Instagram allows at most 30 hashtags. Provide between 5 and 15 highly targeted, non-spammy hashtags.
-3. If tone is "Hinglish", blend natural conversational Hindi words written in English alphabet with modern English phrasing (e.g. "Aaj ka vibe check!", "Kaam karo aisa jo yaad rahe").
-4. If tone is "Minimal", output a short, punchy 1-2 sentence caption with subtle emojis.
-5. If action is "shorten", trim the caption to essential words without losing the hook.
-6. If action is "add_cta", append a compelling engagement question or call-to-action (e.g. "Save this for later", "Drop your thoughts below 👇").
+CORE ARCHITECTURAL RULES (CRITICAL):
+1. THE 125-CHARACTER VISIBLE FEED CUTOFF RULE:
+   - Line 1 is what strangers see before Instagram cuts it off with "... more".
+   - Line 1 MUST be under 125 characters.
+   - Line 1 must NEVER start with a greeting ("Hey guys"), an emoji as the first character, or generic fluff ("Stop scrolling", "Are you ready").
+   - Line 1 must end on a natural curiosity cliffhanger or punchy complete statement, NOT cut mid-word.
 
-Return ONLY a valid JSON object matching this schema without any markdown backticks or commentary:
+2. ZERO AI SLOP / HUMAN VOICE (MANDATORY):
+   - You MUST NOT use giveaway bot words: "delve", "testament", "tapestry", "elevate", "unlock", "seamless", "dive deep", "game changer", "beacon", "in today's fast-paced world", "harness", "leverage".
+   - DO NOT use em dashes ("—"). Use natural pauses, commas, or clean hyphens.
+   - Write like a human speaking out loud to a colleague or peer.
+
+3. THE BODY:
+   - 2 to 4 short, crisp paragraphs with clean blank line spacing between them.
+   - Include natural keywords that users search on Instagram Explore.
+
+4. THE ASK (EXACTLY ONE CTA):
+   - Exactly ONE call to action (e.g. "Save this before your next shoot", "Comment [KEYWORD] and I'll send you the link", "What's your biggest bottleneck?").
+   - NEVER ask for multiple actions at once.
+
+5. HASHTAGS (STRICT 3 TO 5 TAGS):
+   - Provide between 3 and 5 hyper-targeted niche keywords at the bottom.
+   - NEVER provide 10 or 30 hashtags (Instagram penalizes large hashtag spam).
+
+6. LANGUAGE BLEND:
+   - If TONE is "Hinglish", write natural conversational Hinglish using English alphabet (e.g. "Yeh 1 galti har creator karta hai...", "Save kar lo baad me kaam aayega").
+
+Return ONLY a valid JSON object matching this schema without markdown code blocks or commentary:
 {
-  "caption": "The main caption text ready to paste on Instagram",
-  "cta": "The specific call to action line used",
-  "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
+  "caption": "Full formatted caption with line breaks and the single CTA",
+  "cta": "The single call to action sentence",
+  "hashtags": ["#keyword1", "#keyword2", "#keyword3", "#keyword4"]
 }
 `;
 
@@ -112,42 +157,53 @@ Return ONLY a valid JSON object matching this schema without any markdown backti
     }
   }
 
-  // 3. Fallback heuristic if offline / no keys
+  // 3. Heuristic Fallback if offline
   if (!jsonText) {
-    const defaultCaption = currentCaption
-      ? `${currentCaption}\n\n✨ Crafted with intention.`
-      : `Behind every great shot is a story waiting to be shared. 📸\n\nWhat are you creating today? Let me know in the comments below!`;
-    const defaultTags = ["#creator", "#viralokit", "#instagramgrowth", "#visualcontent", "#creativelife"];
+    const defaultHook = selectedFormula
+      ? selectedFormula.example
+      : "Nobody tells you that your first 30 posts are supposed to feel like testing.";
+    const defaultBody = `${defaultHook}\n\nThe difference between accounts that grow and accounts that stall isn't luck. It's understanding that line 1 earns the tap.\n\nSave this for your next post checklist.`;
+    const defaultTags = ["#creatorgrowth", "#instagramtips", "#contentstrategy", "#viralokit"];
 
+    const lint = lintInstagramCaption(defaultBody);
     return {
-      caption: defaultCaption,
+      caption: defaultBody,
       hashtags: defaultTags,
-      cta: "Let me know in the comments below!",
-      charCount: defaultCaption.length,
+      cta: "Save this for your next post checklist.",
+      charCount: defaultBody.length,
       hashtagCount: defaultTags.length,
+      feedCutoffText: lint.feedVisibleWindow,
+      hookScore: lint.hookScore,
+      lintReport: lint,
       provider: "Offline Engine",
       model: "Heuristic Generator",
     };
   }
 
-  const { caption, hashtags, cta } = parseAiCaptionResponse(jsonText, currentCaption);
+  // Parse and Humanize
+  const parsed = parseAiCaptionResponse(jsonText, currentCaption);
+
+  // Apply Humanizer filter to strip AI buzzwords and em dashes
+  const humanized = humanizeCaption(parsed.caption);
+  const finalCaption = humanized.humanized;
+
+  // Lint the final caption
+  const lintReport = lintInstagramCaption(finalCaption);
 
   return {
-    caption,
-    hashtags,
-    cta,
-    charCount: caption.length,
-    hashtagCount: hashtags.length,
+    caption: finalCaption,
+    hashtags: parsed.hashtags.slice(0, 5),
+    cta: parsed.cta,
+    charCount: finalCaption.length,
+    hashtagCount: parsed.hashtags.slice(0, 5).length,
+    feedCutoffText: lintReport.feedVisibleWindow,
+    hookScore: lintReport.hookScore,
+    lintReport,
     provider: chosenProvider,
     model: chosenModel,
   };
 }
 
-/**
- * Robustly parses caption, hashtags, and CTA from AI output.
- * Handles valid JSON, markdown blocks, truncated JSON strings, unescaped newlines,
- * and ensures raw JSON syntax is never returned as caption text.
- */
 export function parseAiCaptionResponse(
   rawText: string,
   currentCaption: string = ""
@@ -158,7 +214,7 @@ export function parseAiCaptionResponse(
 } {
   if (!rawText || !rawText.trim()) {
     return {
-      caption: currentCaption || "Capturing moments that inspire.",
+      caption: currentCaption || "Capturing moments that matter.",
       hashtags: ["#creator", "#viralokit"],
       cta: "",
     };
@@ -180,7 +236,7 @@ export function parseAiCaptionResponse(
           .filter((t: string) => t.length > 0);
       }
       if (cap) {
-        return { caption: cap, hashtags: tags, cta };
+        return { caption: cap, hashtags: tags.slice(0, 5), cta };
       }
     }
   } catch {
@@ -198,7 +254,7 @@ export function parseAiCaptionResponse(
         return {
           caption: String(parsed.caption).trim(),
           hashtags: Array.isArray(parsed.hashtags)
-            ? parsed.hashtags.map(String).filter(Boolean)
+            ? parsed.hashtags.map(String).filter(Boolean).slice(0, 5)
             : [],
           cta: parsed.cta ? String(parsed.cta).trim() : "",
         };
@@ -208,12 +264,11 @@ export function parseAiCaptionResponse(
     }
   }
 
-  // 3. Robust Regex Extraction (handles truncated JSON, unescaped newlines inside strings)
+  // 3. Robust Regex Extraction
   let extractedCaption = "";
   let extractedCta = "";
   const extractedTags: string[] = [];
 
-  // Match "caption": "..."
   const captionMatch = cleaned.match(
     /"caption"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:cta|hashtags)"|"$|(?<!\\)")/
   );
@@ -225,7 +280,6 @@ export function parseAiCaptionResponse(
       .trim();
   }
 
-  // Match "cta": "..."
   const ctaMatch = cleaned.match(
     /"cta"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"(?:hashtags|caption)"|"$|(?<!\\)")/
   );
@@ -237,17 +291,15 @@ export function parseAiCaptionResponse(
       .trim();
   }
 
-  // Extract all hashtags from the text (e.g. #AestheticVibes)
   const tagMatches = cleaned.match(/#[a-zA-Z0-9_\u0900-\u097F]+/g);
   if (tagMatches) {
     for (const tag of tagMatches) {
-      if (!extractedTags.includes(tag)) {
+      if (!extractedTags.includes(tag) && extractedTags.length < 5) {
         extractedTags.push(tag);
       }
     }
   }
 
-  // 4. Fallback if regex failed to find "caption" property
   if (!extractedCaption) {
     if (!cleaned.startsWith("{")) {
       extractedCaption = cleaned;
@@ -260,18 +312,6 @@ export function parseAiCaptionResponse(
         .replace(/\\n/g, "\n")
         .trim();
     }
-  }
-
-  // Final sanity check: if extractedCaption still contains JSON keys, sanitize
-  if (extractedCaption.startsWith("{") || extractedCaption.includes('"caption":')) {
-    extractedCaption = extractedCaption
-      .replace(/^[^{]*\{/, "")
-      .replace(/"caption"\s*:\s*"?/g, "")
-      .replace(/"cta"\s*:\s*"?/g, "")
-      .replace(/"hashtags"\s*:\s*\[[\s\S]*?\]/g, "")
-      .replace(/["}]/g, "")
-      .replace(/\\n/g, "\n")
-      .trim();
   }
 
   return {
