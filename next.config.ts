@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob: https://res.cloudinary.com https://*.cdninstagram.com https://*.fbcdn.net https://images.unsplash.com",
-              "connect-src 'self' https://*.supabase.co https://api.openrouter.ai https://generativelanguage.googleapis.com https://graph.facebook.com https://graph.instagram.com https://api.instagram.com https://res.cloudinary.com https://api.cloudinary.com https://va.vercel-scripts.com",
+              "connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://graph.facebook.com https://graph.instagram.com https://api.instagram.com https://res.cloudinary.com https://api.cloudinary.com https://va.vercel-scripts.com",
               "frame-ancestors 'none'",
             ].join("; "),
           },
@@ -94,7 +94,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Access-Control-Allow-Headers",
-            value: "Content-Type, Authorization, X-Requested-With",
+            value: "Content-Type, Authorization, X-Requested-With, x-gemini-api-key",
           },
           {
             key: "Access-Control-Allow-Credentials",

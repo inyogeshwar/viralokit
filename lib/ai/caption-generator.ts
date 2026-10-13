@@ -1,4 +1,3 @@
-import { config } from "@/lib/config";
 import { generateWithGemini } from "./gemini";
 import { HOOK_FORMULAS, HookFormula, HookScoreBreakdown, scoreHook } from "./hooks-data";
 import { humanizeCaption } from "./humanizer";
@@ -39,8 +38,8 @@ export async function generateCaptionWithAi({
   tone = "Creator",
   action = "generate",
   currentCaption = "",
-  modelId = "openrouter/free",
-  enableGeminiFallback = true,
+  modelId = "gemini-1.5-flash",
+  apiKey,
   hookFormulaId,
   imageUrl,
   customPrompt = "",
@@ -50,17 +49,17 @@ export async function generateCaptionWithAi({
   action?: CaptionAction;
   currentCaption?: string;
   modelId?: string;
-  enableGeminiFallback?: boolean;
+  apiKey?: string;
   hookFormulaId?: number;
   imageUrl?: string;
   customPrompt?: string;
 }): Promise<CaptionGenerationResult> {
   let jsonText = "";
-  let chosenProvider = "Gemini Flash Vision";
-  let chosenModel = "gemini-1.5-flash";
+  const chosenProvider = "Google Gemini";
+  const chosenModel = modelId || "gemini-1.5-flash";
 
-  // 1. If Image is provided, try direct Google Gemini Multimodal Vision first!
-  if (imageUrl && config.ai.geminiKey) {
+  // 1. If Image is provided, use Google Gemini Multimodal Vision!
+  if (imageUrl) {
     try {
       const imgRes = await fetch(imageUrl);
       if (imgRes.ok) {
@@ -97,17 +96,18 @@ Return ONLY a valid JSON object matching this schema without markdown:
         jsonText = await generateWithGemini(
           visionPrompt,
           { data: base64Data, mimeType },
-          { maxOutputTokens: 1000, temperature: 0.6 }
+          { maxOutputTokens: 1000, temperature: 0.6, model: chosenModel, apiKey }
         );
-        chosenProvider = "Google Gemini Vision";
-        chosenModel = "gemini-1.5-flash";
       }
-    } catch (visionErr) {
+    } catch (visionErr: any) {
       console.warn("Direct Gemini Vision error, falling back to text prompt:", visionErr);
+      if (visionErr?.message?.includes("API key")) {
+        throw visionErr;
+      }
     }
   }
 
-  // 2. Text-based prompt if vision not available or failed
+  // 2. Text-based prompt via Gemini if vision not used or image not supplied
   if (!jsonText) {
     const selectedFormula: HookFormula | undefined = hookFormulaId
       ? HOOK_FORMULAS.find((f) => f.id === hookFormulaId)
@@ -130,12 +130,12 @@ ${currentCaption ? `CURRENT DRAFT TO IMPROVE: "${currentCaption}"` : ""}
 ${hookInstruction}
 
 RULES:
-1. Keep the caption simple, natural, and aesthetic. Avoid 5 paragraphs of corporate advice.
+1. Keep the caption simple, natural, and aesthetic. Avoid corporate jargon.
 2. First line must stop the scroll before 125 characters.
 3. NO generic AI buzzwords ("delve", "elevate", "tapestry", "beacon", "game changer", "harness").
 4. Provide 4-6 targeted niche hashtags.
 
-Return ONLY a valid JSON object:
+Return ONLY a valid JSON object without markdown:
 {
   "caption": "Your caption here",
   "hashtags": ["#aesthetic", "#creator"],
@@ -143,53 +143,22 @@ Return ONLY a valid JSON object:
 }
 `;
 
-    // Attempt OpenRouter
-    if (config.ai.openRouterKey) {
-      try {
-        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          signal: AbortSignal.timeout(12000),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${config.ai.openRouterKey}`,
-            "HTTP-Referer": config.app.url,
-            "X-Title": "ViraloKit Creator",
-          },
-          body: JSON.stringify({
-            model: modelId,
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.6,
-            max_tokens: 1000,
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const content = data.choices?.[0]?.message?.content;
-          if (content) {
-            jsonText = content;
-            chosenProvider = "OpenRouter";
-            chosenModel = modelId;
-          }
-        }
-      } catch (err) {
-        console.warn("OpenRouter text caption error:", err);
-      }
-    }
-
-    // Gemini Fallback
-    if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
-      try {
-        chosenProvider = "Google Gemini";
-        chosenModel = "gemini-1.5-flash";
-        jsonText = await generateWithGemini(prompt, undefined, { maxOutputTokens: 1000, temperature: 0.6 });
-      } catch (err) {
-        console.warn("Gemini text caption error:", err);
+    try {
+      jsonText = await generateWithGemini(prompt, undefined, {
+        maxOutputTokens: 1000,
+        temperature: 0.6,
+        model: chosenModel,
+        apiKey,
+      });
+    } catch (geminiErr: any) {
+      console.warn("Gemini text caption error:", geminiErr);
+      if (geminiErr?.message?.includes("API key") || geminiErr?.message?.includes("missing")) {
+        throw geminiErr;
       }
     }
   }
 
-  // 3. Heuristic Fallback if offline
+  // 3. Fallback only if offline/no response
   if (!jsonText) {
     const isAesthetic = /dp|pfp|aesthetic|vector|art|wall|vibe|pinterest/i.test(customPrompt || context || "");
     const defaultCaption = isAesthetic
@@ -199,78 +168,64 @@ Return ONLY a valid JSON object:
       ? ["#aestheticdp", "#pfp", "#vectorart", "#matchingpfp", "#explorepage"]
       : ["#creator", "#contentcreator", "#viralokit", "#aesthetic"];
 
-    const lint = lintInstagramCaption(defaultCaption);
     return {
       caption: defaultCaption,
       hashtags: defaultTags,
-      cta: "Save this post before it's gone.",
+      cta: "Save this post",
       charCount: defaultCaption.length,
       hashtagCount: defaultTags.length,
-      feedCutoffText: lint.feedVisibleWindow,
-      hookScore: lint.hookScore,
-      lintReport: lint,
-      provider: "ViraloKit Engine",
-      model: "Aesthetic Smart Generator",
-    };
-  }
-
-  // Parse and Humanize
-  const parsed = parseAiCaptionResponse(jsonText, currentCaption);
-  const humanized = humanizeCaption(parsed.caption);
-  const finalCaption = humanized.humanized;
-  const lintReport = lintInstagramCaption(finalCaption);
-
-  return {
-    caption: finalCaption,
-    hashtags: parsed.hashtags.slice(0, 6),
-    cta: parsed.cta,
-    charCount: finalCaption.length,
-    hashtagCount: parsed.hashtags.slice(0, 6).length,
-    feedCutoffText: lintReport.feedVisibleWindow,
-    hookScore: lintReport.hookScore,
-    lintReport,
-    provider: chosenProvider,
-    model: chosenModel,
-  };
-}
-
-export function parseAiCaptionResponse(
-  rawText: string,
-  currentCaption: string = ""
-): {
-  caption: string;
-  hashtags: string[];
-  cta: string;
-} {
-  if (!rawText || !rawText.trim()) {
-    return {
-      caption: currentCaption || "Capturing moments that matter.",
-      hashtags: ["#aesthetic", "#creator", "#viralokit"],
-      cta: "",
+      feedCutoffText: defaultCaption.slice(0, 125),
+      hookScore: scoreHook(defaultCaption.split("\n")[0]),
+      lintReport: lintInstagramCaption(defaultCaption),
+      provider: "Offline Engine",
+      model: "Heuristic Fallback",
     };
   }
 
   try {
-    const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const cleaned = jsonText
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
     const parsed = JSON.parse(cleaned);
 
-    return {
-      caption: parsed.caption || currentCaption || rawText,
-      hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : ["#aesthetic", "#creator"],
-      cta: parsed.cta || "",
-    };
-  } catch {
-    // If not valid JSON, extract clean text
-    const cleanLines = rawText
-      .split("\n")
-      .filter((l) => !l.startsWith("```") && !l.includes('"caption":'))
-      .join("\n")
-      .trim();
+    const rawCaption = parsed.caption || "Clean creator post";
+    const humanized = humanizeCaption(rawCaption).humanized;
+    const finalCaption = humanized;
+
+    const rawHashtags = Array.isArray(parsed.hashtags) ? parsed.hashtags : ["#creator", "#viralokit"];
+    const cleanedHashtags = rawHashtags.map((h: string) => (h.startsWith("#") ? h : `#${h}`));
+
+    const firstLine = finalCaption.split("\n")[0] || finalCaption;
+    const hookScore = scoreHook(firstLine);
+    const lintReport = lintInstagramCaption(finalCaption);
 
     return {
-      caption: cleanLines || currentCaption,
-      hashtags: ["#aesthetic", "#explorepage", "#viralokit"],
-      cta: "",
+      caption: finalCaption,
+      hashtags: cleanedHashtags,
+      cta: parsed.cta || "Save this post",
+      charCount: finalCaption.length,
+      hashtagCount: cleanedHashtags.length,
+      feedCutoffText: firstLine.slice(0, 125),
+      hookScore,
+      lintReport,
+      provider: chosenProvider,
+      model: chosenModel,
+    };
+  } catch (parseErr) {
+    console.error("Failed to parse AI JSON caption:", jsonText);
+    const rawCaption = jsonText.slice(0, 300);
+    return {
+      caption: rawCaption,
+      hashtags: ["#creator", "#viralokit"],
+      cta: "Save this post",
+      charCount: rawCaption.length,
+      hashtagCount: 2,
+      feedCutoffText: rawCaption.slice(0, 125),
+      hookScore: scoreHook(rawCaption),
+      lintReport: lintInstagramCaption(rawCaption),
+      provider: chosenProvider,
+      model: chosenModel,
     };
   }
 }

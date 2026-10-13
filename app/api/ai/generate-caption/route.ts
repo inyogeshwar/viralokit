@@ -3,7 +3,6 @@ import { z } from "zod";
 import { generateCaptionWithAi, CaptionTone, CaptionAction } from "@/lib/ai/caption-generator";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
-
 import { sanitizePromptInput, sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 const captionSchema = z.object({
@@ -13,8 +12,8 @@ const captionSchema = z.object({
     .default("Creator"),
   action: z.enum(["generate", "shorten", "improve", "add_cta", "add_hashtags"]).default("generate"),
   currentCaption: z.string().max(2200).default(""),
-  modelId: z.string().max(100).default("openrouter/free"),
-  enableGeminiFallback: z.boolean().default(true),
+  modelId: z.string().max(100).default("gemini-1.5-flash"),
+  apiKey: z.string().max(250).optional(),
   hookFormulaId: z.number().optional(),
   imageUrl: z.string().url().max(2000).optional(),
   customPrompt: z.string().max(1000).optional(),
@@ -30,6 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const headerApiKey = request.headers.get("x-gemini-api-key")?.trim() || undefined;
     const body = await request.json();
     const validated = captionSchema.safeParse(body);
 
@@ -43,11 +43,13 @@ export async function POST(request: Request) {
       action,
       currentCaption,
       modelId,
-      enableGeminiFallback,
+      apiKey: bodyApiKey,
       hookFormulaId,
       imageUrl,
       customPrompt,
     } = validated.data;
+
+    const effectiveApiKey = bodyApiKey?.trim() || headerApiKey;
 
     // Sanitize user inputs to neutralize prompt injection attacks
     const sanitizedContext = sanitizePromptInput(context, 1000);
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
       action: action as CaptionAction,
       currentCaption: sanitizedCaption,
       modelId,
-      enableGeminiFallback,
+      apiKey: effectiveApiKey,
       hookFormulaId,
       imageUrl,
       customPrompt: sanitizedCustomPrompt,

@@ -17,7 +17,6 @@ export async function GET() {
       cloudinaryConfigured: Boolean(
         config.cloudinary.cloudName && config.cloudinary.apiKey && config.cloudinary.apiSecret
       ),
-      openRouterConfigured: Boolean(config.ai.openRouterKey),
       geminiConfigured: Boolean(config.ai.geminiKey),
       apiVersion: config.meta.apiVersion,
     },

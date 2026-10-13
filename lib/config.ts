@@ -34,7 +34,6 @@ export const config = {
     anonKey: clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   },
   ai: {
-    openRouterKey: clean(process.env.OPENROUTER_API_KEY),
     geminiKey: clean(process.env.GEMINI_API_KEY),
   },
   auth: {

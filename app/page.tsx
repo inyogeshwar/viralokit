@@ -105,7 +105,7 @@ export default function LandingPage() {
         author: { "@id": "https://viralokit.vercel.app/#organization" },
         featureList: [
           "Meta Graph API v23.0 direct publishing",
-          "AI-powered caption generation with OpenRouter & Gemini",
+          "AI-powered caption generation with Google Gemini Vision",
           "25 GB isolated Cloudinary media storage",
           "Verified post insights (Views, Reach, Non-follower %, Saves)",
           "Smart carousel builder (2-10 slides, aspect ratio locking)",
@@ -153,7 +153,7 @@ export default function LandingPage() {
             name: "Which AI models power the caption generator and visual analysis?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "ViraloKit integrates dynamic model routing with OpenRouter (accessing top free open-weights models) and Google Gemini 1.5 Flash for multimodal visual subject and mood analysis."
+              text: "ViraloKit is powered by Google Gemini (1.5 Flash, 2.0 Flash, and 1.5 Pro) for multimodal visual analysis and caption generation. Every user can bring their own free Gemini API key to avoid consuming developer quotas."
             }
           }
         ]
@@ -220,7 +220,7 @@ export default function LandingPage() {
     },
     {
       q: "Which AI models power the caption generator and visual analysis?",
-      a: "ViraloKit integrates dynamic model routing with OpenRouter (accessing top free open-weights models) and Google Gemini 1.5 Flash for multimodal visual subject and mood analysis.",
+      a: "ViraloKit is powered by Google Gemini (1.5 Flash, 2.0 Flash, and 1.5 Pro) for multimodal visual analysis and caption generation. Every user can bring their own free Gemini API key in Settings.",
     },
   ];
 
@@ -321,7 +321,7 @@ export default function LandingPage() {
               <div>
                 <h2 className="text-xs font-bold text-pink-300 uppercase tracking-wider mb-1">Key Takeaway</h2>
                 <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-medium">
-                  ViraloKit is the only Instagram creator studio that combines <strong>official Meta Graph API v23.0 publishing</strong> (zero scraping, zero shadowban risk), <strong>multimodal AI caption generation</strong> (OpenRouter + Gemini), and <strong>25 GB isolated Cloudinary storage</strong> — all free forever for serious creators and brands.
+                  ViraloKit is the only Instagram creator studio that combines <strong>official Meta Graph API v23.0 publishing</strong> (zero scraping, zero shadowban risk), <strong>multimodal Google Gemini AI</strong> (1.5 Flash, 2.0 Flash & BYOK), and <strong>25 GB isolated Cloudinary storage</strong> — all free forever for serious creators and brands.
                 </p>
               </div>
             </div>
@@ -809,13 +809,13 @@ export default function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-white">How does AI caption generation work?</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                AI visual subject recognition, mood analysis, viral caption generation, and hashtag recommendations powered by OpenRouter & Gemini.
+                Multimodal visual subject recognition, mood analysis, viral caption generation, and hashtag recommendations powered by Google Gemini.
               </p>
               <ul className="space-y-1 text-[11px] text-zinc-500 border-t border-zinc-800/50 pt-3">
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Visual subject & mood analysis (Gemini 1.5 Flash)</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Dynamic model routing via OpenRouter (free models)</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Tone presets: Creator, Brand, Educational, Viral</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Hashtag recommendations with volume estimates</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Visual subject & mood analysis (Gemini Multimodal Vision)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Free Tier BYOK (Bring Your Own Key, 15 RPM free forever)</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Tone presets: Creator, Aesthetic, Minimal, Hinglish</li>
+                <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /> Anti-slop humanizer & 26 scored hook formulas</li>
               </ul>
             </div>
 
@@ -905,7 +905,7 @@ export default function LandingPage() {
                   </tr>
                   <tr>
                     <td className="py-3 font-medium">AI Captions</td>
-                    <td className="text-center text-emerald-400">OpenRouter + Gemini</td>
+                    <td className="text-center text-emerald-400">Google Gemini (Free BYOK)</td>
                     <td className="text-center text-red-400">None</td>
                     <td className="text-center text-red-400">None</td>
                   </tr>

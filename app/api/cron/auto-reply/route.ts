@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { decryptToken } from "@/lib/security/encryption";
 import { getMediaComments, replyToComment } from "@/lib/meta/interactions";
+import { generateWithGemini } from "@/lib/ai/gemini";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // max 5 min for Vercel Cron
@@ -72,24 +73,12 @@ Context of the post caption: "${post.caption}"`;
 
               const userPrompt = `Comment from ${comment.from?.username || "user"}: "${comment.text}"`;
 
-              const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                },
-                body: JSON.stringify({
-                  model: "openrouter/free",
-                  messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: userPrompt }
-                  ]
-                }),
-              });
-
-              if (!aiRes.ok) throw new Error("AI Reply Generation Failed");
-              const aiData = await aiRes.json();
-              const replyText = aiData.choices?.[0]?.message?.content?.trim();
+              const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nReply in 1-2 friendly sentences:`;
+              const replyText = (await generateWithGemini(fullPrompt, undefined, {
+                maxOutputTokens: 150,
+                temperature: 0.6,
+                model: "gemini-1.5-flash",
+              })).trim();
 
               if (!replyText) throw new Error("Empty AI response");
 

@@ -37,7 +37,8 @@ import { Badge } from "@/components/ui/badge";
 import { AccountAuditResult, RubricItem } from "@/lib/ai/account-analysis";
 
 export default function AiAnalysisPage() {
-  const [selectedModel, setSelectedModel] = useState("openrouter/free");
+  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState("Hinglish");
   const [customBio, setCustomBio] = useState("");
   const [showBioInput, setShowBioInput] = useState(false);
@@ -46,6 +47,15 @@ export default function AiAnalysisPage() {
   const [copiedBio, setCopiedBio] = useState(false);
   const [copiedName, setCopiedName] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedKey = localStorage.getItem("viralokit_gemini_api_key");
+      if (savedKey) setUserGeminiKey(savedKey);
+      const savedModel = localStorage.getItem("viralokit_gemini_model");
+      if (savedModel) setSelectedModel(savedModel);
+    }
+  }, []);
 
   // Fetch Free Models for dropdown
   const { data: modelsData } = useQuery({
@@ -70,10 +80,13 @@ export default function AiAnalysisPage() {
     try {
       const res = await fetch("/api/ai/account-analysis", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(userGeminiKey ? { "x-gemini-api-key": userGeminiKey } : {}),
+        },
         body: JSON.stringify({
           modelId: selectedModel,
-          enableGeminiFallback: true,
+          apiKey: userGeminiKey || undefined,
           language: selectedLanguage,
           customBioOverride: customBio.trim() ? customBio.trim() : undefined,
         }),
@@ -84,10 +97,10 @@ export default function AiAnalysisPage() {
         throw new Error(data.error || "Failed to generate audit");
       }
 
-      setAuditResult(data.audit);
+      setAuditResult(data.audit || data);
       toast.success(`12-Part Creator Audit Complete (${selectedLanguage})!`);
     } catch (err: any) {
-      toast.error(err?.message || "Audit could not be completed. Please try another model.");
+      toast.error(err?.message || "Audit could not be completed. Check your Gemini API key in Settings.");
     } finally {
       setIsAuditing(false);
     }
@@ -170,18 +183,38 @@ export default function AiAnalysisPage() {
                 </select>
               </div>
 
-              {/* Model Selector */}
+              {/* User Key Status Badge */}
+              {userGeminiKey ? (
+                <span className="text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5 rounded-xl font-medium">
+                  Custom Key Active
+                </span>
+              ) : (
+                <a
+                  href="/settings"
+                  className="text-[10px] text-pink-400 hover:text-pink-300 bg-pink-500/10 border border-pink-500/25 px-2.5 py-1.5 rounded-xl font-medium hover:underline"
+                  title="Add your 100% Free Gemini API key in Settings"
+                >
+                  + Add Free Key in Settings
+                </a>
+              )}
+
+              {/* Gemini Model Selector */}
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="bg-black/70 border border-white/[0.12] rounded-xl px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
               >
-                <option value="openrouter/free">Auto — Intelligent Router</option>
                 {modelsData?.freeTextModels?.map((m: any) => (
                   <option key={m.id} value={m.id} className="bg-zinc-950">
-                    {m.name.replace(/\s*\(free\)/gi, "")}
+                    {m.name}
                   </option>
-                ))}
+                )) || (
+                  <>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
+                  </>
+                )}
               </select>
 
               <Button

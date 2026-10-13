@@ -232,8 +232,8 @@ function calculateMedian(numbers: number[]): number {
 
 export async function generateAccountAnalysisWithAi(
   analytics: NormalizedAccountAnalytics,
-  modelId = "openrouter/free",
-  enableGeminiFallback = true,
+  modelId = "gemini-1.5-flash",
+  apiKey?: string,
   language = "English",
   customBioOverride?: string
 ): Promise<AccountAuditResult> {
@@ -540,48 +540,19 @@ ANTI-SLOP CRITICAL RULES:
 `;
 
   let jsonText = "";
-  let chosenProvider = "OpenRouter";
-  let chosenModel = modelId;
+  const chosenProvider = "Google Gemini";
+  const chosenModel = modelId || "gemini-1.5-flash";
 
-  // 1. OpenRouter (15s timeout)
-  if (config.ai.openRouterKey) {
-    try {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        signal: AbortSignal.timeout(15000),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.ai.openRouterKey}`,
-          "HTTP-Referer": config.app.url,
-          "X-Title": "ViraloKit Creator Studio",
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.4,
-          max_tokens: 2200,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (content) jsonText = content;
-      }
-    } catch (err) {
-      console.warn("OpenRouter account audit failed/timed out, attempting fallback:", err);
-    }
-  }
-
-  // 2. Gemini Fallback with 2500 maxOutputTokens
-  if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
-    try {
-      chosenProvider = "Gemini Flash Engine";
-      chosenModel = "gemini-1.5-flash";
-      jsonText = await generateWithGemini(prompt, undefined, { maxOutputTokens: 2500, temperature: 0.4 });
-    } catch (err) {
-      console.warn("Gemini account audit failed:", err);
-    }
+  // Use Google Gemini directly
+  try {
+    jsonText = await generateWithGemini(prompt, undefined, {
+      maxOutputTokens: 2500,
+      temperature: 0.4,
+      model: chosenModel,
+      apiKey,
+    });
+  } catch (err: any) {
+    console.warn("Gemini account audit failed, using heuristic engine:", err);
   }
 
   // Parse or Fallback

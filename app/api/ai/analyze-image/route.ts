@@ -3,13 +3,12 @@ import { z } from "zod";
 import { analyzeImageWithAi } from "@/lib/ai/image-analysis";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
-
 import { isSafePublicUrl, sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 const requestSchema = z.object({
   imageUrl: z.string().url().max(2000),
-  modelId: z.string().max(100).default("openrouter/free"),
-  enableGeminiFallback: z.boolean().default(true),
+  modelId: z.string().max(100).default("gemini-1.5-flash"),
+  apiKey: z.string().max(250).optional(),
 });
 
 export async function POST(request: Request) {
@@ -22,16 +21,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const headerApiKey = request.headers.get("x-gemini-api-key")?.trim() || undefined;
     const body = await request.json();
     const validated = requestSchema.safeParse(body);
 
     if (!validated.success) {
-      return NextResponse.json({ error: "Invalid image URL", details: validated.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: "Invalid request parameters", details: validated.error.flatten() }, { status: 400 });
     }
 
-    const { imageUrl, modelId, enableGeminiFallback } = validated.data;
+    const { imageUrl, modelId, apiKey: bodyApiKey } = validated.data;
+    const effectiveApiKey = bodyApiKey?.trim() || headerApiKey;
 
-    // Security Problem #3 & #8: SSRF validation for external image URLs
+    // Security: SSRF validation for external image URLs
     if (!isSafePublicUrl(imageUrl)) {
       return NextResponse.json(
         { error: "Invalid or restricted image URL. Only public HTTPS URLs are permitted." },
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const analysis = await analyzeImageWithAi(imageUrl, modelId, enableGeminiFallback);
+    const analysis = await analyzeImageWithAi(imageUrl, modelId, effectiveApiKey);
 
     // Save record to Supabase if DB available
     const supabase = await createClient();

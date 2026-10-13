@@ -1,4 +1,3 @@
-import { config } from "@/lib/config";
 import { generateWithGemini } from "./gemini";
 
 export interface ImageAnalysisResult {
@@ -28,109 +27,68 @@ Follow this JSON structure precisely:
 {
   "subject": "Main subject description",
   "scene": "Scene or setting description",
-  "style": "Visual aesthetic (e.g. Minimal, Cinematic, Modern, Editorial)",
+  "style": "Visual aesthetic (e.g. Minimal, Cinematic, Modern, Editorial, Anime DP, Vector Art)",
   "colors": ["Color 1", "Color 2", "Color 3"],
   "lighting": "Description of lighting (e.g. Warm golden hour, Soft diffused, Moody contrast)",
-  "composition": "Framing and rule of thirds notes",
-  "mood": "Emotional vibe (e.g. Confident, Inspiring, Chill, Energetic)",
+  "composition": "Framing and composition notes",
+  "mood": "Emotional vibe (e.g. Aesthetic, Chill, Inspiring, Confident)",
   "visibleText": "Any text visible in the image or 'None'",
-  "category": "Broad category (e.g. Lifestyle, Travel, Fashion, Tech, Architecture)",
+  "category": "Broad category (e.g. Lifestyle, Aesthetic DP, Art, Travel, Fashion)",
   "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "suggestedCaption": "A compelling, high-engagement Instagram caption tailored to this image with hook, body, and call-to-action",
-  "suggestedHashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5", "#tag6", "#tag7", "#tag8"],
+  "suggestedCaption": "A compelling, natural Instagram caption tailored to this image",
+  "suggestedHashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5", "#tag6"],
   "altText": "Descriptive, accessible alt text for screen readers"
 }
 `;
 
 export async function analyzeImageWithAi(
   imageUrl: string,
-  modelId = "openrouter/free",
-  enableGeminiFallback = true
+  modelId = "gemini-1.5-flash",
+  apiKey?: string
 ): Promise<ImageAnalysisResult> {
   let jsonText = "";
-  let chosenProvider = "OpenRouter";
-  let chosenModel = modelId;
+  const chosenProvider = "Google Gemini Vision";
+  const chosenModel = modelId || "gemini-1.5-flash";
 
-  // 1. Attempt OpenRouter Free Vision
-  if (config.ai.openRouterKey) {
-    try {
-      const messages = [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: ANALYSIS_PROMPT },
-            { type: "image_url", image_url: { url: imageUrl } },
-          ],
-        },
-      ];
+  try {
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) throw new Error("Unable to fetch image for analysis");
+    const imgBuffer = await imgRes.arrayBuffer();
+    const base64Data = Buffer.from(imgBuffer).toString("base64");
+    const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
 
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.ai.openRouterKey}`,
-          "HTTP-Referer": config.app.url,
-          "X-Title": "ViraloKit Creator",
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages,
-          temperature: 0.4,
-          max_tokens: 1000,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const rawContent = data.choices?.[0]?.message?.content;
-        if (rawContent) {
-          jsonText = rawContent;
-        }
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        console.warn("OpenRouter vision call failed:", errData);
+    jsonText = await generateWithGemini(
+      ANALYSIS_PROMPT,
+      { data: base64Data, mimeType },
+      {
+        model: chosenModel,
+        apiKey,
+        maxOutputTokens: 1200,
+        temperature: 0.4,
       }
-    } catch (err) {
-      console.warn("OpenRouter vision request error:", err);
+    );
+  } catch (err: any) {
+    console.error("Gemini Vision analysis error:", err);
+    if (err?.message?.includes("API key") || err?.message?.includes("missing")) {
+      throw err;
     }
   }
 
-  // 2. Fallback to Gemini Free Tier if OpenRouter failed or not configured
-  if (!jsonText && enableGeminiFallback && config.ai.geminiKey) {
-    try {
-      chosenProvider = "Gemini Fallback";
-      chosenModel = "gemini-1.5-flash";
-
-      // Fetch image to pass buffer to Gemini
-      const imgRes = await fetch(imageUrl);
-      const imgBuffer = await imgRes.arrayBuffer();
-      const base64Data = Buffer.from(imgBuffer).toString("base64");
-      const mimeType = imgRes.headers.get("content-type") || "image/jpeg";
-
-      jsonText = await generateWithGemini(ANALYSIS_PROMPT, {
-        data: base64Data,
-        mimeType,
-      });
-    } catch (geminiErr) {
-      console.warn("Gemini vision fallback error:", geminiErr);
-    }
-  }
-
-  // 3. If neither AI responded (or keys missing in offline dev), provide realistic parsed template
+  // Fallback if offline
   if (!jsonText) {
     return {
       isAiGenerated: true,
       subject: "Aesthetic Visual Creator Post",
       scene: "Clean editorial environment",
-      style: "Minimalist • Cinematic • Modern",
+      style: "Minimalist • Cinematic • Aesthetic",
       colors: ["Neutral Warm", "Deep Slate", "Golden Accent"],
       lighting: "Soft ambient diffused lighting",
-      composition: "Balanced centered focal point with ample negative space",
+      composition: "Balanced centered focal point with clean framing",
       mood: "Confident • Aesthetic • Thoughtful",
       visibleText: "None detected",
       category: "Lifestyle / Creator",
       keywords: ["lifestyle", "aesthetic", "creative", "portrait", "modern"],
-      suggestedCaption: "Finding beauty in the simplest frames. ✨ What inspires your work this week?",
+      suggestedCaption: "Finding beauty in the simplest frames. ✨ Which slide matches your vibe today?",
       suggestedHashtags: ["#lifestyle", "#creator", "#visualsofvisuals", "#aesthetic", "#creativelife", "#viralokit"],
       altText: "A curated aesthetic photo capturing modern lifestyle composition and warm tones.",
       provider: "Offline Analysis Engine",
@@ -149,13 +107,13 @@ export async function analyzeImageWithAi(
       isAiGenerated: true,
       subject: parsed.subject || "Subject identified",
       scene: parsed.scene || "General setting",
-      style: parsed.style || "Modern",
+      style: parsed.style || "Modern Aesthetic",
       colors: Array.isArray(parsed.colors) ? parsed.colors : ["Neutral"],
       lighting: parsed.lighting || "Natural light",
       composition: parsed.composition || "Standard",
-      mood: parsed.mood || "Engaging",
+      mood: parsed.mood || "Aesthetic",
       visibleText: parsed.visibleText || "None",
-      category: parsed.category || "General",
+      category: parsed.category || "Creator Content",
       keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
       suggestedCaption: parsed.suggestedCaption || "",
       suggestedHashtags: Array.isArray(parsed.suggestedHashtags) ? parsed.suggestedHashtags : [],

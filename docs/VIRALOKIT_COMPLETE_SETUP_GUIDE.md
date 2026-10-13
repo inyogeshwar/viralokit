@@ -273,9 +273,9 @@ Instagram par multi-slide carousel publish karne se pehle Meta ko ek public HTTP
    - **API Key:** Copy kar lein
    - **API Secret:** Copy kar lein
 
-### 3.2 AI Engine (Gemini 1.5 Flash & OpenRouter)
-1. **Google Gemini API Key:** [aistudio.google.com](https://aistudio.google.com/) par jakar Free API key create karein (`GEMINI_API_KEY`).
-2. **OpenRouter API Key (Optional):** [openrouter.ai](https://openrouter.ai/) par jakar free model access key create karein (`OPENROUTER_API_KEY`).
+### 3.2 AI Engine (Google Gemini Free Tier - Bring Your Own Key)
+1. **Google Gemini API Key:** [aistudio.google.com](https://aistudio.google.com/) par jakar 100% Free API key create karein (`GEMINI_API_KEY`).
+2. Har user apne account/settings page me apni personal free Gemini key daal sakta hai, jisse developer ka quota exhaust nahi hota aur har user ko 15 requests/minute free milte hain.
 
 ---
 
@@ -320,10 +320,8 @@ CLOUDINARY_API_KEY="your_cloudinary_api_key"
 CLOUDINARY_API_SECRET="your_cloudinary_api_secret"
 
 # ------------------------------------------------------------------------------
-# AI ENGINE KEYS
-# ------------------------------------------------------------------------------
+# AI ENGINE KEYS (Google Gemini 1.5/2.0 Flash)
 GEMINI_API_KEY="your_gemini_api_key_here"
-OPENROUTER_API_KEY="your_openrouter_api_key_here"
 
 # ------------------------------------------------------------------------------
 # SECURITY ENCRYPTION (AES-256 Token Storage)

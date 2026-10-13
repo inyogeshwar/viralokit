@@ -81,6 +81,10 @@ export default function CreatePostPage() {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("viralokit_creator_theme");
       if (saved) setCustomPrompt(saved);
+      const savedKey = localStorage.getItem("viralokit_gemini_api_key");
+      if (savedKey) setUserGeminiKey(savedKey);
+      const savedModel = localStorage.getItem("viralokit_gemini_model");
+      if (savedModel) setSelectedModel(savedModel);
     }
   }, []);
 
@@ -90,7 +94,8 @@ export default function CreatePostPage() {
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
   const [selectedTone, setSelectedTone] = useState("Creator");
-  const [selectedModel, setSelectedModel] = useState("openrouter/free");
+  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedHookFormulaId, setSelectedHookFormulaId] = useState<number | null>(3); // Default to #3 "Nobody Tells You"
   const [showFeedInspector, setShowFeedInspector] = useState(true);
   const [publishStatus, setPublishStatus] = useState<
@@ -332,10 +337,14 @@ export default function CreatePostPage() {
     try {
       const res = await fetch("/api/ai/analyze-image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(userGeminiKey ? { "x-gemini-api-key": userGeminiKey } : {}),
+        },
         body: JSON.stringify({
           imageUrl: images[0],
           modelId: selectedModel,
+          apiKey: userGeminiKey || undefined,
         }),
       });
 
@@ -347,7 +356,7 @@ export default function CreatePostPage() {
       setAnalysisResult(data);
       toast.success("AI Image Analysis complete!");
     } catch (err: any) {
-      toast.error(err?.message || "AI Analysis unavailable. Check keys or try another model.");
+      toast.error(err?.message || "AI Analysis unavailable. Check your Gemini API key in Settings.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -363,7 +372,10 @@ export default function CreatePostPage() {
 
       const res = await fetch("/api/ai/generate-caption", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(userGeminiKey ? { "x-gemini-api-key": userGeminiKey } : {}),
+        },
         body: JSON.stringify({
           imageUrl: images.length > 0 ? images[0] : undefined,
           customPrompt: customPrompt.trim() || undefined,
@@ -372,6 +384,7 @@ export default function CreatePostPage() {
           action,
           currentCaption: caption,
           modelId: selectedModel,
+          apiKey: userGeminiKey || undefined,
           hookFormulaId: selectedHookFormulaId || undefined,
         }),
       });
@@ -888,7 +901,7 @@ export default function CreatePostPage() {
                   <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between">
                     <div className="text-xs text-zinc-400 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                      <span>Deep visual analysis with OpenRouter multimodal AI</span>
+                      <span>Deep visual analysis with Google Gemini Multimodal Vision</span>
                     </div>
                     <Button
                       size="sm"
@@ -975,13 +988,23 @@ export default function CreatePostPage() {
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <h2 className="text-base font-bold text-white font-headline">Caption & AI Engine</h2>
-                    <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-purple-500/10 text-purple-300 border-purple-500/20">
-                      Multi-Model Ready
-                    </Badge>
+                    <h2 className="text-base font-bold text-white font-headline">Google Gemini AI Engine</h2>
+                    {userGeminiKey ? (
+                      <span className="text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-full font-medium">
+                        Custom Key Active
+                      </span>
+                    ) : (
+                      <a
+                        href="/settings"
+                        className="text-[10px] text-pink-400 hover:text-pink-300 bg-pink-500/10 border border-pink-500/25 px-2 py-0.5 rounded-full font-medium hover:underline"
+                        title="Add your 100% Free Gemini API key in Settings"
+                      >
+                        + Add Free Key in Settings
+                      </a>
+                    )}
                   </div>
 
-                  {/* Free AI Model Picker */}
+                  {/* Gemini AI Model Picker */}
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className="text-zinc-400 text-[11px]">Model:</span>
                     <select
@@ -989,12 +1012,17 @@ export default function CreatePostPage() {
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
                     >
-                      <option value="openrouter/free">Auto — Intelligent Free Router</option>
                       {modelsData?.freeTextModels?.map((m: any) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name.replace(/\s*\(free\)/gi, "")}
+                        <option key={m.id} value={m.id} className="bg-zinc-950">
+                          {m.name}
                         </option>
-                      ))}
+                      )) || (
+                        <>
+                          <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+                          <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Speed)</option>
+                          <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>
