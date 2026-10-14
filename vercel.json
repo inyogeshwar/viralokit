@@ -1,12 +1,7 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/publish",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/auto-reply",
-      "schedule": "0 1 * * *"
-    }
+    { "path": "/api/cron/publish", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/auto-reply", "schedule": "0 1 * * *" },
+    { "path": "/api/cron/pinterest-publish", "schedule": "*/15 * * * *" }
   ]
 }
