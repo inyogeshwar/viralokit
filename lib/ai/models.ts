@@ -18,27 +18,27 @@ export interface ModelsResponse {
 
 const GEMINI_MODELS: AIModelInfo[] = [
   {
-    id: "gemini-3.5-flash",
-    name: "Gemini 3.5 Flash (Fast, Multimodal — Recommended)",
-    description: "High-speed Google multimodal model with deep visual understanding and fast generation.",
+    id: "gemini-3.8-flash",
+    name: "Gemini 3.8 Flash (Recommended)",
+    description: "General text and multimodal understanding model.",
     contextLength: 1048576,
     isFree: true,
     supportsVision: true,
     supportsText: true,
   },
   {
-    id: "gemini-3-flash-preview",
-    name: "Gemini 3 Flash Preview (Ultra-Low Latency)",
-    description: "Google's latest low-latency flash preview model for rapid caption ideation.",
+    id: "gemini-3.6-flash",
+    name: "Gemini 3.6 Flash",
+    description: "General text and multimodal understanding model.",
     contextLength: 1048576,
     isFree: true,
     supportsVision: true,
     supportsText: true,
   },
   {
-    id: "gemini-flash-latest",
-    name: "Gemini Flash Latest (Active Pointer)",
-    description: "Automatically points to Google's latest production flash model release.",
+    id: "gemini-3.8-flash-lite",
+    name: "Gemini 3.5 Flash-Lite",
+    description: "Cost-efficient model for high-throughput text generation.",
     contextLength: 1048576,
     isFree: true,
     supportsVision: true,
@@ -48,7 +48,7 @@ const GEMINI_MODELS: AIModelInfo[] = [
 
 export async function fetchFreeModels(_forceRefresh = false): Promise<ModelsResponse> {
   return {
-    autoModel: "gemini-3.5-flash",
+    autoModel: "gemini-3.8-flash",
     freeTextModels: GEMINI_MODELS,
     freeVisionModels: GEMINI_MODELS,
     totalAvailable: GEMINI_MODELS.length,
