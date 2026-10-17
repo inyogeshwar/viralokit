@@ -8,6 +8,36 @@ const DEFAULT_CANDIDATE_MODELS = [
   "gemini-3.1-flash-lite",
 ] as const;
 
+type GeminiImageMimeType =
+  | "image/png"
+  | "image/jpeg"
+  | "image/webp"
+  | "image/heic"
+  | "image/heif"
+  | "image/gif"
+  | "image/bmp"
+  | "image/tiff";
+
+function normalizeImageMimeType(mimeType: string): GeminiImageMimeType {
+  const normalized = mimeType.toLowerCase().split(";")[0].trim();
+  const supported: GeminiImageMimeType[] = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+  ];
+  if (supported.includes(normalized as GeminiImageMimeType)) {
+    return normalized as GeminiImageMimeType;
+  }
+  throw new Error(
+    `Unsupported image MIME type "${mimeType}". Use PNG, JPEG, WEBP, HEIC, HEIF, GIF, BMP, or TIFF.`
+  );
+}
+
 function normalizeModelId(model?: string): string | undefined {
   if (!model) return undefined;
   const id = model.replace(/^(google\/|openrouter\/)/i, "").split(":")[0].trim();
@@ -56,7 +86,7 @@ export async function generateWithGemini(
             {
               type: "image" as const,
               data: imageBuffer.data,
-              mime_type: imageBuffer.mimeType,
+              mime_type: normalizeImageMimeType(imageBuffer.mimeType),
             },
           ]
         : prompt;
