@@ -100,7 +100,11 @@ export async function generateWithGemini(
         },
       });
 
-      const output = response.output_text?.trim();
+      const output = response.outputs
+        ?.filter((item) => item.type === "text")
+        .map((item) => item.text ?? "")
+        .join("")
+        .trim();
       if (output) return output;
       throw new Error("Gemini returned an empty text response.");
     } catch (err: unknown) {
