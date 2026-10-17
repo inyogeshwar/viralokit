@@ -37,7 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { AccountAuditResult, RubricItem } from "@/lib/ai/account-analysis";
 
 export default function AiAnalysisPage() {
-  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.8-flash");
   const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState("Hinglish");
   const [customBio, setCustomBio] = useState("");
@@ -53,10 +53,10 @@ export default function AiAnalysisPage() {
       const savedKey = localStorage.getItem("viralokit_gemini_api_key");
       if (savedKey) setUserGeminiKey(savedKey);
       const savedModel = localStorage.getItem("viralokit_gemini_model");
-      if (savedModel && savedModel !== "gemini-1.5-flash" && savedModel !== "openrouter/free") {
+      if (savedModel && savedModel !== "gemini-3.8-flash" && savedModel !== "openrouter/free") {
         setSelectedModel(savedModel);
       } else {
-        setSelectedModel("gemini-3.5-flash");
+        setSelectedModel("gemini-3.8-flash");
       }
     }
   }, []);
@@ -214,8 +214,8 @@ export default function AiAnalysisPage() {
                   </option>
                 )) || (
                   <>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen)</option>
+                    <option value="gemini-3.8-flash">Gemini 1.5 Flash (Fast & Free)</option>
+                    <option value="gemini-3.6-flash">Gemini 2.0 Flash (Next-Gen)</option>
                     <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
                   </>
                 )}
