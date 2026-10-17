@@ -43,12 +43,12 @@ Follow this JSON structure precisely:
 
 export async function analyzeImageWithAi(
   imageUrl: string,
-  modelId = "gemini-3.5-flash",
+  modelId = "gemini-3.8-flash",
   apiKey?: string
 ): Promise<ImageAnalysisResult> {
   let jsonText = "";
   const chosenProvider = "Google Gemini Vision";
-  const chosenModel = modelId || "gemini-3.5-flash";
+  const chosenModel = modelId || "gemini-3.8-flash";
 
   try {
     const imgRes = await fetch(imageUrl);
