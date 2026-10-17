@@ -36,7 +36,7 @@ const GEMINI_MODELS: AIModelInfo[] = [
     supportsText: true,
   },
   {
-    id: "gemini-3.8-flash-lite",
+    id: "gemini-3.5-flash-lite",
     name: "Gemini 3.5 Flash-Lite",
     description: "Cost-efficient model for high-throughput text generation.",
     contextLength: 1048576,
