@@ -66,7 +66,6 @@ export async function generateWithGemini(
         input,
         generation_config: {
           max_output_tokens: options?.maxOutputTokens ?? 2500,
-          temperature: options?.temperature ?? 0.5,
           thinking_level: options?.thinkingLevel ?? "low",
         },
       });
