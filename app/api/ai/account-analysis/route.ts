@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const validated = auditSchema.safeParse(rawBody);
     const { modelId, apiKey: bodyApiKey, language, customBioOverride } = validated.success
       ? validated.data
-      : { modelId: "gemini-1.5-flash", apiKey: undefined, language: "English" as const, customBioOverride: undefined };
+      : { modelId: "gemini-3.8-flash", apiKey: undefined, language: "English" as const, customBioOverride: undefined };
 
     const effectiveApiKey = bodyApiKey?.trim() || headerApiKey;
 

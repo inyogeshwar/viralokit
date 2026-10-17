@@ -1,19 +1,56 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { config } from "@/lib/config";
 
-export function getGeminiClient(customApiKey?: string): GoogleGenerativeAI | null {
-  const activeKey = customApiKey?.trim() || config.ai.geminiKey;
-  if (!activeKey) return null;
-  return new GoogleGenerativeAI(activeKey);
+const DEFAULT_CANDIDATE_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+] as const;
+
+type GeminiImageMimeType =
+  | "image/png"
+  | "image/jpeg"
+  | "image/webp"
+  | "image/heic"
+  | "image/heif"
+  | "image/gif"
+  | "image/bmp"
+  | "image/tiff";
+
+function normalizeImageMimeType(mimeType: string): GeminiImageMimeType {
+  const normalized = mimeType.toLowerCase().split(";")[0].trim();
+  const supported: GeminiImageMimeType[] = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+  ];
+  if (supported.includes(normalized as GeminiImageMimeType)) {
+    return normalized as GeminiImageMimeType;
+  }
+  throw new Error(
+    `Unsupported image MIME type "${mimeType}". Use PNG, JPEG, WEBP, HEIC, HEIF, GIF, BMP, or TIFF.`
+  );
 }
 
-// Recommended active models in Google AI Studio v1beta
-const DEFAULT_CANDIDATE_MODELS = [
-  "gemini-3.5-flash",
-  "gemini-3-flash-preview",
-  "gemini-flash-latest",
-  "gemini-2.5-flash",
-];
+function normalizeModelId(model?: string): string | undefined {
+  if (!model) return undefined;
+  const id = model.replace(/^(google\/|openrouter\/)/i, "").split(":")[0].trim();
+  const legacyAliases: Record<string, string> = {
+    "gemini-1.5-flash": "gemini-3.8-flash",
+    "gemini-2.0-flash": "gemini-3.8-flash",
+    "gemini-2.5-flash": "gemini-3.8-flash",
+    "gemini-3.5-flash": "gemini-3.8-flash",
+    "gemini-3-flash-preview": "gemini-3.6-flash",
+    "gemini-flash-latest": "gemini-3.8-flash",
+  };
+  return legacyAliases[id] || id;
+}
 
 export async function generateWithGemini(
   prompt: string,
@@ -23,88 +60,72 @@ export async function generateWithGemini(
     temperature?: number;
     model?: string;
     apiKey?: string;
+    thinkingLevel?: "minimal" | "low" | "medium" | "high";
   }
 ): Promise<string> {
-  const client = getGeminiClient(options?.apiKey);
-  if (!client) {
+  const apiKey = options?.apiKey?.trim() || config.ai.geminiKey;
+  if (!apiKey) {
     throw new Error(
-      "Google Gemini API key is missing. Please add your free Gemini API key in Settings (get your free key at https://aistudio.google.com)."
+      "Google Gemini API key is missing. Add a Gemini API key in ViraloKit Settings or configure GEMINI_API_KEY."
     );
   }
 
-  // Clean and prepare candidate models list
-  const requestedModel = options?.model
-    ? options.model.replace(/^(google\/|openrouter\/)/i, "").split(":")[0]
-    : undefined;
+  const client = new GoogleGenAI({ apiKey });
+  const requestedModel = normalizeModelId(options?.model);
+  const candidateModels = [
+    ...(requestedModel ? [requestedModel] : []),
+    ...DEFAULT_CANDIDATE_MODELS,
+  ].filter((model, index, all) => all.indexOf(model) === index);
 
-  const candidateModels: string[] = [];
-  if (requestedModel) candidateModels.push(requestedModel);
-  for (const m of DEFAULT_CANDIDATE_MODELS) {
-    if (!candidateModels.includes(m)) candidateModels.push(m);
-  }
-
-  let lastError: any = null;
-
-  for (const currentModel of candidateModels) {
+  let lastError: unknown;
+  for (const model of candidateModels) {
     try {
-      const model = client.getGenerativeModel({
-        model: currentModel,
-        generationConfig: {
-          maxOutputTokens: options?.maxOutputTokens ?? 2500,
-          temperature: options?.temperature ?? 0.5,
+      const input = imageBuffer
+        ? [
+            { type: "text" as const, text: prompt },
+            {
+              type: "image" as const,
+              data: imageBuffer.data,
+              mime_type: normalizeImageMimeType(imageBuffer.mimeType),
+            },
+          ]
+        : prompt;
+
+      const response = await client.interactions.create({
+        model,
+        input,
+        generation_config: {
+          max_output_tokens: options?.maxOutputTokens ?? 2500,
+          thinking_level: options?.thinkingLevel ?? "low",
         },
       });
 
-      const parts: any[] = [prompt];
-
-      if (imageBuffer) {
-        parts.push({
-          inlineData: {
-            data: imageBuffer.data,
-            mimeType: imageBuffer.mimeType,
-          },
-        });
-      }
-
-      const result = await model.generateContent(parts);
-      const text = result.response.text();
-      return text;
-    } catch (err: any) {
+      const output = response.output_text?.trim();
+      if (output) return output;
+      throw new Error("Gemini returned an empty text response.");
+    } catch (err: unknown) {
       lastError = err;
-      const msg = err?.message || "";
+      const message = err instanceof Error ? err.message : String(err);
+      const lower = message.toLowerCase();
 
-      // If the model is 404 Not Found, no longer available, or deprecated, try the next model candidate!
-      const isModelNotFound =
-        msg.includes("404") ||
-        msg.includes("not found") ||
-        msg.includes("no longer available") ||
-        msg.includes("is not supported for generateContent");
-
-      if (isModelNotFound) {
-        console.warn(`Model ${currentModel} not available on Gemini API. Trying next fallback model...`);
+      if (lower.includes("404") || lower.includes("not found") || lower.includes("unknown model") || lower.includes("unsupported model")) {
+        console.warn(`Gemini model ${model} unavailable; trying fallback model.`);
         continue;
       }
-
-      // If key is invalid or quota is exhausted, rethrow with friendly message
-      if (msg.includes("API_KEY_INVALID") || msg.includes("API key not valid")) {
-        throw new Error("Invalid Gemini API key. Please check your API key in Settings.");
+      if (lower.includes("api_key_invalid") || lower.includes("api key not valid") || lower.includes("invalid api key")) {
+        throw new Error("Invalid Gemini API key. Check the key in ViraloKit Settings.");
       }
-      if (msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")) {
-        throw new Error("Gemini API rate limit exceeded (15 RPM free tier limit). Please wait a few seconds and try again.");
+      if (lower.includes("resource_exhausted") || lower.includes("429") || lower.includes("quota")) {
+        throw new Error("Gemini rate/quota limit reached. Check active limits in Google AI Studio and retry after the quota resets.");
       }
-
-      // For 503 high demand spikes, try next candidate model
-      if (msg.includes("503") || msg.includes("high demand")) {
-        console.warn(`Model ${currentModel} experiencing high demand (503). Trying fallback...`);
+      if (lower.includes("503") || lower.includes("high demand") || lower.includes("temporarily unavailable")) {
+        console.warn(`Gemini model ${model} temporarily unavailable; trying fallback model.`);
         continue;
       }
-
-      throw new Error(msg || "Gemini execution failed.");
+      throw new Error(message || "Gemini generation failed.");
     }
   }
 
-  console.error("All Gemini candidate models failed:", lastError);
-  throw new Error(
-    lastError?.message || "All Gemini models unavailable. Please try again in a few moments."
-  );
+  const lastMessage = lastError instanceof Error ? lastError.message : String(lastError ?? "");
+  throw new Error(lastMessage || "All configured Gemini models failed. Check the model availability and API key in Google AI Studio.");
 }
