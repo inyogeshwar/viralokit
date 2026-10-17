@@ -9,10 +9,10 @@ export function getGeminiClient(customApiKey?: string): GoogleGenerativeAI | nul
 
 // Recommended active models in Google AI Studio v1beta
 const DEFAULT_CANDIDATE_MODELS = [
-  "gemini-3.5-flash",
-  "gemini-3-flash-preview",
-  "gemini-flash-latest",
-  "gemini-2.5-flash",
+  "gemini-3.8-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
 ];
 
 export async function generateWithGemini(
