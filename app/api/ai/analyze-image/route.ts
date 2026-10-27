@@ -7,7 +7,7 @@ import { isSafePublicUrl, sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 const requestSchema = z.object({
   imageUrl: z.string().url().max(2000),
-  modelId: z.string().max(100).default("gemini-3.5-flash"),
+  modelId: z.string().max(100).default("gemini-3.8-flash"),
   apiKey: z.string().max(250).optional(),
 });
 

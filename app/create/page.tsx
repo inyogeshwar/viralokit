@@ -172,10 +172,10 @@ export default function CreatePostPage() {
       const savedKey = localStorage.getItem("viralokit_gemini_api_key");
       if (savedKey) setUserGeminiKey(savedKey);
       const savedModel = localStorage.getItem("viralokit_gemini_model");
-      if (savedModel && savedModel !== "gemini-1.5-flash" && savedModel !== "openrouter/free") {
+      if (savedModel && savedModel !== "gemini-3.8-flash" && savedModel !== "openrouter/free") {
         setSelectedModel(savedModel);
       } else {
-        setSelectedModel("gemini-3.5-flash");
+        setSelectedModel("gemini-3.8-flash");
       }
     }
   }, []);
@@ -187,7 +187,7 @@ export default function CreatePostPage() {
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
   const [selectedTone, setSelectedTone] = useState("Creator");
-  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.8-flash");
   const [userGeminiKey, setUserGeminiKey] = useState<string>("");
   const [selectedHookFormulaId, setSelectedHookFormulaId] = useState<number | null>(3); // Default to #3 "Nobody Tells You"
   const [showFeedInspector, setShowFeedInspector] = useState(true);
@@ -1282,8 +1282,8 @@ export default function CreatePostPage() {
                         </option>
                       )) || (
                         <>
-                          <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
-                          <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Speed)</option>
+                          <option value="gemini-3.8-flash">Gemini 3.8 Flash (Recommended)</option>
+                          <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
                           <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Reasoning)</option>
                         </>
                       )}

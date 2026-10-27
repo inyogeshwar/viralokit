@@ -38,7 +38,7 @@ export async function generateCaptionWithAi({
   tone = "Creator",
   action = "generate",
   currentCaption = "",
-  modelId = "gemini-3.5-flash",
+  modelId = "gemini-3.8-flash",
   apiKey,
   hookFormulaId,
   imageUrl,
@@ -56,7 +56,7 @@ export async function generateCaptionWithAi({
 }): Promise<CaptionGenerationResult> {
   let jsonText = "";
   const chosenProvider = "Google Gemini";
-  const chosenModel = modelId || "gemini-3.5-flash";
+  const chosenModel = modelId || "gemini-3.8-flash";
 
   // 1. If Image is provided, use Google Gemini Multimodal Vision!
   if (imageUrl) {
