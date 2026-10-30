@@ -5,20 +5,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Zap,
   PlusSquare,
-  Images,
-  BarChart3,
-  Sparkles,
+  MessageSquare,
+  Share2,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const mobileItems = [
   { name: "Home", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Automate", href: "/automations", icon: Zap },
   { name: "Create", href: "/create", icon: PlusSquare },
-  { name: "Posts", href: "/posts", icon: Images },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "AI", href: "/ai-analysis", icon: Sparkles },
+  { name: "Inbox", href: "/messages", icon: MessageSquare },
+  { name: "Channels", href: "/channels", icon: Share2 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -36,7 +36,7 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors",
+                "flex flex-col items-center gap-1 py-1 px-2 rounded-lg text-[10px] font-medium transition-colors",
                 isActive ? "text-pink-400 font-semibold" : "text-zinc-400 hover:text-zinc-200"
               )}
             >

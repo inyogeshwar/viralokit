@@ -5,13 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Zap,
+  MessageSquare,
+  Share2,
   PlusSquare,
   Images,
   BarChart3,
   Sparkles,
   Settings,
   Instagram,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +23,24 @@ const navItems = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    name: "Automations",
+    href: "/automations",
+    icon: Zap,
+    badge: "Funnels",
+  },
+  {
+    name: "Messages",
+    href: "/messages",
+    icon: MessageSquare,
+    badge: "Direct",
+  },
+  {
+    name: "Channels",
+    href: "/channels",
+    icon: Share2,
+    badge: "FB + Threads",
   },
   {
     name: "Create Post",
@@ -127,14 +147,14 @@ export function Sidebar() {
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-white flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-            Lumina Studio
+            Meta Social Suite
           </span>
           <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-pink-500/40 text-pink-300">
             v23.0
           </Badge>
         </div>
         <p className="text-[11px] text-zinc-400 leading-tight">
-          Meta Graph API Connected & Multi-Model AI Engine
+          Instagram DMs, Growth Funnels, Facebook & Threads
         </p>
       </div>
     </aside>

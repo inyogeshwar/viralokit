@@ -17,6 +17,10 @@ import {
   ShieldCheck,
   Zap,
   Activity,
+  MessageSquare,
+  Share2,
+  Radio,
+  Lock,
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -29,7 +33,6 @@ import { formatNumber, formatDate } from "@/lib/utils";
 import { InstagramMediaItem } from "@/lib/meta/types";
 import { PostInsightsModal } from "@/components/posts/post-insights-modal";
 
-// Animation Variants
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -98,7 +101,6 @@ export default function DashboardPage() {
             
             {/* Welcome Glassmorphic Hero */}
             <motion.div variants={fadeUp} className="relative overflow-hidden rounded-[2rem] glass-card p-6 sm:p-10 shadow-2xl border border-white/10 group">
-              {/* Dynamic hover glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-purple-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
@@ -110,10 +112,10 @@ export default function DashboardPage() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-pink-500/40 bg-pink-500/10 text-pink-300 text-xs font-semibold backdrop-blur-md"
                   >
                     <span className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" />
-                    <span>Meta Graph v23.0 Connected</span>
+                    <span>Meta Graph v23.0 + Threads API</span>
                   </motion.div>
                   
-                  <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-headline leading-tight">
+                  <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-headline leading-tight">
                     {capabilities?.connected ? (
                       <>
                         Welcome back, <br />
@@ -127,32 +129,94 @@ export default function DashboardPage() {
                     )}
                   </h1>
                   <p className="text-sm text-zinc-400 max-w-xl leading-relaxed">
-                    {capabilities?.connected
-                      ? "Your Instagram Professional studio is live. High-definition carousels, 25 GB isolated CDN, and multi-model AI are ready."
-                      : "Connect your Instagram Professional account to enable zero-cost publishing, real-time telemetry, and AI captioning."}
+                    Social Growth Automation Studio: Follow-to-unlock comment funnels, voice notes, direct messages, and cross-platform publishing on Facebook and Threads. Runs 24/7 on your smartphone without needing a laptop!
                   </p>
                 </div>
 
                 {/* Quick Action Buttons */}
-                <div className="flex flex-wrap items-center gap-4">
-                  <Link href="/create">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href="/automations">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="h-12 px-6 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold text-sm shadow-[0_0_20px_rgba(236,72,153,0.3)] border-none transition-all cursor-pointer gap-2">
-                        <PlusSquare className="w-5 h-5" />
-                        <span>Create Post</span>
+                      <Button className="h-11 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-600 hover:to-pink-600 text-white font-semibold text-xs shadow-[0_0_20px_rgba(245,158,11,0.3)] border-none transition-all cursor-pointer gap-2">
+                        <Zap className="w-4 h-4" />
+                        <span>Growth Funnels</span>
                       </Button>
                     </motion.div>
                   </Link>
-                  <Link href="/analytics">
+
+                  <Link href="/messages">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button variant="secondary" className="h-12 px-6 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 font-medium text-sm backdrop-blur-md transition-all cursor-pointer gap-2">
-                        <BarChart3 className="w-5 h-5 text-indigo-400" />
-                        <span>Analytics</span>
+                      <Button variant="secondary" className="h-11 px-5 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 font-medium text-xs backdrop-blur-md transition-all cursor-pointer gap-2">
+                        <MessageSquare className="w-4 h-4 text-pink-400" />
+                        <span>Direct Inbox</span>
+                      </Button>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/create">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button variant="secondary" className="h-11 px-5 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 font-medium text-xs backdrop-blur-md transition-all cursor-pointer gap-2">
+                        <PlusSquare className="w-4 h-4 text-purple-400" />
+                        <span>Create Post</span>
                       </Button>
                     </motion.div>
                   </Link>
                 </div>
               </div>
+            </motion.div>
+
+            {/* 3 Showcase Feature Pillars for Smartphone Creators */}
+            <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link href="/automations" className="group">
+                <div className="bg-[#0C0C0C] border border-amber-500/20 hover:border-amber-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center justify-between">
+                      <span>Follow-to-Unlock Funnel</span>
+                      <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Auto-reply to comments and DM links or guides only if the user follows your account. 24/7 cloud execution via Meta Webhooks.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/messages" className="group">
+                <div className="bg-[#0C0C0C] border border-pink-500/20 hover:border-pink-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
+                  <div className="w-10 h-10 rounded-2xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center justify-between">
+                      <span>Direct Messaging Suite</span>
+                      <ArrowRight className="w-4 h-4 text-pink-400 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Send audio voice notes (.m4a/.wav), PDF attachments, double-tap heart reactions (❤️), and quoted replies directly from your phone.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/channels" className="group">
+                <div className="bg-[#0C0C0C] border border-purple-500/20 hover:border-purple-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <Share2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center justify-between">
+                      <span>Threads & Facebook</span>
+                      <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Cross-post text & photos to Facebook Pages, compose Threads, reply to threads, and exchange 60-day tokens.
+                    </p>
+                  </div>
+                </div>
+              </Link>
             </motion.div>
 
             <motion.div variants={fadeUp}>
@@ -226,12 +290,12 @@ export default function DashboardPage() {
                       onClick={() => setSelectedPostForInsights(post)}
                       className="group relative rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 aspect-square cursor-pointer hover:border-pink-500/50 transition-all duration-300 shadow-xl"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={post.media_url || post.thumbnail_url}
                         alt={post.caption || "Post"}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      {/* Glassmorphic overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 flex flex-col justify-between">
                         <div className="flex justify-end transform -translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
                           <Badge className="text-[10px] py-1 px-3 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full">
