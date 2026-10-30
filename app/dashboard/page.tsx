@@ -21,6 +21,8 @@ import {
   Share2,
   Radio,
   Lock,
+  Search,
+  BookOpen,
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -165,8 +167,8 @@ export default function DashboardPage() {
               </div>
             </motion.div>
 
-            {/* 3 Showcase Feature Pillars for Smartphone Creators */}
-            <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Core Showcase Feature Pillars for Smartphone Creators */}
+            <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link href="/automations" className="group">
                 <div className="bg-[#0C0C0C] border border-amber-500/20 hover:border-amber-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
                   <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -179,6 +181,23 @@ export default function DashboardPage() {
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
                       Auto-reply to comments and DM links or guides only if the user follows your account. 24/7 cloud execution via Meta Webhooks.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/discovery" className="group">
+                <div className="bg-[#0C0C0C] border border-emerald-500/20 hover:border-emerald-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <Search className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center justify-between">
+                      <span>Intelligence & Discovery</span>
+                      <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Competitor @username lookup, viral hashtag discovery, 24-hour rate limit quota monitor, and instant error code resolver.
                     </p>
                   </div>
                 </div>
@@ -213,6 +232,23 @@ export default function DashboardPage() {
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
                       Cross-post text & photos to Facebook Pages, compose Threads, reply to threads, and exchange 60-day tokens.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/docs" className="group">
+                <div className="bg-[#0C0C0C] border border-blue-500/20 hover:border-blue-500/50 transition-all rounded-3xl p-5 space-y-3 relative overflow-hidden h-full">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center justify-between">
+                      <span>Meta Developer Docs</span>
+                      <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Offline mobile reader for all 70 official Meta Graph API documentation guides, webhooks, error codes, and publishing rules.
                     </p>
                   </div>
                 </div>

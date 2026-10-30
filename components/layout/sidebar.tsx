@@ -14,6 +14,8 @@ import {
   Sparkles,
   Settings,
   Instagram,
+  Search,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +33,12 @@ const navItems = [
     badge: "Funnels",
   },
   {
+    name: "Discovery & Limits",
+    href: "/discovery",
+    icon: Search,
+    badge: "Meta v26",
+  },
+  {
     name: "Messages",
     href: "/messages",
     icon: MessageSquare,
@@ -41,6 +49,12 @@ const navItems = [
     href: "/channels",
     icon: Share2,
     badge: "FB + Threads",
+  },
+  {
+    name: "Meta Docs",
+    href: "/docs",
+    icon: BookOpen,
+    badge: "70 Guides",
   },
   {
     name: "Create Post",
