@@ -17,8 +17,21 @@ export const config = {
     getBaseUrl: () => `https://graph.facebook.com/${clean(process.env.META_GRAPH_API_VERSION) || "v23.0"}`,
     appId: clean(process.env.META_APP_ID),
     appSecret: clean(process.env.META_APP_SECRET),
-    defaultUserId: clean(process.env.IG_USER_ID),
-    defaultAccessToken: clean(process.env.IG_ACCESS_TOKEN),
+    defaultUserId: clean(process.env.IG_USER_ID) || clean(process.env.INSTAGRAM_ID),
+    defaultAccessToken: clean(process.env.IG_ACCESS_TOKEN) || clean(process.env.FB_PAGE_ACCESS_TOKEN),
+    facebookPageId: clean(process.env.FB_PAGE_ID),
+    facebookPageAccessToken: clean(process.env.FB_PAGE_ACCESS_TOKEN),
+    instagramId: clean(process.env.INSTAGRAM_ID) || clean(process.env.IG_USER_ID),
+    instagramUsername: clean(process.env.INSTAGRAM_USERNAME),
+  },
+  threads: {
+    userId: clean(process.env.THREADS_USER_ID),
+    accessToken: clean(process.env.THREADS_ACCESS_TOKEN),
+    appSecret: clean(process.env.THREADS_APP_SECRET),
+    apiBase: "https://graph.threads.net/v1.0",
+  },
+  webhook: {
+    verifyToken: clean(process.env.META_WEBHOOK_VERIFY_TOKEN) || "viralokit_verify_token",
   },
   instagram: {
     appId: clean(process.env.INSTAGRAM_APP_ID),
@@ -37,7 +50,6 @@ export const config = {
     geminiKey: clean(process.env.GEMINI_API_KEY),
   },
   auth: {
-    // Comma-separated list of authorized admin user IDs or emails.
     adminUserIds: (clean(process.env.ADMIN_USER_IDS) || clean(process.env.ADMIN_WORKOS_USER_IDS))
       ? (clean(process.env.ADMIN_USER_IDS) || clean(process.env.ADMIN_WORKOS_USER_IDS))
           .split(",")
@@ -50,14 +62,10 @@ export const config = {
   },
 };
 
-/**
- * Checks if a given Supabase user is authorized to perform privileged Meta operations.
- * If ADMIN_WORKOS_USER_IDS is configured, user must match one of the allowed IDs or emails.
- */
 export function isAuthorizedUser(user: { id: string; email?: string } | null): boolean {
   if (!user) return false;
   const admins = config.auth.adminUserIds;
-  if (admins.length === 0) return false; // Fail closed: if no admins are configured, no one is admin
+  if (admins.length === 0) return false;
   return admins.includes(user.id) || (user.email ? admins.includes(user.email) : false);
 }
 
@@ -77,10 +85,6 @@ export function getMetaGraphUrl(endpoint: string, accessToken?: string): string 
   return `https://${host}/${version}/${cleanEndpoint}`;
 }
 
-/**
- * Validates critical environment variables in production.
- * Fails fast if mandatory security configurations are missing without leaking values.
- */
 export function validateProductionEnvironment(): { valid: boolean; missing: string[] } {
   if (process.env.NODE_ENV !== "production") {
     return { valid: true, missing: [] };

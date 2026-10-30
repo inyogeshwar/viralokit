@@ -13,7 +13,7 @@
    - 1.3 Domains aur Website Platform Add Karna (Domain Whitelist)
    - 1.4 OAuth Redirect URI, Deauthorize aur Data Deletion URLs Set Karna
    - 1.5 Instagram App ID & Secret Praapt Karna
-   - 1.6 Account Link Karna (`in.yogeshwar` Professional Account)
+   - 1.6 Account Link Karna (`your_instagram_handle` Professional Account)
 4. [Step 2: Supabase Backend & Database Setup](#step-2-supabase-backend-setup)
    - 2.1 Supabase Project Create Karna
    - 2.2 Database Schema & Tables Run Karna

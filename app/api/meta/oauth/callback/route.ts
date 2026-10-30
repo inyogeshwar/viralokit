@@ -80,13 +80,13 @@ export async function GET(request: NextRequest) {
         const meData = await meRes.json();
         igAccount = {
           id: String(meData.id || meData.user_id || userId),
-          username: meData.username || "in.yogeshwar",
+          username: meData.username || "your_instagram_handle",
           profile_picture_url: meData.profile_picture_url || null,
         };
       } catch {
         igAccount = {
-          id: userId || "17841460845031449",
-          username: "in.yogeshwar",
+          id: userId || "YOUR_INSTAGRAM_USER_ID",
+          username: "your_instagram_handle",
         };
       }
     } else {
