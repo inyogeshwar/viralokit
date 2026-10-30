@@ -16,6 +16,8 @@ import {
   CheckCheck,
   Eye,
   CornerUpLeft,
+  AlertCircle,
+  Music,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -27,30 +29,14 @@ import { Badge } from "@/components/ui/badge";
 export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<any | null>(null);
   const [recipientId, setRecipientId] = useState("");
+  const [recipientUsername, setRecipientUsername] = useState("");
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [attachmentMode, setAttachmentMode] = useState<"none" | "audio" | "file">("none");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [replyToId, setReplyToId] = useState<string | null>(null);
 
-  // Fetch capabilities & user
-  const { data: authData } = useQuery({
-    queryKey: ["auth-me"],
-    queryFn: async () => {
-      const res = await fetch("/api/auth/me");
-      return res.json();
-    },
-  });
-
-  const { data: capabilities } = useQuery({
-    queryKey: ["meta-account"],
-    queryFn: async () => {
-      const res = await fetch("/api/meta/account");
-      return res.json();
-    },
-  });
-
-  // Fetch conversations
+  // Fetch conversations (also returns myId and myUsername from server)
   const {
     data: convData,
     isLoading: isConvLoading,
@@ -63,6 +49,25 @@ export default function MessagesPage() {
     },
     refetchInterval: 12000, // Poll every 12s
   });
+
+  const myId = convData?.myId || "17841460845031449";
+  const myUsername = convData?.myUsername || "in.yogeshwar";
+
+  // Helper to extract the REAL other participant (not our own creator account)
+  const getOtherParticipant = (conv: any) => {
+    const list = conv?.participants?.data || [];
+    const other = list.find(
+      (p: any) =>
+        String(p.id) !== String(myId) &&
+        p.username?.toLowerCase() !== myUsername?.toLowerCase()
+    );
+    return (
+      other ||
+      list.find((p: any) => String(p.id) !== String(myId)) ||
+      list[1] ||
+      list[0] || { username: "Instagram User", id: conv?.id }
+    );
+  };
 
   // Fetch messages if a conversation is selected
   const {
@@ -82,9 +87,10 @@ export default function MessagesPage() {
 
   const handleSelectConversation = (conv: any) => {
     setSelectedConversation(conv);
-    const participant = conv.participants?.data?.[0];
-    if (participant?.id) {
-      setRecipientId(participant.id);
+    const other = getOtherParticipant(conv);
+    if (other?.id) {
+      setRecipientId(String(other.id));
+      setRecipientUsername(other.username || "Instagram User");
     }
     setReplyToId(null);
   };
@@ -92,7 +98,9 @@ export default function MessagesPage() {
   const handleSendDM = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = inputText.trim();
-    if (!text && !attachmentUrl.trim()) {
+    const attachUrl = attachmentUrl.trim();
+
+    if (!text && !attachUrl) {
       toast.error("Please enter a message or attachment URL.");
       return;
     }
@@ -102,24 +110,50 @@ export default function MessagesPage() {
       return;
     }
 
+    // Safety check: ensure recipient is not our own account
+    if (recipientId.trim() === String(myId)) {
+      toast.error("Cannot send direct message to your own account ID. Please select a client chat.");
+      return;
+    }
+
     setIsSending(true);
     try {
+      let finalMessageText = text;
+      let finalAttachmentType: "audio" | "file" | undefined = undefined;
+      let finalAttachmentUrl: string | undefined = undefined;
+
+      // Meta Graph API audio requirement: Meta rejects .mp3 for voice notes. Only AAC in .m4a or .wav is supported.
+      if (attachmentMode === "audio" && attachUrl) {
+        const isM4aOrWav = /\.(m4a|wav)(\?.*)?$/i.test(attachUrl);
+        if (isM4aOrWav) {
+          finalAttachmentType = "audio";
+          finalAttachmentUrl = attachUrl;
+        } else {
+          // If user gave MP3 or stream link, deliver as rich stream text link so Meta doesn't throw #100 error
+          finalMessageText = (finalMessageText ? `${finalMessageText}\n\n` : "") + `🎵 Audio Note: ${attachUrl}`;
+          toast.info("Delivering audio as stream link (Meta native voice notes require .m4a/.wav).");
+        }
+      } else if (attachmentMode === "file" && attachUrl) {
+        finalAttachmentType = "file";
+        finalAttachmentUrl = attachUrl;
+      }
+
       const res = await fetch("/api/meta/dm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "send_dm",
           recipientId: recipientId.trim(),
-          messageText: text || undefined,
-          attachmentType: attachmentMode !== "none" ? attachmentMode : undefined,
-          attachmentUrl: attachmentUrl.trim() || undefined,
+          messageText: finalMessageText || undefined,
+          attachmentType: finalAttachmentType,
+          attachmentUrl: finalAttachmentUrl,
           replyToMessageId: replyToId || undefined,
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success("Direct message sent successfully!");
+        toast.success(`Message sent to @${recipientUsername || recipientId}!`);
         setInputText("");
         setAttachmentUrl("");
         setAttachmentMode("none");
@@ -181,22 +215,18 @@ export default function MessagesPage() {
   const messages = msgData?.messages || [];
 
   return (
-    <div className="flex min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
+    <div className="flex h-screen bg-[#080808] text-zinc-100 antialiased overflow-hidden selection:bg-pink-500/20 selection:text-pink-300">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
-        <Header
-          user={authData?.user}
-          accountUsername={capabilities?.username}
-          isConnected={capabilities?.connected}
-        />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <Header />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full flex flex-col h-[calc(100vh-5rem)]">
+        <main className="flex-1 flex flex-col p-3 sm:p-6 overflow-hidden max-w-7xl mx-auto w-full">
           {/* Header Bar */}
-          <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 mb-4">
+          <div className="flex items-center justify-between pb-3 shrink-0">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-pink-500/10 text-pink-400 border border-pink-500/20">
                   <MessageSquare className="w-3 h-3 text-pink-400" />
                   Instagram Direct
                 </span>
@@ -244,8 +274,10 @@ export default function MessagesPage() {
                   </div>
                 ) : (
                   conversations.map((c: any) => {
-                    const participant = c.participants?.data?.[0];
+                    const participant = getOtherParticipant(c);
                     const isSelected = selectedConversation?.id === c.id;
+                    const initial = (participant?.username || "U").charAt(0).toUpperCase();
+
                     return (
                       <button
                         key={c.id}
@@ -256,7 +288,7 @@ export default function MessagesPage() {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                            {participant?.username?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+                            {initial}
                           </div>
                           <div className="min-w-0">
                             <span className="text-xs font-bold text-white block truncate">
@@ -287,7 +319,7 @@ export default function MessagesPage() {
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-xs font-bold text-white truncate">
                     {selectedConversation
-                      ? `@${selectedConversation.participants?.data?.[0]?.username || "Chat"}`
+                      ? `@${getOtherParticipant(selectedConversation)?.username || "Chat"}`
                       : "Direct Messenger"}
                   </span>
                   {recipientId && (
@@ -321,7 +353,10 @@ export default function MessagesPage() {
                   </div>
                 ) : (
                   messages.map((m: any) => {
-                    const isFromMe = m.from?.id === capabilities?.userId;
+                    const isFromMe =
+                      String(m.from?.id) === String(myId) ||
+                      m.from?.username?.toLowerCase() === myUsername.toLowerCase();
+
                     return (
                       <div
                         key={m.id}
@@ -330,7 +365,7 @@ export default function MessagesPage() {
                         <div
                           className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-xs relative ${
                             isFromMe
-                              ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-br-none"
+                              ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-br-none shadow-md shadow-pink-500/10"
                               : "bg-zinc-800/90 text-zinc-100 rounded-bl-none border border-white/[0.06]"
                           }`}
                         >
@@ -408,28 +443,35 @@ export default function MessagesPage() {
                 )}
 
                 {attachmentMode !== "none" && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="url"
-                      value={attachmentUrl}
-                      onChange={(e) => setAttachmentUrl(e.target.value)}
-                      placeholder={
-                        attachmentMode === "audio"
-                          ? "Direct URL to audio file (.m4a or .wav)"
-                          : "Direct URL to document (.pdf)"
-                      }
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAttachmentMode("none");
-                        setAttachmentUrl("");
-                      }}
-                      className="text-xs text-zinc-500 hover:text-white px-2"
-                    >
-                      Cancel
-                    </button>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={attachmentUrl}
+                        onChange={(e) => setAttachmentUrl(e.target.value)}
+                        placeholder={
+                          attachmentMode === "audio"
+                            ? "Direct audio URL (.m4a, .wav, or .mp3 link)"
+                            : "Direct URL to document (.pdf)"
+                        }
+                        className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttachmentMode("none");
+                          setAttachmentUrl("");
+                        }}
+                        className="text-xs text-zinc-500 hover:text-white px-2"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    {attachmentMode === "audio" && (
+                      <p className="text-[10px] text-zinc-500 px-1">
+                        💡 Native voice notes require <code className="text-pink-400">.m4a</code> or <code className="text-pink-400">.wav</code>. MP3 links will be sent as a direct playable link.
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -466,7 +508,11 @@ export default function MessagesPage() {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Type an Instagram direct message..."
+                    placeholder={
+                      selectedConversation
+                        ? `Message @${recipientUsername || "user"}...`
+                        : "Type an Instagram direct message..."
+                    }
                     className="flex-1 bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
                   />
 

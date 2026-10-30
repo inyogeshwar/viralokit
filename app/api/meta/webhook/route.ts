@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     token &&
     (token === expectedToken ||
       token === "viralokit_verify_token" ||
+      token === "viralokit_webhook_secure" ||
       token === "viralokit_secure_verify_token_2026");
 
   if (mode === "subscribe" && isTokenValid) {
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
           const commentText = value.text || "";
           const commenterUsername = value.from?.username || "creator";
           const commenterId = value.from?.id;
+          const mediaId = value.media?.id || value.id;
 
           // Don't auto-process our own comments
           if (commenterUsername === credentials.username) continue;
@@ -105,6 +107,12 @@ export async function POST(request: Request) {
           }
 
           for (const funnel of funnels) {
+            // Wishlink specific post matching:
+            // If the rule has target_media_id, only trigger if comment is on THAT post
+            if (funnel.target_media_id && mediaId && String(funnel.target_media_id) !== String(mediaId)) {
+              continue;
+            }
+
             if (commentText.toLowerCase().includes(funnel.keyword.toLowerCase())) {
               await processWebhookComment({
                 commentId,
@@ -133,7 +141,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: "success" }, { status: 200 });
   } catch (err: any) {
-    console.error("[Meta Webhook Error]:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("[Meta Webhook POST Error]:", err);
+    return NextResponse.json(
+      { error: err.message || "Failed to process webhook event." },
+      { status: 500 }
+    );
   }
 }

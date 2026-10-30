@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get("conversationId");
-    const limit = parseInt(searchParams.get("limit") || "15", 10);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
 
     if (conversationId) {
       const messages = await getConversationMessages({
@@ -25,7 +25,11 @@ export async function GET(request: Request) {
         limit,
         accessToken: credentials.pageAccessToken,
       });
-      return NextResponse.json({ messages });
+      return NextResponse.json({
+        messages,
+        myId: credentials.instagramUserId,
+        myUsername: credentials.username,
+      });
     }
 
     const conversations = await getConversations({
@@ -34,7 +38,12 @@ export async function GET(request: Request) {
       accessToken: credentials.pageAccessToken,
     });
 
-    return NextResponse.json({ conversations });
+    return NextResponse.json({
+      conversations,
+      myId: credentials.instagramUserId,
+      myUsername: credentials.username,
+      pageId: credentials.pageId,
+    });
   } catch (err: any) {
     console.error("[Conversations API Error]:", err);
     return NextResponse.json(

@@ -19,6 +19,13 @@ import {
   Plus,
   RefreshCw,
   Loader2,
+  ShoppingBag,
+  ExternalLink,
+  Trash2,
+  Layers,
+  Tag,
+  CheckCircle2,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -27,45 +34,61 @@ import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+const WISHLINK_TEMPLATES = [
+  {
+    id: "product_drop",
+    name: "🛍️ Wishlink Product Drop",
+    text: "Hey @{username}! 🛍️ Here is the exact product link from this post:\n\n🔗 {link}\n\nTap above to view product details and buy! ✨",
+  },
+  {
+    id: "outfit",
+    name: "👗 Outfit & Aesthetic Links",
+    text: "Hey @{username}! 🎀 Here are all the outfit & item links from this reel:\n\n✨ {link}\n\nSave this for later! 💖",
+  },
+  {
+    id: "discount",
+    name: "🎟️ Exclusive Discount & Deal",
+    text: "Hey @{username}! 🎟️ Special Creator Discount unlocked for you:\n\n👉 {link}\n\nUse this direct link for extra discount at checkout! 🔥",
+  },
+  {
+    id: "custom",
+    name: "📝 Custom Template",
+    text: "Hey @{username}! Here is your link: {link} 🚀 Enjoy!",
+  },
+];
+
 export default function AutomationsPage() {
+  const [activeTab, setActiveTab] = useState<"wishlink" | "global" | "runner">("wishlink");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedToken, setCopiedToken] = useState(false);
 
-  // New Rule Form State
-  const [keyword, setKeyword] = useState("LINK");
-  const [requireFollow, setRequireFollow] = useState(true);
-  const [publicReply, setPublicReply] = useState("Sent you the link in DM! 📩 Check your inbox @{username}!");
-  const [followGateMsg, setFollowGateMsg] = useState(
-    "Hey @{username}! 👋 Follow our account first to unlock this exclusive link! Once followed, reply 'DONE' 🚀"
+  // --- Wishlink Studio State ---
+  const [wishlinkMode, setWishlinkMode] = useState<"specific" | "all">("specific");
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [wishlinkKeyword, setWishlinkKeyword] = useState("LINK");
+  const [wishlinkProductUrl, setWishlinkProductUrl] = useState("https://wishlink.com/in.yogeshwar/");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("product_drop");
+  const [wishlinkMessageTemplate, setWishlinkMessageTemplate] = useState(WISHLINK_TEMPLATES[0].text);
+  const [wishlinkRequireFollow, setWishlinkRequireFollow] = useState(true);
+  const [wishlinkPublicReply, setWishlinkPublicReply] = useState("Sent you the direct link in DM! 🛍️ Check your inbox @{username}!");
+  const [isSavingWishlink, setIsSavingWishlink] = useState(false);
+
+  // --- Global Funnel State ---
+  const [globalKeyword, setGlobalKeyword] = useState("GUIDE");
+  const [globalRequireFollow, setGlobalRequireFollow] = useState(true);
+  const [globalPublicReply, setGlobalPublicReply] = useState("Sent you the resource in DM! 📩 Check your inbox @{username}!");
+  const [globalFollowGateMsg, setGlobalFollowGateMsg] = useState(
+    "Hey @{username}! 👋 Follow our account first to unlock this exclusive resource! Once followed, reply 'DONE' 🚀"
   );
-  const [unlockedMsg, setUnlockedMsg] = useState(
+  const [globalUnlockedMsg, setGlobalUnlockedMsg] = useState(
     "Here is your exclusive link: https://viralokit.vercel.app 🚀 Enjoy!"
   );
-  const [attachmentType, setAttachmentType] = useState<"none" | "audio" | "file">("none");
-  const [attachmentUrl, setAttachmentUrl] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingGlobal, setIsSavingGlobal] = useState(false);
 
-  // Manual Runner State
+  // --- Manual Runner State ---
   const [targetMediaId, setTargetMediaId] = useState("latest");
   const [isRunningManual, setIsRunningManual] = useState(false);
   const [runLogs, setRunLogs] = useState<any[] | null>(null);
-
-  // Fetch capabilities & user
-  const { data: authData } = useQuery({
-    queryKey: ["auth-me"],
-    queryFn: async () => {
-      const res = await fetch("/api/auth/me");
-      return res.json();
-    },
-  });
-
-  const { data: capabilities } = useQuery({
-    queryKey: ["meta-account"],
-    queryFn: async () => {
-      const res = await fetch("/api/meta/account");
-      return res.json();
-    },
-  });
 
   // Fetch active funnels
   const {
@@ -76,6 +99,19 @@ export default function AutomationsPage() {
     queryKey: ["growth-funnels"],
     queryFn: async () => {
       const res = await fetch("/api/meta/growth-funnel");
+      return res.json();
+    },
+  });
+
+  // Fetch recent posts for Wishlink Post Picker
+  const {
+    data: postsData,
+    isLoading: isPostsLoading,
+    refetch: refetchPosts,
+  } = useQuery({
+    queryKey: ["recent-posts-picker"],
+    queryFn: async () => {
+      const res = await fetch("/api/meta/posts?limit=12");
       return res.json();
     },
   });
@@ -98,41 +134,113 @@ export default function AutomationsPage() {
     toast.success("Copied to clipboard!");
   };
 
-  const handleSaveRule = async (e: React.FormEvent) => {
+  const handleTemplateSelect = (tmpl: typeof WISHLINK_TEMPLATES[0]) => {
+    setSelectedTemplateId(tmpl.id);
+    setWishlinkMessageTemplate(tmpl.text);
+  };
+
+  const handleSaveWishlinkAutomation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!keyword.trim() || !unlockedMsg.trim()) {
-      toast.error("Keyword and unlocked DM content are required.");
+    if (!wishlinkKeyword.trim()) {
+      toast.error("Please enter a trigger keyword (e.g. LINK or BUY).");
+      return;
+    }
+    if (!wishlinkProductUrl.trim()) {
+      toast.error("Please enter your Wishlink or product URL.");
       return;
     }
 
-    setIsSaving(true);
+    if (wishlinkMode === "specific" && !selectedPost) {
+      toast.error("Please select a specific Instagram post/reel below or choose 'Apply to All Posts'.");
+      return;
+    }
+
+    setIsSavingWishlink(true);
+    try {
+      const finalDmText = wishlinkMessageTemplate.replace(/\{link\}/gi, wishlinkProductUrl.trim());
+
+      const res = await fetch("/api/meta/growth-funnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_rule",
+          keyword: wishlinkKeyword.trim().toUpperCase(),
+          publicReplyTemplate: wishlinkPublicReply.trim(),
+          requireFollow: wishlinkRequireFollow,
+          followGateMessage: `Hey @{username}! 👋 Follow our account first to unlock this link! Once followed, reply 'DONE' 🛍️`,
+          unlockedContentText: finalDmText,
+          targetMediaId: wishlinkMode === "specific" ? selectedPost?.id : undefined,
+          targetMediaCaption: wishlinkMode === "specific" ? selectedPost?.caption?.slice(0, 100) : undefined,
+          targetMediaPermalink: wishlinkMode === "specific" ? selectedPost?.permalink : undefined,
+          funnelType: "wishlink",
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`Wishlink automation activated for "${wishlinkKeyword.toUpperCase()}"!`);
+        refetchFunnels();
+      } else {
+        toast.error(data.error || "Failed to save Wishlink rule.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Network error saving Wishlink rule.");
+    } finally {
+      setIsSavingWishlink(false);
+    }
+  };
+
+  const handleSaveGlobalFunnel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!globalKeyword.trim()) {
+      toast.error("Please enter a trigger keyword.");
+      return;
+    }
+
+    setIsSavingGlobal(true);
     try {
       const res = await fetch("/api/meta/growth-funnel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "save_rule",
-          keyword: keyword.trim().toLowerCase(),
-          publicReplyTemplate: publicReply,
-          requireFollow,
-          followGateMessage: followGateMsg,
-          unlockedContentText: unlockedMsg,
-          attachmentType: attachmentType !== "none" ? attachmentType : undefined,
-          attachmentUrl: attachmentUrl.trim() || undefined,
+          keyword: globalKeyword.trim().toUpperCase(),
+          publicReplyTemplate: globalPublicReply.trim(),
+          requireFollow: globalRequireFollow,
+          followGateMessage: globalFollowGateMsg.trim(),
+          unlockedContentText: globalUnlockedMsg.trim(),
+          funnelType: "keyword",
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(`Automation funnel for '${keyword}' created!`);
+        toast.success(`Global funnel rule activated for "${globalKeyword.toUpperCase()}"!`);
         refetchFunnels();
       } else {
-        toast.error(data.error || "Failed to save funnel rule.");
+        toast.error(data.error || "Failed to save rule.");
       }
     } catch (err: any) {
-      toast.error(err.message || "Network error saving rule.");
+      toast.error(err.message || "Network error.");
     } finally {
-      setIsSaving(false);
+      setIsSavingGlobal(false);
+    }
+  };
+
+  const handleDeleteRule = async (ruleId: string) => {
+    try {
+      const res = await fetch("/api/meta/growth-funnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_rule", ruleId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Rule removed.");
+        refetchFunnels();
+      }
+    } catch {
+      toast.error("Failed to delete rule.");
     }
   };
 
@@ -146,317 +254,478 @@ export default function AutomationsPage() {
         body: JSON.stringify({
           action: "run_manual",
           mediaId: targetMediaId.trim() || "latest",
-          keyword: keyword.trim().toLowerCase(),
-          publicReplyTemplate: publicReply,
-          requireFollow,
-          followGateMessage: followGateMsg,
-          unlockedContentText: unlockedMsg,
-          attachmentType: attachmentType !== "none" ? attachmentType : undefined,
-          attachmentUrl: attachmentUrl.trim() || undefined,
+          keyword: wishlinkKeyword.trim(),
+          publicReplyTemplate: wishlinkPublicReply,
+          requireFollow: wishlinkRequireFollow,
+          unlockedContentText: wishlinkMessageTemplate.replace(/\{link\}/gi, wishlinkProductUrl),
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         setRunLogs(data.results || []);
-        toast.success(`Processed ${data.processedCount || 0} matching comments!`);
+        toast.success(
+          `Scanned ${data.totalCommentsChecked} comments. Processed ${data.processedCount} matching comments!`
+        );
       } else {
-        toast.error(data.error || "Execution failed.");
+        toast.error(data.error || "Manual scan failed.");
       }
     } catch (err: any) {
-      toast.error(err.message || "Network error executing funnel.");
+      toast.error(err.message || "Network error running scan.");
     } finally {
       setIsRunningManual(false);
     }
   };
 
+  const activeFunnels = funnelsData?.funnels || [];
+  const recentPosts = postsData?.posts || [];
+
   return (
-    <div className="flex min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
+    <div className="flex h-screen bg-[#080808] text-zinc-100 antialiased overflow-hidden selection:bg-pink-500/20 selection:text-pink-300">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
-        <Header
-          user={authData?.user}
-          accountUsername={capabilities?.username}
-          isConnected={capabilities?.connected}
-        />
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <Header />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-8">
-          {/* Top Title Banner */}
-          <div className="border-b border-white/[0.08] pb-6">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                <Zap className="w-3 h-3 text-pink-400" />
-                Growth Engine
+        <main className="flex-1 p-4 sm:p-8 max-w-6xl mx-auto w-full space-y-6">
+          {/* Header Title */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-400 border border-pink-500/30">
+                <ShoppingBag className="w-3 h-3 text-pink-400" />
+                Wishlink & ManyChat Alternative
               </span>
-              <span className="text-[11px] text-zinc-500">• ManyChat / Superprofile Alternative</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-headline flex items-center gap-2">
-              Social Growth & Funnel Automation
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1.5">
+              Social Growth & DM Automation Studio
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              Follow-to-Unlock comment funnels, voice notes & automated DMs. Runs 24/7 in the cloud on Vercel without keeping your phone or laptop on!
+            <p className="text-xs text-zinc-400 mt-1">
+              Send product links, affiliate collections, or guides automatically when someone comments on your Instagram posts!
             </p>
           </div>
 
-          {/* 1. 24/7 Cloud Webhook Configuration Card */}
-          <div className="bg-[#0C0C0C] border border-pink-500/25 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-pink-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
-                  <Radio className="w-5 h-5 text-pink-400 animate-pulse" />
-                  <span>24/7 Real-Time Cloud Webhook (Zero Laptop Required)</span>
-                </h3>
-                <p className="text-xs text-zinc-400">
-                  When anyone comments on your Instagram posts, Meta immediately sends the event to Vercel. ViraloKit executes your growth funnel in under 1 second!
-                </p>
-              </div>
-              <Badge variant="outline" className="border-emerald-500/40 text-emerald-300 bg-emerald-500/10 text-[10px] py-1 px-3 self-start sm:self-auto">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1.5 animate-ping" />
-                Cloud Active
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="text-zinc-400 font-medium">Meta Callback URL</label>
-                <div className="flex items-center gap-2 bg-zinc-900/90 border border-white/[0.08] rounded-xl px-3 py-2 text-zinc-200">
-                  <span className="truncate flex-1 font-mono text-[11px] text-pink-300">{webhookUrl}</span>
-                  <button
-                    onClick={() => handleCopy(webhookUrl, "url")}
-                    className="p-1 hover:text-white transition-colors"
-                    title="Copy URL"
-                  >
-                    {copiedUrl ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
-                  </button>
+          {/* Webhook Status Card */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-white/[0.08] relative overflow-hidden shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 shrink-0">
+                  <Radio className="w-4 h-4 animate-pulse" />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-zinc-400 font-medium">Verify Token</label>
-                <div className="flex items-center gap-2 bg-zinc-900/90 border border-white/[0.08] rounded-xl px-3 py-2 text-zinc-200">
-                  <span className="truncate flex-1 font-mono text-[11px] text-emerald-300">{verifyToken}</span>
-                  <button
-                    onClick={() => handleCopy(verifyToken, "token")}
-                    className="p-1 hover:text-white transition-colors"
-                    title="Copy Token"
-                  >
-                    {copiedToken ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3.5 bg-zinc-900/40 border border-white/[0.06] rounded-2xl text-[11px] text-zinc-400 space-y-1">
-              <span className="font-semibold text-zinc-200 block">📱 How to connect on your smartphone:</span>
-              <p>
-                1. Open <a href="https://developers.facebook.com/apps" target="_blank" rel="noreferrer" className="text-pink-400 underline">Meta Developer Portal</a> → Select your App → <strong>Webhooks</strong>.
-              </p>
-              <p>
-                2. Select <strong>Instagram</strong> → Click <strong>Edit Subscription</strong> → Paste the Callback URL and Verify Token above.
-              </p>
-              <p>
-                3. Check the <strong>comments</strong> and <strong>messages</strong> boxes. Done! Your automation is 100% active in the cloud!
-              </p>
-            </div>
-          </div>
-
-          {/* 2. Active Funnel Rules List */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-pink-400" />
-                Active Follow-to-Unlock Funnels
-              </h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetchFunnels()}
-                disabled={isFunnelsLoading}
-                className="text-xs border-white/[0.08]"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isFunnelsLoading ? "animate-spin" : ""}`} />
-                Refresh Rules
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {funnelsData?.funnels?.map((f: any) => (
-                <div
-                  key={f.id}
-                  className="bg-zinc-900/60 border border-white/[0.08] hover:border-pink-500/30 transition-all rounded-2xl p-5 space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-pink-300 uppercase tracking-wide flex items-center gap-1.5">
-                      <MessageCircle className="w-4 h-4 text-pink-400" />
-                      Trigger: &quot;{f.keyword}&quot;
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={
-                        f.require_follow !== false
-                          ? "border-amber-500/40 text-amber-300 bg-amber-500/10 text-[10px]"
-                          : "border-zinc-700 text-zinc-400 text-[10px]"
-                      }
-                    >
-                      {f.require_follow !== false ? "🔒 Follower Gate" : "🔓 Open to All"}
+                <div>
+                  <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                    24/7 Meta Cloud Webhook
+                    <Badge className="bg-emerald-500/15 text-emerald-400 text-[9px] px-1.5 py-0 h-4 border-emerald-500/30">
+                      Active In Cloud
                     </Badge>
-                  </div>
-
-                  <div className="text-xs space-y-2 text-zinc-300">
-                    <div>
-                      <span className="text-zinc-500 block text-[10px] font-semibold uppercase">Public Reply:</span>
-                      <p className="bg-zinc-950/50 rounded-lg p-2 text-zinc-200 mt-0.5 border border-white/[0.04]">
-                        {f.public_reply_template}
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="text-zinc-500 block text-[10px] font-semibold uppercase">Unlocked DM:</span>
-                      <p className="bg-zinc-950/50 rounded-lg p-2 text-pink-200 mt-0.5 border border-white/[0.04] truncate">
-                        {f.unlocked_content_text}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Create New Funnel Rule Form */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-            <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline border-b border-white/[0.08] pb-4">
-              <Plus className="w-5 h-5 text-pink-400" />
-              <span>Create Follow-to-Unlock Automation</span>
-            </h3>
-
-            <form onSubmit={handleSaveRule} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-zinc-300 font-semibold">Comment Trigger Keyword</label>
-                  <input
-                    type="text"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    placeholder="e.g. LINK, GUIDE, AI, PRICE"
-                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 uppercase tracking-wider font-bold"
-                  />
-                  <p className="text-[10px] text-zinc-500">Case-insensitive. Triggers when comment contains this word.</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-zinc-300 font-semibold">Follower Verification Gate</label>
-                  <div className="flex items-center gap-3 bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2.5">
-                    <input
-                      type="checkbox"
-                      id="followGateToggle"
-                      checked={requireFollow}
-                      onChange={(e) => setRequireFollow(e.target.checked)}
-                      className="w-4 h-4 rounded text-pink-500 focus:ring-pink-500 bg-zinc-800 border-zinc-700"
-                    />
-                    <label htmlFor="followGateToggle" className="cursor-pointer text-zinc-200 font-medium">
-                      Require user to follow before unlocking link
-                    </label>
-                  </div>
-                  <p className="text-[10px] text-amber-400/90 font-medium">
-                    ⚡ Increases your Instagram follower conversion by 400%!
+                  </h3>
+                  <p className="text-[11px] text-zinc-500">
+                    Works 24/7 on Vercel without keeping your laptop or phone on.
                   </p>
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="text-zinc-300 font-semibold">Public Comment Reply Template</label>
-                <input
-                  type="text"
-                  value={publicReply}
-                  onChange={(e) => setPublicReply(e.target.value)}
-                  placeholder="Sent you the link in DM! 📩 Check your inbox @{username}!"
-                  className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
-                />
-                <p className="text-[10px] text-zinc-500">Use {'{username}'} to automatically tag the commenter.</p>
-              </div>
-
-              {requireFollow && (
-                <div className="space-y-1.5">
-                  <label className="text-zinc-300 font-semibold text-amber-300 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5" />
-                    Non-Follower Gate Prompt (Sent if user is not following yet)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={followGateMsg}
-                    onChange={(e) => setFollowGateMsg(e.target.value)}
-                    className="w-full bg-zinc-900 border border-amber-500/30 rounded-xl px-3.5 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
-                  />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+              <div className="bg-zinc-900/60 p-2.5 rounded-xl border border-white/[0.04] flex items-center justify-between">
+                <div className="min-w-0 pr-2">
+                  <span className="text-[10px] text-zinc-500 block uppercase tracking-wider font-semibold">Callback URL</span>
+                  <span className="text-xs font-mono text-zinc-300 truncate block">{webhookUrl}</span>
                 </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label className="text-zinc-300 font-semibold text-pink-300">
-                  Unlocked Content / Resource (Sent in DM once verified)
-                </label>
-                <textarea
-                  rows={2}
-                  value={unlockedMsg}
-                  onChange={(e) => setUnlockedMsg(e.target.value)}
-                  placeholder="Here is your exclusive link: https://... 🚀 Enjoy!"
-                  className="w-full bg-zinc-900 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-pink-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                <div className="space-y-1.5">
-                  <label className="text-zinc-300 font-semibold">Optional DM Attachment Type</label>
-                  <select
-                    value={attachmentType}
-                    onChange={(e: any) => setAttachmentType(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-zinc-200 focus:outline-none focus:border-pink-500"
-                  >
-                    <option value="none">None (Text / Link only)</option>
-                    <option value="audio">Voice Note / Audio (.m4a / .wav)</option>
-                    <option value="file">Document / PDF (.pdf)</option>
-                  </select>
-                </div>
-
-                {attachmentType !== "none" && (
-                  <div className="space-y-1.5">
-                    <label className="text-zinc-300 font-semibold">Public Attachment URL</label>
-                    <input
-                      type="url"
-                      value={attachmentUrl}
-                      onChange={(e) => setAttachmentUrl(e.target.value)}
-                      placeholder="https://example.com/audio.m4a or .pdf"
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end pt-3">
-                <Button
-                  type="submit"
-                  disabled={isSaving}
-                  className="primary-gradient-bg text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-pink-500/20"
+                <button
+                  onClick={() => handleCopy(webhookUrl, "url")}
+                  className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 shrink-0"
                 >
-                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-                  Save & Activate Funnel
-                </Button>
+                  {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
               </div>
-            </form>
+
+              <div className="bg-zinc-900/60 p-2.5 rounded-xl border border-white/[0.04] flex items-center justify-between">
+                <div className="min-w-0 pr-2">
+                  <span className="text-[10px] text-zinc-500 block uppercase tracking-wider font-semibold">Verify Token</span>
+                  <span className="text-xs font-mono text-zinc-300 truncate block">{verifyToken}</span>
+                </div>
+                <button
+                  onClick={() => handleCopy(verifyToken, "token")}
+                  className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 shrink-0"
+                >
+                  {copiedToken ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* 4. Live Manual Runner & Simulator */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
-                  <Play className="w-5 h-5 text-emerald-400" />
-                  <span>Test Run Funnel Now (On-Demand Scan)</span>
-                </h3>
-                <p className="text-xs text-zinc-400">
-                  Scan recent comments on your latest Instagram post or specific Media ID, execute follower verification, and deliver DMs.
+          {/* Studio Navigation Tabs */}
+          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
+            <button
+              onClick={() => setActiveTab("wishlink")}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "wishlink"
+                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Wishlink & Post DM Studio
+            </button>
+
+            <button
+              onClick={() => setActiveTab("global")}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "global"
+                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              Global Keywords (All Posts)
+            </button>
+
+            <button
+              onClick={() => setActiveTab("runner")}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "runner"
+                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+              }`}
+            >
+              <Play className="w-3.5 h-3.5" />
+              Scan Now (Test Runner)
+            </button>
+          </div>
+
+          {/* TAB 1: WISHLINK & POST-SPECIFIC DM STUDIO */}
+          {activeTab === "wishlink" && (
+            <div className="space-y-6">
+              <form onSubmit={handleSaveWishlinkAutomation} className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-5 shadow-2xl">
+                <div className="border-b border-white/[0.06] pb-3 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                      <ShoppingBag className="w-4 h-4 text-pink-400" />
+                      Create Wishlink Post Automation
+                    </h2>
+                    <p className="text-[11px] text-zinc-500">
+                      When someone comments your trigger keyword on a specific post, ViraloKit sends the exact product link instantly in DM!
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-white/[0.06]">
+                    <button
+                      type="button"
+                      onClick={() => setWishlinkMode("specific")}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                        wishlinkMode === "specific" ? "bg-pink-600 text-white" : "text-zinc-400"
+                      }`}
+                    >
+                      Specific Post
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWishlinkMode("all");
+                        setSelectedPost(null);
+                      }}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                        wishlinkMode === "all" ? "bg-pink-600 text-white" : "text-zinc-400"
+                      }`}
+                    >
+                      All Posts
+                    </button>
+                  </div>
+                </div>
+
+                {/* Specific Post Picker */}
+                {wishlinkMode === "specific" && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-300 block flex items-center justify-between">
+                      <span>1. Select Specific Instagram Post / Reel:</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => refetchPosts()}
+                        disabled={isPostsLoading}
+                        className="text-[10px] text-zinc-500 h-6 px-1.5"
+                      >
+                        <RefreshCw className={`w-3 h-3 mr-1 ${isPostsLoading ? "animate-spin" : ""}`} /> Refresh Posts
+                      </Button>
+                    </label>
+
+                    {selectedPost ? (
+                      <div className="p-3 bg-pink-500/10 border border-pink-500/30 rounded-2xl flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {selectedPost.thumbnail_url || selectedPost.media_url ? (
+                            <img
+                              src={selectedPost.thumbnail_url || selectedPost.media_url}
+                              alt="Post"
+                              className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/[0.1]"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                              <ImageIcon className="w-5 h-5 text-zinc-500" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-white block truncate">
+                              {selectedPost.caption || "Instagram Media Post"}
+                            </span>
+                            <span className="text-[10px] text-pink-300 font-mono block">
+                              Media ID: {selectedPost.id} • {selectedPost.media_type}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedPost(null)}
+                          className="text-[10px] border-white/[0.1] text-zinc-400 hover:text-white"
+                        >
+                          Change
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-56 overflow-y-auto p-1">
+                        {isPostsLoading ? (
+                          <div className="col-span-full py-8 text-center text-xs text-zinc-500 flex items-center justify-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-pink-400" /> Loading your recent Instagram posts...
+                          </div>
+                        ) : recentPosts.length === 0 ? (
+                          <div className="col-span-full py-6 text-center text-xs text-zinc-500">
+                            No posts found. You can also paste Media ID or choose "All Posts".
+                          </div>
+                        ) : (
+                          recentPosts.map((post: any) => (
+                            <button
+                              key={post.id}
+                              type="button"
+                              onClick={() => setSelectedPost(post)}
+                              className="text-left p-2 rounded-xl bg-zinc-900/80 border border-white/[0.06] hover:border-pink-500/50 hover:bg-zinc-800/80 transition-all group flex flex-col justify-between"
+                            >
+                              <div className="w-full aspect-square rounded-lg bg-zinc-800 overflow-hidden mb-1.5 relative">
+                                {post.thumbnail_url || post.media_url ? (
+                                  <img
+                                    src={post.thumbnail_url || post.media_url}
+                                    alt="Post"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-zinc-600">
+                                    <ImageIcon className="w-6 h-6" />
+                                  </div>
+                                )}
+                                <span className="absolute bottom-1 right-1 bg-black/70 text-[9px] px-1 rounded text-white font-mono">
+                                  {post.media_type === "VIDEO" ? "Reel" : "Post"}
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-zinc-200 line-clamp-1 block font-medium">
+                                {post.caption || "Untitled"}
+                              </span>
+                              <span className="text-[9px] text-pink-400 mt-0.5 group-hover:underline">
+                                Select Post →
+                              </span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Trigger Keyword & Product URL */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">2. Comment Trigger Keyword:</label>
+                    <input
+                      type="text"
+                      value={wishlinkKeyword}
+                      onChange={(e) => setWishlinkKeyword(e.target.value.toUpperCase())}
+                      placeholder="e.g. LINK, BUY, SHOP, 1, OUTFIT"
+                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono font-bold"
+                      required
+                    />
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      <span className="text-[10px] text-zinc-500">Quick set:</span>
+                      {["LINK", "BUY", "SHOP", "1", "OUTFIT", "PRICE"].map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => setWishlinkKeyword(k)}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.06]"
+                        >
+                          {k}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">3. Wishlink / Product URL:</label>
+                    <input
+                      type="url"
+                      value={wishlinkProductUrl}
+                      onChange={(e) => setWishlinkProductUrl(e.target.value)}
+                      placeholder="https://wishlink.com/in.yogeshwar/... or store link"
+                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono"
+                      required
+                    />
+                    <span className="text-[10px] text-zinc-500 block">
+                      This link will be automatically inserted into the direct message.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Templates Selector */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-300">4. Choose Wishlink DM Template:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {WISHLINK_TEMPLATES.map((tmpl) => (
+                      <button
+                        key={tmpl.id}
+                        type="button"
+                        onClick={() => handleTemplateSelect(tmpl)}
+                        className={`text-left p-2.5 rounded-xl border text-xs transition-all ${
+                          selectedTemplateId === tmpl.id
+                            ? "bg-pink-500/10 border-pink-500 text-white font-medium shadow-sm shadow-pink-500/10"
+                            : "bg-zinc-900/60 border-white/[0.06] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <span className="block font-bold text-white mb-1">{tmpl.name}</span>
+                        <span className="text-[11px] text-zinc-400 line-clamp-2">{tmpl.text}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    rows={3}
+                    value={wishlinkMessageTemplate}
+                    onChange={(e) => setWishlinkMessageTemplate(e.target.value)}
+                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl p-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
+                    placeholder="Custom DM text (use {username} and {link} as placeholders)..."
+                  />
+                </div>
+
+                {/* Settings & Switches */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-white/[0.06]">
+                    <input
+                      type="checkbox"
+                      id="wishlinkFollow"
+                      checked={wishlinkRequireFollow}
+                      onChange={(e) => setWishlinkRequireFollow(e.target.checked)}
+                      className="w-4 h-4 rounded text-pink-600 bg-zinc-800 border-zinc-700 focus:ring-0"
+                    />
+                    <label htmlFor="wishlinkFollow" className="text-xs text-zinc-300 cursor-pointer">
+                      <span className="font-semibold block text-white">Require User To Follow (Follow-to-Unlock)</span>
+                      <span className="text-[10px] text-zinc-500 block">
+                        Non-followers get a prompt to follow first, boosting your follower growth by 400%!
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-zinc-400 block">Public Comment Auto-Reply:</label>
+                    <input
+                      type="text"
+                      value={wishlinkPublicReply}
+                      onChange={(e) => setWishlinkPublicReply(e.target.value)}
+                      className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end pt-2">
+                  <Button
+                    type="submit"
+                    disabled={isSavingWishlink}
+                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-pink-500/20"
+                  >
+                    {isSavingWishlink ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    ) : (
+                      <ShoppingBag className="w-4 h-4 mr-1.5" />
+                    )}
+                    Save & Activate Wishlink Automation
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 2: GLOBAL COMMENT FUNNELS (ALL POSTS) */}
+          {activeTab === "global" && (
+            <div className="space-y-6">
+              <form onSubmit={handleSaveGlobalFunnel} className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
+                <div className="border-b border-white/[0.06] pb-3">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-purple-400" />
+                    Global Comment Funnel (Across All Posts)
+                  </h2>
+                  <p className="text-[11px] text-zinc-500">
+                    Triggers whenever someone comments a keyword on ANY of your Instagram posts or reels.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">Comment Trigger Keyword:</label>
+                    <input
+                      type="text"
+                      value={globalKeyword}
+                      onChange={(e) => setGlobalKeyword(e.target.value.toUpperCase())}
+                      placeholder="e.g. GUIDE, FREE, TUTORIAL"
+                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white font-mono font-bold"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">Public Comment Reply:</label>
+                    <input
+                      type="text"
+                      value={globalPublicReply}
+                      onChange={(e) => setGlobalPublicReply(e.target.value)}
+                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-300">Unlocked DM Message / Resource:</label>
+                  <textarea
+                    rows={3}
+                    value={globalUnlockedMsg}
+                    onChange={(e) => setGlobalUnlockedMsg(e.target.value)}
+                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl p-3 text-xs text-white"
+                    placeholder="Content sent when follower status is confirmed..."
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end pt-2">
+                  <Button
+                    type="submit"
+                    disabled={isSavingGlobal}
+                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-pink-500/20"
+                  >
+                    {isSavingGlobal ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                    Save Global Rule
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 3: TEST RUNNER (ON-DEMAND SCAN) */}
+          {activeTab === "runner" && (
+            <div className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Play className="w-4 h-4 text-emerald-400" />
+                  On-Demand Comment Scanner & Execution Test
+                </h2>
+                <p className="text-[11px] text-zinc-500">
+                  Manually scan comments on your latest Instagram post or specific media ID and execute DM delivery immediately.
                 </p>
               </div>
 
@@ -465,59 +734,141 @@ export default function AutomationsPage() {
                   type="text"
                   value={targetMediaId}
                   onChange={(e) => setTargetMediaId(e.target.value)}
-                  placeholder="latest or media_id"
-                  className="bg-zinc-900 border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-600 w-36"
+                  placeholder="Enter 'latest' or specific Instagram Media ID"
+                  className="flex-1 bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white font-mono"
                 />
                 <Button
                   onClick={handleRunManual}
                   disabled={isRunningManual}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all"
+                  className="primary-gradient-bg text-white text-xs px-4 py-2 rounded-xl shrink-0"
                 >
-                  {isRunningManual ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Play className="w-3.5 h-3.5 mr-1.5 fill-black" />}
-                  Run Scan
+                  {isRunningManual ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Play className="w-4 h-4 mr-1" />}
+                  Scan & Execute
                 </Button>
               </div>
+
+              {runLogs && (
+                <div className="space-y-2 pt-2">
+                  <h4 className="text-xs font-semibold text-zinc-300">Scan Execution Output:</h4>
+                  {runLogs.length === 0 ? (
+                    <div className="p-4 bg-zinc-900/50 rounded-xl text-center text-xs text-zinc-500 border border-white/[0.04]">
+                      No new matching comments found on this post.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-white/[0.04] bg-zinc-900/60 rounded-xl border border-white/[0.06] overflow-hidden">
+                      {runLogs.map((log, idx) => (
+                        <div key={idx} className="p-3 text-xs flex items-center justify-between gap-2">
+                          <div>
+                            <span className="font-bold text-white">@{log.username}</span>
+                            <span className="text-zinc-400 ml-2">"{log.comment_text}"</span>
+                          </div>
+                          <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px] border-emerald-500/30">
+                            {log.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ACTIVE RULES LIST */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-pink-400" />
+                  Active Growth & Wishlink Automations ({activeFunnels.length})
+                </h3>
+                <p className="text-[11px] text-zinc-500">
+                  Rules actively running 24/7 on incoming Instagram comments
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchFunnels()}
+                disabled={isFunnelsLoading}
+                className="text-xs border-white/[0.08]"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isFunnelsLoading ? "animate-spin" : ""}`} />
+              </Button>
             </div>
 
-            {runLogs && (
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Execution Logs ({runLogs.length} matching comments processed):
-                </h4>
-                {runLogs.length === 0 ? (
-                  <p className="text-xs text-zinc-500 italic bg-zinc-950 p-4 rounded-xl border border-white/[0.04]">
-                    No matching comments with keyword &quot;{keyword}&quot; found on the post yet.
-                  </p>
-                ) : (
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {runLogs.map((log: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="bg-zinc-950 p-3.5 rounded-xl border border-white/[0.06] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                      >
-                        <div className="space-y-0.5">
-                          <span className="font-semibold text-white">@{log.username}</span>: &quot;{log.comment_text}&quot;
-                          <div className="flex items-center gap-2 text-[10px] text-zinc-400">
-                            <span>Liked: {log.liked ? "✅" : "❌"}</span>
-                            <span>Public Reply: {log.public_reply_sent ? "✅" : "❌"}</span>
-                            <span>DM Delivered: {log.dm_sent ? "✅" : "❌"}</span>
-                          </div>
+            {isFunnelsLoading ? (
+              <div className="py-8 text-center text-xs text-zinc-500 flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-pink-400" /> Loading active rules...
+              </div>
+            ) : activeFunnels.length === 0 ? (
+              <div className="py-6 text-center text-xs text-zinc-500">
+                No automations created yet. Create your first Wishlink automation above!
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {activeFunnels.map((funnel: any) => {
+                  const isWishlink = funnel.funnel_type === "wishlink" || Boolean(funnel.target_media_id);
+
+                  return (
+                    <div
+                      key={funnel.id}
+                      className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/[0.06] flex flex-col justify-between space-y-2.5"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-lg border border-pink-500/30">
+                            TRIGGER: "{funnel.keyword}"
+                          </span>
+                          <Badge
+                            className={`text-[9px] px-1.5 py-0 h-4 ${
+                              isWishlink
+                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                : "bg-zinc-800 text-zinc-400"
+                            }`}
+                          >
+                            {isWishlink ? "Wishlink" : "Global"}
+                          </Badge>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className={
-                            log.status.includes("UNLOCKED")
-                              ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10 text-[10px]"
-                              : "border-amber-500/40 text-amber-300 bg-amber-500/10 text-[10px]"
-                          }
-                        >
-                          {log.status}
-                        </Badge>
+
+                        {funnel.id && !funnel.id.startsWith("default-") && (
+                          <button
+                            onClick={() => handleDeleteRule(funnel.id)}
+                            className="text-zinc-500 hover:text-red-400 p-1"
+                            title="Delete Rule"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      {funnel.target_media_caption && (
+                        <div className="text-[11px] text-zinc-400 bg-zinc-950/50 p-2 rounded-xl border border-white/[0.04]">
+                          <span className="text-[10px] text-zinc-500 block">Specific Post:</span>
+                          <span className="line-clamp-1 font-medium text-white">{funnel.target_media_caption}</span>
+                          {funnel.target_media_id && (
+                            <span className="text-[9px] text-pink-400 font-mono block mt-0.5">
+                              ID: {funnel.target_media_id}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="text-[11px] text-zinc-300 line-clamp-2 bg-zinc-950/40 p-2 rounded-xl">
+                        <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">DM Content:</span>
+                        {funnel.unlocked_content_text}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1 border-t border-white/[0.04]">
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          {funnel.require_follow ? "Follower-Gated (400% boost)" : "Open to All"}
+                        </span>
+                        <span>Auto-Reply Active</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

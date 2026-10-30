@@ -4,22 +4,21 @@ import { getUserInstagramCredentials } from "@/lib/meta/user-account";
 import { runCommentGrowthFunnel } from "@/lib/meta/funnel";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
-    const user = await getCurrentUser();
     let funnels: any[] = [];
 
-    if (user) {
-      try {
-        const supabase = await createClient();
-        const { data } = await supabase
-          .from("growth_funnels")
-          .select("*")
-          .order("created_at", { ascending: false });
-        if (data) funnels = data;
-      } catch (err) {
-        console.warn("growth_funnels table read warning:", err);
-      }
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("growth_funnels")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) funnels = data;
+    } catch (err) {
+      console.warn("growth_funnels table read warning:", err);
     }
 
     // Default smart funnels if none in DB
@@ -28,9 +27,10 @@ export async function GET() {
         {
           id: "default-link",
           keyword: "link",
+          funnel_type: "keyword",
           public_reply_template: "Sent you the link in DM! 📩 Check your inbox @{username}!",
           require_follow: true,
-          follow_gate_message: "Hey @{username}! 👋 Follow @account first to unlock this link! Once followed, reply 'DONE' 🚀",
+          follow_gate_message: "Hey @{username}! 👋 Follow our account first to unlock this link! Once followed, reply 'DONE' 🚀",
           unlocked_content_text: "Here is your exclusive link: https://viralokit.vercel.app 🚀 Enjoy!",
           is_active: true,
           created_at: new Date().toISOString(),
@@ -38,9 +38,10 @@ export async function GET() {
         {
           id: "default-guide",
           keyword: "guide",
+          funnel_type: "keyword",
           public_reply_template: "I just sent the guide to your DM @{username}! 🎁",
           require_follow: true,
-          follow_gate_message: "Hey @{username}! 👋 Follow @account first to unlock the free guide! Once followed, reply 'DONE' 🎁",
+          follow_gate_message: "Hey @{username}! 👋 Follow our account first to unlock the free guide! Once followed, reply 'DONE' 🎁",
           unlocked_content_text: "Here is your guide: https://viralokit.vercel.app 🚀 Enjoy!",
           is_active: true,
           created_at: new Date().toISOString(),
@@ -116,46 +117,91 @@ export async function POST(request: Request) {
         unlockedContentText,
         attachmentType,
         attachmentUrl,
+        targetMediaId,
+        targetMediaCaption,
+        targetMediaPermalink,
+        funnelType = "keyword",
       } = body;
 
-      if (user) {
-        try {
-          const supabase = await createClient();
-          const { data, error } = await supabase.from("growth_funnels").insert({
-            user_id: user.id,
-            instagram_account_id: credentials.instagramUserId,
-            keyword,
-            public_reply_template: publicReplyTemplate,
-            require_follow: requireFollow,
-            follow_gate_message: followGateMessage,
-            unlocked_content_text: unlockedContentText,
-            attachment_type: attachmentType,
-            attachment_url: attachmentUrl,
-            is_active: true,
-          }).select().single();
-
-          if (error) throw error;
-          return NextResponse.json({ success: true, rule: data });
-        } catch (dbErr: any) {
-          console.warn("DB insert error on growth_funnels:", dbErr.message);
-        }
+      if (!keyword || !unlockedContentText) {
+        return NextResponse.json(
+          { error: "Trigger keyword and unlocked content are required." },
+          { status: 400 }
+        );
       }
 
-      // If DB is unavailable, return success with in-memory rule
+      try {
+        const supabase = await createClient();
+        const insertData: any = {
+          instagram_account_id: credentials.instagramUserId,
+          keyword: keyword.trim().toUpperCase(),
+          public_reply_template: publicReplyTemplate,
+          require_follow: requireFollow,
+          follow_gate_message: followGateMessage,
+          unlocked_content_text: unlockedContentText,
+          attachment_type: attachmentType || null,
+          attachment_url: attachmentUrl || null,
+          target_media_id: targetMediaId || null,
+          target_media_caption: targetMediaCaption || null,
+          target_media_permalink: targetMediaPermalink || null,
+          funnel_type: funnelType || (targetMediaId ? "wishlink" : "keyword"),
+          is_active: true,
+        };
+
+        if (user?.id) {
+          insertData.user_id = user.id;
+        }
+
+        const { data, error } = await supabase
+          .from("growth_funnels")
+          .insert(insertData)
+          .select()
+          .single();
+
+        if (error) {
+          console.warn("DB insert error on growth_funnels:", error.message);
+        } else if (data) {
+          return NextResponse.json({ success: true, rule: data });
+        }
+      } catch (dbErr: any) {
+        console.warn("DB exception on growth_funnels:", dbErr.message);
+      }
+
+      // Fallback response with in-memory rule
       return NextResponse.json({
         success: true,
         rule: {
           id: `rule-${Date.now()}`,
-          keyword,
+          keyword: keyword.trim().toUpperCase(),
           public_reply_template: publicReplyTemplate,
           require_follow: requireFollow,
           follow_gate_message: followGateMessage,
           unlocked_content_text: unlockedContentText,
           attachment_type: attachmentType,
           attachment_url: attachmentUrl,
+          target_media_id: targetMediaId,
+          target_media_caption: targetMediaCaption,
+          target_media_permalink: targetMediaPermalink,
+          funnel_type: funnelType,
           is_active: true,
         },
       });
+    }
+
+    if (action === "delete_rule") {
+      const { ruleId } = body;
+      if (!ruleId) {
+        return NextResponse.json({ error: "ruleId is required." }, { status: 400 });
+      }
+
+      try {
+        const supabase = await createClient();
+        await supabase.from("growth_funnels").delete().eq("id", ruleId);
+      } catch (err: any) {
+        console.warn("Failed to delete rule from DB:", err.message);
+      }
+
+      return NextResponse.json({ success: true, deletedId: ruleId });
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
