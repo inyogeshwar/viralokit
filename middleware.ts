@@ -82,7 +82,9 @@ export async function middleware(request: NextRequest) {
 
   const isPageProtected = protectedRoutes.some((route) => pathname.startsWith(route));
   const isApiProtected =
-    pathname.startsWith("/api/meta") ||
+    (pathname.startsWith("/api/meta") &&
+      !pathname.startsWith("/api/meta/webhook") &&
+      !pathname.startsWith("/api/meta/docs")) ||
     pathname.startsWith("/api/cloudinary") ||
     pathname.startsWith("/api/ai");
 
