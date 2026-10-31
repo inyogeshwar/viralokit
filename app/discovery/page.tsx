@@ -143,7 +143,7 @@ export default function DiscoveryPage() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 space-y-6 pb-24">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 sm:p-6 space-y-6 pb-24 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -156,19 +156,19 @@ export default function DiscoveryPage() {
           </Badge>
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Intelligence & Discovery Studio</h1>
-        <p className="text-xs md:text-sm text-slate-400 max-w-2xl">
+        <p className="text-xs md:text-sm text-zinc-400 max-w-2xl">
           Conduct competitor intelligence via Meta Business Discovery, explore viral hashtags, monitor rolling 24-hour publishing quotas, and troubleshoot API error codes without touching a laptop.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-900/60 p-1.5 rounded-xl border border-slate-800">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-zinc-900 p-1.5 rounded-xl border border-zinc-800">
         <button
           onClick={() => setActiveTab("business")}
           className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs md:text-sm font-semibold transition-all ${
             activeTab === "business"
               ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
           }`}
         >
           <Users className="w-4 h-4" />
@@ -180,7 +180,7 @@ export default function DiscoveryPage() {
           className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs md:text-sm font-semibold transition-all ${
             activeTab === "hashtag"
               ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
           }`}
         >
           <Hash className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default function DiscoveryPage() {
           className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs md:text-sm font-semibold transition-all ${
             activeTab === "quota"
               ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
           }`}
         >
           <Gauge className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function DiscoveryPage() {
           className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs md:text-sm font-semibold transition-all ${
             activeTab === "errors"
               ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-500/20"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
           }`}
         >
           <HelpCircle className="w-4 h-4" />
@@ -215,26 +215,26 @@ export default function DiscoveryPage() {
       {/* Tab 1: Business Discovery */}
       {activeTab === "business" && (
         <div className="space-y-6">
-          <Card className="bg-slate-900/40 border-slate-800">
+          <Card className="bg-zinc-900 border-zinc-800">
             <CardHeader className="pb-3">
               <CardTitle className="text-base md:text-lg flex items-center gap-2">
                 <Search className="w-5 h-5 text-pink-400" />
                 Meta Business Discovery Search
               </CardTitle>
-              <CardDescription className="text-xs text-slate-400">
+              <CardDescription className="text-xs text-zinc-400">
                 Lookup public Instagram Business and Creator profiles to analyze their bio, follower count, and recent post engagement.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold text-sm">@</span>
+                  <span className="absolute left-3 top-2.5 text-zinc-500 font-bold text-sm">@</span>
                   <Input
                     placeholder="e.g. nike, natgeo, or any creator handle"
                     value={bizUsername}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBizUsername(e.target.value)}
                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleDiscoverBusiness()}
-                    className="pl-8 bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600"
+                    className="pl-8 bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                   />
                 </div>
                 <Button
@@ -258,7 +258,7 @@ export default function DiscoveryPage() {
           {bizResult && (
             <div className="space-y-6">
               {/* Profile Card */}
-              <Card className="bg-gradient-to-br from-slate-900/80 to-slate-900/30 border-slate-800 overflow-hidden">
+              <Card className="bg-gradient-to-br from-slate-900/80 to-slate-900/30 border-zinc-800 overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
                     {bizResult.profile_picture_url ? (
@@ -268,7 +268,7 @@ export default function DiscoveryPage() {
                         className="w-20 h-20 rounded-full border-2 border-pink-500/60 object-cover shadow-lg"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+                      <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-zinc-400">
                         <Users className="w-8 h-8" />
                       </div>
                     )}
@@ -277,14 +277,14 @@ export default function DiscoveryPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <h2 className="text-xl font-bold text-white">@{bizResult.username}</h2>
                         {bizResult.name && (
-                          <Badge variant="secondary" className="bg-slate-800 text-slate-300 w-fit mx-auto sm:mx-0">
+                          <Badge variant="secondary" className="bg-slate-800 text-zinc-300 w-fit mx-auto sm:mx-0">
                             {bizResult.name}
                           </Badge>
                         )}
                       </div>
 
                       {bizResult.biography && (
-                        <p className="text-xs text-slate-300 max-w-xl whitespace-pre-wrap">{bizResult.biography}</p>
+                        <p className="text-xs text-zinc-300 max-w-xl whitespace-pre-wrap">{bizResult.biography}</p>
                       )}
 
                       {bizResult.website && (
@@ -305,19 +305,19 @@ export default function DiscoveryPage() {
                           <span className="text-lg font-black text-white block">
                             {Number(bizResult.followers_count || 0).toLocaleString()}
                           </span>
-                          <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Followers</span>
+                          <span className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider">Followers</span>
                         </div>
                         <div className="text-center sm:text-left">
                           <span className="text-lg font-black text-white block">
                             {Number(bizResult.follows_count || 0).toLocaleString()}
                           </span>
-                          <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Following</span>
+                          <span className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider">Following</span>
                         </div>
                         <div className="text-center sm:text-left">
                           <span className="text-lg font-black text-white block">
                             {Number(bizResult.media_count || 0).toLocaleString()}
                           </span>
-                          <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Posts</span>
+                          <span className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider">Posts</span>
                         </div>
                       </div>
                     </div>
@@ -328,28 +328,28 @@ export default function DiscoveryPage() {
               {/* Recent Media Feed */}
               {bizResult.media && bizResult.media.data && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
                     <ImageIcon className="w-4 h-4 text-pink-400" />
                     Latest Public Media ({bizResult.media.data.length})
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {bizResult.media.data.map((m: any) => (
-                      <Card key={m.id} className="bg-slate-900/50 border-slate-800 overflow-hidden flex flex-col justify-between">
+                      <Card key={m.id} className="bg-zinc-900 border-zinc-800 overflow-hidden flex flex-col justify-between">
                         <CardContent className="p-4 space-y-3">
-                          <div className="flex items-center justify-between text-[11px] text-slate-400">
-                            <Badge variant="outline" className="border-slate-700 text-slate-300">
+                          <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                            <Badge variant="outline" className="border-zinc-700 text-zinc-300">
                               {m.media_type || "MEDIA"}
                             </Badge>
                             {m.timestamp && <span>{new Date(m.timestamp).toLocaleDateString()}</span>}
                           </div>
 
                           {m.caption && (
-                            <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">{m.caption}</p>
+                            <p className="text-xs text-zinc-300 line-clamp-3 leading-relaxed">{m.caption}</p>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
-                            <div className="flex items-center gap-4 text-slate-400">
+                          <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80 text-xs">
+                            <div className="flex items-center gap-4 text-zinc-400">
                               <span className="flex items-center gap-1">
                                 <Heart className="w-3.5 h-3.5 text-pink-400" />
                                 {Number(m.like_count || 0).toLocaleString()}
@@ -386,26 +386,26 @@ export default function DiscoveryPage() {
       {/* Tab 2: Hashtag Explorer */}
       {activeTab === "hashtag" && (
         <div className="space-y-6">
-          <Card className="bg-slate-900/40 border-slate-800">
+          <Card className="bg-zinc-900 border-zinc-800">
             <CardHeader className="pb-3">
               <CardTitle className="text-base md:text-lg flex items-center gap-2">
                 <Hash className="w-5 h-5 text-purple-400" />
                 Meta Hashtag Intelligence Explorer
               </CardTitle>
-              <CardDescription className="text-xs text-slate-400">
+              <CardDescription className="text-xs text-zinc-400">
                 Discover viral hashtags and query top-performing posts and recent uploads using official Meta endpoints.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold text-sm">#</span>
+                  <span className="absolute left-3 top-2.5 text-zinc-500 font-bold text-sm">#</span>
                   <Input
                     placeholder="e.g. reelsviral, ai, tech, marketing"
                     value={hashtagQuery}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHashtagQuery(e.target.value)}
                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleSearchHashtag(hashtagMode)}
-                    className="pl-8 bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600"
+                    className="pl-8 bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                   />
                 </div>
                 <Button
@@ -419,21 +419,21 @@ export default function DiscoveryPage() {
 
               {hashtagId && (
                 <div className="flex items-center justify-between flex-wrap gap-2 pt-2">
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <div className="flex items-center gap-2 text-xs text-zinc-400">
                     <span>Static Hashtag ID:</span>
                     <Badge variant="outline" className="border-purple-500/40 text-purple-300 font-mono">
                       {hashtagId}
                     </Badge>
                   </div>
 
-                  <div className="flex gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                  <div className="flex gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
                     <button
                       onClick={() => {
                         setHashtagMode("top");
                         handleSearchHashtag("top");
                       }}
                       className={`text-xs py-1 px-3 rounded font-medium transition-all ${
-                        hashtagMode === "top" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-slate-200"
+                        hashtagMode === "top" ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
                       Top Posts
@@ -444,7 +444,7 @@ export default function DiscoveryPage() {
                         handleSearchHashtag("recent");
                       }}
                       className={`text-xs py-1 px-3 rounded font-medium transition-all ${
-                        hashtagMode === "recent" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-slate-200"
+                        hashtagMode === "recent" ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
                       Recent Posts
@@ -465,9 +465,9 @@ export default function DiscoveryPage() {
           {hashtagMedia.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {hashtagMedia.map((m: any) => (
-                <Card key={m.id} className="bg-slate-900/50 border-slate-800 flex flex-col justify-between">
+                <Card key={m.id} className="bg-zinc-900 border-zinc-800 flex flex-col justify-between">
                   <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400">
                       <Badge variant="outline" className="border-purple-500/30 text-purple-300">
                         {m.media_type || "MEDIA"}
                       </Badge>
@@ -475,11 +475,11 @@ export default function DiscoveryPage() {
                     </div>
 
                     {m.caption && (
-                      <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">{m.caption}</p>
+                      <p className="text-xs text-zinc-300 line-clamp-3 leading-relaxed">{m.caption}</p>
                     )}
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
-                      <div className="flex items-center gap-4 text-slate-400">
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80 text-xs">
+                      <div className="flex items-center gap-4 text-zinc-400">
                         {m.like_count !== undefined && (
                           <span className="flex items-center gap-1">
                             <Heart className="w-3.5 h-3.5 text-pink-400" />
@@ -517,14 +517,14 @@ export default function DiscoveryPage() {
       {/* Tab 3: Publishing Limit & Quota */}
       {activeTab === "quota" && (
         <div className="space-y-6">
-          <Card className="bg-slate-900/40 border-slate-800">
+          <Card className="bg-zinc-900 border-zinc-800">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div>
                 <CardTitle className="text-base md:text-lg flex items-center gap-2">
                   <Gauge className="w-5 h-5 text-emerald-400" />
                   Meta Content Publishing Quota Monitor
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-zinc-400">
                   Meta enforces a strict limit of 50 published posts (reels, carousels, photos) per rolling 24 hours.
                 </CardDescription>
               </div>
@@ -533,7 +533,7 @@ export default function DiscoveryPage() {
                 variant="outline"
                 onClick={handleCheckQuota}
                 disabled={quotaLoading}
-                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                className="border-zinc-700 text-zinc-300 hover:bg-slate-800"
               >
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${quotaLoading ? "animate-spin" : ""}`} />
                 Refresh
@@ -551,13 +551,13 @@ export default function DiscoveryPage() {
                   {/* Quota Progress Bar */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-300 font-semibold">24-Hour Quota Usage</span>
+                      <span className="text-zinc-300 font-semibold">24-Hour Quota Usage</span>
                       <span className="font-mono text-emerald-400 font-bold">
                         {quotaData.quota_usage} / {quotaData.quota_total} Used ({quotaData.quota_remaining} Available)
                       </span>
                     </div>
 
-                    <div className="w-full bg-slate-950 rounded-full h-3.5 p-0.5 border border-slate-800 overflow-hidden">
+                    <div className="w-full bg-zinc-950 rounded-full h-3.5 p-0.5 border border-zinc-800 overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           quotaData.quota_usage > 40
@@ -575,22 +575,22 @@ export default function DiscoveryPage() {
 
                   {/* Stat Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Posts Published</span>
+                    <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+                      <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-semibold">Posts Published</span>
                       <p className="text-2xl font-black text-white mt-1">{quotaData.quota_usage}</p>
-                      <span className="text-[10px] text-slate-500">In last 24 hours</span>
+                      <span className="text-[10px] text-zinc-500">In last 24 hours</span>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Remaining Quota</span>
+                    <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+                      <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-semibold">Remaining Quota</span>
                       <p className="text-2xl font-black text-emerald-400 mt-1">{quotaData.quota_remaining}</p>
-                      <span className="text-[10px] text-slate-500">Safe to publish</span>
+                      <span className="text-[10px] text-zinc-500">Safe to publish</span>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Window Reset</span>
+                    <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+                      <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-semibold">Window Reset</span>
                       <p className="text-2xl font-black text-blue-400 mt-1">24 Hours</p>
-                      <span className="text-[10px] text-slate-500">Rolling moving period</span>
+                      <span className="text-[10px] text-zinc-500">Rolling moving period</span>
                     </div>
                   </div>
 
@@ -600,14 +600,14 @@ export default function DiscoveryPage() {
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       <span>Official Meta Quota Rules:</span>
                     </div>
-                    <p className="text-slate-400 leading-relaxed text-[11px]">
+                    <p className="text-zinc-400 leading-relaxed text-[11px]">
                       Publishing single photos, reels, or multi-item carousels each count as 1 container publish. If quota reaches 50, Meta returns Error code 9 / Subcode 2207042 until previous posts clear the 24-hour moving window.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="py-8 text-center text-slate-500 text-xs">
-                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-slate-400" />
+                <div className="py-8 text-center text-zinc-500 text-xs">
+                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-zinc-400" />
                   Loading rate limit usage...
                 </div>
               )}
@@ -619,35 +619,35 @@ export default function DiscoveryPage() {
       {/* Tab 4: Meta Error Code Troubleshooter */}
       {activeTab === "errors" && (
         <div className="space-y-6">
-          <Card className="bg-slate-900/40 border-slate-800">
+          <Card className="bg-zinc-900 border-zinc-800">
             <CardHeader className="pb-3">
               <CardTitle className="text-base md:text-lg flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-400" />
                 Meta Graph API Error Resolver
               </CardTitle>
-              <CardDescription className="text-xs text-slate-400">
+              <CardDescription className="text-xs text-zinc-400">
                 Instant offline diagnostics and recommended fixes for Meta Graph API error codes & subcodes.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-slate-400 font-medium">Error Code (Required)</label>
+                  <label className="text-xs text-zinc-400 font-medium">Error Code (Required)</label>
                   <Input
                     placeholder="e.g. 100, 190, 9, 36000"
                     value={errorCode}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setErrorCode(e.target.value)}
-                    className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600"
+                    className="bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs text-slate-400 font-medium">Error Subcode (Optional)</label>
+                  <label className="text-xs text-zinc-400 font-medium">Error Subcode (Optional)</label>
                   <Input
                     placeholder="e.g. 2018007, 2207042, 2207004"
                     value={errorSubcode}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setErrorSubcode(e.target.value)}
-                    className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600"
+                    className="bg-zinc-950 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                   />
                 </div>
               </div>
@@ -663,7 +663,7 @@ export default function DiscoveryPage() {
           </Card>
 
           {errorResult && (
-            <Card className="bg-slate-900/60 border-amber-500/40 overflow-hidden">
+            <Card className="bg-zinc-900 border-amber-500/40 overflow-hidden">
               <CardHeader className="bg-amber-500/10 border-b border-amber-500/20 py-3">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="border-amber-500/50 text-amber-300 font-mono">
@@ -674,10 +674,10 @@ export default function DiscoveryPage() {
               </CardHeader>
               <CardContent className="p-5 space-y-4 text-xs">
                 <div className="space-y-1">
-                  <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">
+                  <span className="text-zinc-400 font-semibold block uppercase tracking-wider text-[10px]">
                     Meta Error Message
                   </span>
-                  <p className="text-slate-200 bg-slate-950 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px]">
+                  <p className="text-zinc-200 bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 font-mono text-[11px]">
                     {errorResult.message}
                   </p>
                 </div>
@@ -696,7 +696,7 @@ export default function DiscoveryPage() {
 
           {/* Quick Common Codes */}
           <div className="space-y-2">
-            <span className="text-xs font-semibold text-slate-400">Common Creator Errors:</span>
+            <span className="text-xs font-semibold text-zinc-400">Common Creator Errors:</span>
             <div className="flex flex-wrap gap-2">
               {[
                 { label: "Daily Quota Reached (Code 9 / 2207042)", c: "9", s: "2207042" },
@@ -712,7 +712,7 @@ export default function DiscoveryPage() {
                     setErrorSubcode(item.s);
                     handleResolveError();
                   }}
-                  className="text-[11px] py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
+                  className="text-[11px] py-1 px-2.5 rounded-lg bg-slate-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
                 >
                   {item.label}
                 </button>

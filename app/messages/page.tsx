@@ -215,7 +215,7 @@ export default function MessagesPage() {
   const messages = msgData?.messages || [];
 
   return (
-    <div className="flex h-screen bg-[#080808] text-zinc-100 antialiased overflow-hidden selection:bg-pink-500/20 selection:text-pink-300">
+    <div className="flex h-screen bg-zinc-950 text-zinc-100 antialiased overflow-hidden selection:bg-pink-500/20 selection:text-pink-300">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -251,7 +251,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Main Messaging Interface: Split View */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0 bg-[#0C0C0C] border border-white/[0.08] rounded-3xl overflow-hidden shadow-2xl">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-0 min-h-0 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
             {/* Left Column: Conversations List */}
             <div className="border-r border-white/[0.08] flex flex-col min-h-0">
               <div className="p-3.5 border-b border-white/[0.08] flex items-center justify-between">
@@ -365,41 +365,45 @@ export default function MessagesPage() {
                         <div
                           className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-xs relative ${
                             isFromMe
-                              ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-br-none shadow-md shadow-pink-500/10"
+                              ? "bg-pink-600 text-white rounded-br-none"
                               : "bg-zinc-800/90 text-zinc-100 rounded-bl-none border border-white/[0.06]"
                           }`}
                         >
                           <p className="whitespace-pre-wrap break-words">{m.message}</p>
 
                           {/* Quick Emoji Reaction Pill */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-3 right-0 flex items-center gap-1 bg-zinc-900 border border-white/[0.1] rounded-full px-1.5 py-0.5 shadow-md">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-3 right-0 flex items-center gap-0.5 bg-zinc-900 border border-zinc-700 rounded-full px-1 py-0.5 shadow-md">
                             <button
                               onClick={() => handleReact(m.id, "❤️")}
-                              className="text-[11px] hover:scale-125 transition-transform"
+                              className="w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-full transition-colors text-sm"
                               title="Double-Tap Heart"
+                              type="button"
                             >
                               ❤️
                             </button>
                             <button
                               onClick={() => handleReact(m.id, "🔥")}
-                              className="text-[11px] hover:scale-125 transition-transform"
+                              className="w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-full transition-colors text-sm"
                               title="Fire"
+                              type="button"
                             >
                               🔥
                             </button>
                             <button
                               onClick={() => handleReact(m.id, "👍")}
-                              className="text-[11px] hover:scale-125 transition-transform"
+                              className="w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-full transition-colors text-sm"
                               title="Thumbs Up"
+                              type="button"
                             >
                               👍
                             </button>
                             <button
                               onClick={() => setReplyToId(m.id)}
-                              className="text-zinc-400 hover:text-white p-0.5"
+                              className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-colors"
                               title="Quote Reply"
+                              type="button"
                             >
-                              <CornerUpLeft className="w-3 h-3" />
+                              <CornerUpLeft className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
@@ -480,7 +484,7 @@ export default function MessagesPage() {
                     <button
                       type="button"
                       onClick={() => setAttachmentMode(attachmentMode === "audio" ? "none" : "audio")}
-                      className={`p-2 rounded-xl border transition-colors ${
+                      className={`min-w-\[44px\] min-h-\[44px\] flex items-center justify-center rounded-md border transition-colors ${
                         attachmentMode === "audio"
                           ? "bg-pink-500/20 border-pink-500 text-pink-400"
                           : "border-white/[0.08] hover:bg-zinc-900 text-zinc-400"
@@ -493,7 +497,7 @@ export default function MessagesPage() {
                     <button
                       type="button"
                       onClick={() => setAttachmentMode(attachmentMode === "file" ? "none" : "file")}
-                      className={`p-2 rounded-xl border transition-colors ${
+                      className={`min-w-\[44px\] min-h-\[44px\] flex items-center justify-center rounded-md border transition-colors ${
                         attachmentMode === "file"
                           ? "bg-pink-500/20 border-pink-500 text-pink-400"
                           : "border-white/[0.08] hover:bg-zinc-900 text-zinc-400"
@@ -519,7 +523,7 @@ export default function MessagesPage() {
                   <Button
                     type="submit"
                     disabled={isSending}
-                    className="primary-gradient-bg text-white text-xs px-4 py-2 rounded-xl shadow-lg shadow-pink-500/20 shrink-0"
+                    className="bg-pink-600 hover:bg-pink-700 text-white text-xs min-w-\[44px\] min-h-\[44px\] rounded-md shrink-0"
                   >
                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   </Button>

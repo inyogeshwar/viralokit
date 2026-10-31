@@ -251,7 +251,7 @@ export default function ChannelsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
+    <div className="flex min-h-screen bg-zinc-950 text-zinc-100 font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
@@ -278,12 +278,12 @@ export default function ChannelsPage() {
             </div>
 
             {/* Tab Switcher */}
-            <div className="flex items-center bg-zinc-900/90 border border-white/[0.08] p-1 rounded-2xl">
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 p-1 rounded-md">
               <button
                 onClick={() => setActiveTab("threads")}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === "threads"
-                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md shadow-pink-500/20"
+                    ? "bg-pink-600 text-white"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -293,7 +293,7 @@ export default function ChannelsPage() {
                 onClick={() => setActiveTab("facebook")}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === "facebook"
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                    ? "bg-blue-600 text-white"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -307,7 +307,7 @@ export default function ChannelsPage() {
             <div className="space-y-6">
               {/* Profile Bar */}
               {threadsData?.profile && (
-                <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-5 flex items-center justify-between">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-pink-500 to-yellow-500 flex items-center justify-center font-bold text-white text-base">
                       {threadsData.profile.threads_profile_picture_url ? (
@@ -340,7 +340,7 @@ export default function ChannelsPage() {
               )}
 
               {/* Threads Composer */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-4 shadow-xl">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Send className="w-4 h-4 text-pink-400" />
                   Publish New Thread
@@ -353,7 +353,7 @@ export default function ChannelsPage() {
                     onChange={(e) => setThreadText(e.target.value)}
                     maxLength={500}
                     placeholder="What's happening? Share thoughts, links, or updates on Threads (up to 500 chars)..."
-                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-2xl p-4 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 resize-none"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 resize-none"
                   />
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -364,7 +364,7 @@ export default function ChannelsPage() {
                         value={threadImageUrl}
                         onChange={(e) => setThreadImageUrl(e.target.value)}
                         placeholder="Optional public image URL to attach"
-                        className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-pink-500"
                       />
                     </div>
 
@@ -394,7 +394,7 @@ export default function ChannelsPage() {
                   {threadsData?.posts?.map((p: any) => (
                     <div
                       key={p.id}
-                      className="bg-zinc-900/60 border border-white/[0.08] rounded-2xl p-4 space-y-3"
+                      className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-3"
                     >
                       <p className="text-xs text-zinc-200 whitespace-pre-wrap">{p.text}</p>
 
@@ -439,7 +439,7 @@ export default function ChannelsPage() {
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder="Write a reply to this thread..."
-                            className="flex-1 bg-zinc-950 border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
+                            className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-pink-500"
                           />
                           <Button
                             type="submit"
@@ -464,7 +464,7 @@ export default function ChannelsPage() {
               </div>
 
               {/* 60-Day Threads Token Exchanger Tool */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 space-y-4">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-4">
                 <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
                   <Key className="w-4 h-4 text-amber-400" />
                   <span className="text-sm font-bold text-white">60-Day Threads Token Generator</span>
@@ -480,14 +480,14 @@ export default function ChannelsPage() {
                       value={shortLivedToken}
                       onChange={(e) => setShortLivedToken(e.target.value)}
                       placeholder="Short-Lived Threads Token (TH...)"
-                      className="bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-white placeholder-zinc-600"
+                      className="bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-white placeholder:text-zinc-500"
                     />
                     <input
                       type="password"
                       value={clientSecret}
                       onChange={(e) => setClientSecret(e.target.value)}
                       placeholder="Threads App Client Secret"
-                      className="bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-white placeholder-zinc-600"
+                      className="bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-white placeholder:text-zinc-500"
                     />
                   </div>
 
@@ -522,7 +522,7 @@ export default function ChannelsPage() {
             <div className="space-y-6">
               {/* Facebook Profile Bar */}
               {fbData?.profile && (
-                <div className="bg-[#0C0C0C] border border-blue-500/20 rounded-3xl p-5 flex items-center justify-between">
+                <div className="bg-zinc-900 border border-blue-500/20 rounded-lg p-5 flex items-center justify-between">
                   <div>
                     <span className="font-bold text-white text-base block">{fbData.profile.name}</span>
                     <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1">
@@ -544,7 +544,7 @@ export default function ChannelsPage() {
               )}
 
               {/* Facebook Composer */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Send className="w-4 h-4 text-blue-400" />
@@ -577,14 +577,14 @@ export default function ChannelsPage() {
                         value={fbPostText}
                         onChange={(e) => setFbPostText(e.target.value)}
                         placeholder="Write an announcement or post for your Facebook Page..."
-                        className="w-full bg-zinc-900 border border-white/[0.1] rounded-2xl p-4 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500 resize-none"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 resize-none"
                       />
                       <input
                         type="url"
                         value={fbLink}
                         onChange={(e) => setFbLink(e.target.value)}
                         placeholder="Optional web link to attach to post"
-                        className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500"
                       />
                     </>
                   ) : (
@@ -594,14 +594,14 @@ export default function ChannelsPage() {
                         value={fbPhotoUrl}
                         onChange={(e) => setFbPhotoUrl(e.target.value)}
                         placeholder="Public photo URL (HTTPS)"
-                        className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500"
                       />
                       <textarea
                         rows={3}
                         value={fbPhotoCaption}
                         onChange={(e) => setFbPhotoCaption(e.target.value)}
                         placeholder="Write a photo caption..."
-                        className="w-full bg-zinc-900 border border-white/[0.1] rounded-2xl p-4 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500 resize-none"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 resize-none"
                       />
                     </>
                   )}
@@ -630,7 +630,7 @@ export default function ChannelsPage() {
                   {fbData?.posts?.map((p: any) => (
                     <div
                       key={p.id}
-                      className="bg-zinc-900/60 border border-white/[0.08] rounded-2xl p-4 space-y-2"
+                      className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-2"
                     >
                       <p className="text-xs text-zinc-200 whitespace-pre-wrap">{p.message || "Photo / Media Post"}</p>
                       <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-2 border-t border-white/[0.04]">

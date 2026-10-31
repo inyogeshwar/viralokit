@@ -721,7 +721,7 @@ export default function CreatePostPage() {
   const suggestedTags = ["#growth", "#creatorlife", "#instatips", "#aesthetic", "#reelstrending", "#foryou"];
 
   return (
-    <div className="flex min-h-screen bg-[#050505] overflow-hidden relative text-zinc-100 font-sans selection:bg-pink-500 selection:text-white">
+    <div className="flex min-h-screen bg-zinc-950 overflow-x-hidden text-zinc-100 font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
@@ -731,8 +731,8 @@ export default function CreatePostPage() {
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8 relative z-10">
-          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-pink-600/10 to-transparent blur-[120px] pointer-events-none" />
+          {/* ambient glow removed */}
+          
           
           {/* Top Bar: Title & Primary Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
@@ -834,7 +834,7 @@ export default function CreatePostPage() {
             {/* Left Column: Media Upload & AI Studio (7 Cols) */}
             <div className="lg:col-span-7 space-y-6">
               {/* Media Assets Section */}
-              <div className="glass-card bg-white/5 border border-white/10 rounded-[2rem] p-6 sm:p-7 space-y-6 shadow-2xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 sm:p-6 space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
                   <div>
                     <h2 className="text-base font-bold text-white font-headline flex items-center gap-2">
@@ -859,7 +859,7 @@ export default function CreatePostPage() {
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "IMAGE"
-                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
+                          ? "bg-zinc-800 text-white font-semibold border-b-2 border-pink-500"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -874,7 +874,7 @@ export default function CreatePostPage() {
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "CAROUSEL"
-                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
+                          ? "bg-zinc-800 text-white font-semibold border-b-2 border-pink-500"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -890,7 +890,7 @@ export default function CreatePostPage() {
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "REELS"
-                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
+                          ? "bg-zinc-800 text-white font-semibold border-b-2 border-pink-500"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -906,7 +906,7 @@ export default function CreatePostPage() {
                       }}
                       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                         postType === "STORIES"
-                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md font-semibold"
+                          ? "bg-zinc-800 text-white font-semibold border-b-2 border-pink-500"
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
@@ -955,7 +955,7 @@ export default function CreatePostPage() {
                       processAndUploadFiles(e.dataTransfer.files);
                     }
                   }}
-                  className="border-2 border-dashed border-zinc-700/80 hover:border-pink-500/60 bg-gradient-to-b from-zinc-900/40 via-zinc-950/50 to-zinc-900/30 hover:bg-zinc-900/40 rounded-2xl p-7 text-center cursor-pointer transition-all duration-300 group shadow-inner"
+                  className="border-2 border-dashed border-zinc-700 hover:border-pink-500/50 bg-zinc-900/30 hover:bg-zinc-900/50 rounded-lg p-7 text-center cursor-pointer transition-colors group"
                 >
                   <input
                     ref={fileInputRef}
@@ -965,7 +965,7 @@ export default function CreatePostPage() {
                     className="hidden"
                     onChange={handleFileUpload}
                   />
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-500/15 to-purple-500/15 border border-pink-500/25 flex items-center justify-center mx-auto mb-3 text-pink-400 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(244,82,173,0.3)] transition-all">
+                  <div className="w-12 h-12 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-3 text-pink-400">
                     {isUploading ? (
                       <Loader2 className="w-6 h-6 animate-spin text-pink-400" />
                     ) : (
@@ -1187,7 +1187,7 @@ export default function CreatePostPage() {
 
               {/* AI Image Analysis Breakdown Results */}
               {analysisResult && (
-                <div className="glass-panel rounded-2xl p-5 border-pink-500/30 space-y-3.5">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-pink-400" />
@@ -1248,7 +1248,7 @@ export default function CreatePostPage() {
               )}
 
               {/* AI Caption & Details Studio */}
-              <div className="glass-card bg-white/5 border border-white/10 rounded-[2rem] p-6 sm:p-7 space-y-6 shadow-2xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 sm:p-6 space-y-5">
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-400" />
@@ -1292,7 +1292,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Page Theme / Custom Prompt for 1-Click Gemini Vision */}
-                <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/[0.08]">
+                <div className="space-y-2 p-4 rounded-md bg-zinc-900/80 border border-zinc-800">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
                       <Wand2 className="w-3.5 h-3.5 text-pink-400" />
@@ -1315,7 +1315,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* 26 Proven Hook Formulas (Jake Schincariol Creator Architecture) */}
-                <div className="space-y-2.5 p-4 rounded-2xl bg-black/40 border border-white/[0.08]">
+                <div className="space-y-2 p-4 rounded-md bg-zinc-900/80 border border-zinc-800">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-pink-400" />
@@ -1395,13 +1395,13 @@ export default function CreatePostPage() {
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Write your Instagram caption here or click Generate with AI..."
                     rows={5}
-                    className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-pink-500/80 focus:ring-2 focus:ring-pink-500/20 resize-y leading-relaxed transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-md p-4 text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 resize-y leading-relaxed"
                   />
                 </div>
 
                 {/* Real-Time 125-Character Feed Window & Hook Scorer */}
                 {caption.trim().length > 0 && (
-                  <div className="rounded-2xl p-4 bg-black/60 border border-white/[0.08] space-y-3">
+                  <div className="rounded-md p-4 bg-zinc-900/80 border border-zinc-800 space-y-3">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 font-bold text-white">
                         <Eye className="w-3.5 h-3.5 text-pink-400" />
@@ -1458,7 +1458,7 @@ export default function CreatePostPage() {
                     size="sm"
                     onClick={() => handleGenerateCaption("generate")}
                     disabled={isGeneratingCaption}
-                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs h-9 px-4 rounded-xl gap-2 font-medium cursor-pointer shadow-md shadow-pink-500/20"
+                    className="bg-pink-600 hover:bg-pink-700 text-white text-xs h-9 px-4 rounded-md gap-2 font-medium cursor-pointer"
                   >
                     {isGeneratingCaption ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1606,7 +1606,7 @@ export default function CreatePostPage() {
             {/* Right Column: Live Instagram Preview & Publishing (5 Cols) */}
             <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
               {/* Device Preview Card */}
-              <div className="glass-card bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-4 shadow-2xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -1631,9 +1631,9 @@ export default function CreatePostPage() {
               </div>
 
               {/* Publish Control Card */}
-              <div className="glass-card bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-4 shadow-2xl">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4">
                 {publishStatus !== "idle" && (
-                  <div className="p-4 bg-black/60 rounded-2xl border border-white/[0.08] text-xs space-y-2.5">
+                  <div className="p-4 bg-zinc-900/80 rounded-md border border-zinc-800 text-xs space-y-2">
                     <div className="flex items-center gap-2 font-medium">
                       {publishStatus === "published" ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -1658,9 +1658,9 @@ export default function CreatePostPage() {
                     </div>
 
                     {/* Step Progress Bar */}
-                    <div className="w-full bg-[#141414] rounded-full h-2 overflow-hidden border border-white/[0.05]">
+                    <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-pink-500 to-purple-600 h-full transition-all duration-500 rounded-full"
+                        className="bg-pink-600 h-full transition-all rounded-full"
                         style={{
                           width:
                             publishStatus === "uploading"
@@ -1681,7 +1681,7 @@ export default function CreatePostPage() {
                 )}
 
                 {/* Post Scheduling Controls */}
-                <div className="p-4 bg-black/40 rounded-2xl border border-white/[0.08] space-y-3.5">
+                <div className="p-4 bg-zinc-900/80 rounded-md border border-zinc-800 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-purple-400" />
@@ -1727,7 +1727,7 @@ export default function CreatePostPage() {
                     (postType === "CAROUSEL" && images.length < 2) ||
                     (publishStatus !== "idle" && publishStatus !== "failed")
                   }
-                  className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:opacity-95 text-white font-bold text-sm gap-2 h-12 rounded-xl shadow-2xl shadow-pink-500/20 transition-all cursor-pointer"
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm gap-2 h-12 rounded-md cursor-pointer"
                 >
                   {isUploading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />

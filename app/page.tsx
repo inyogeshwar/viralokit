@@ -232,13 +232,6 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Background Ambience Glows */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-tr from-pink-600/15 via-purple-600/15 to-transparent blur-[160px] rounded-full" />
-        <div className="absolute top-[800px] right-0 w-[600px] h-[600px] bg-gradient-to-bl from-blue-600/10 via-purple-600/10 to-transparent blur-[150px] rounded-full" />
-        <div className="absolute top-[1800px] left-[-100px] w-[600px] h-[600px] bg-gradient-to-tr from-pink-600/10 via-amber-600/10 to-transparent blur-[160px] rounded-full" />
-      </div>
-
       {/* Top Navigation Bar */}
       <header className="border-b border-zinc-800/80 bg-[#050507]/85 backdrop-blur-2xl sticky top-0 z-50 px-6 py-4 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -284,7 +277,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="sm" className="text-xs gap-1.5 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 shadow-md shadow-pink-500/20 font-semibold cursor-pointer border-0">
+              <Button size="sm" className="text-xs gap-1.5 bg-pink-600 hover:bg-pink-700 font-semibold cursor-pointer border-0">
                 <span>Launch Studio Free</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
@@ -303,7 +296,7 @@ export default function LandingPage() {
             variant="outline"
             className="gap-2 py-1.5 px-4 text-xs rounded-full border-pink-500/30 bg-pink-500/10 text-pink-300 backdrop-blur-md shadow-sm"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Official Meta Graph API v23.0 Verified Studio</span>
           </Badge>
 
@@ -313,7 +306,7 @@ export default function LandingPage() {
           </h1>
 
           {/* Top Summary / Key Takeaway for AI Extraction */}
-          <div className="mt-4 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 max-w-3xl w-full text-left">
+          <div className="mt-4 p-4 sm:p-6 rounded-md bg-zinc-900/80 border border-pink-500/20 max-w-3xl w-full text-left">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                 <Target className="w-5 h-5 text-white" />
@@ -328,7 +321,7 @@ export default function LandingPage() {
           </div>
 
           {/* Definition of Main Topic */}
-          <div className="mt-4 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
+          <div className="mt-4 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-4 h-4" />
               What is ViraloKit?
@@ -339,7 +332,7 @@ export default function LandingPage() {
           </div>
 
           {/* Audience & Use-Case Clarity */}
-          <div className="mt-4 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
+          <div className="mt-4 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/80 max-w-3xl w-full text-left">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Users className="w-4 h-4" />
               Who This Is For
@@ -363,7 +356,7 @@ export default function LandingPage() {
             <Link href="/dashboard" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto px-8 text-sm gap-2 font-semibold bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 shadow-xl shadow-pink-500/25 border-0 cursor-pointer transition-all transform hover:-translate-y-0.5"
+                className="w-full sm:w-auto px-8 text-sm gap-2 font-semibold bg-pink-600 hover:bg-pink-700 border-0 cursor-pointer"
               >
                 <span>Start Creating Now — 100% Free</span>
                 <ArrowRight className="w-4 h-4" />
@@ -405,7 +398,7 @@ export default function LandingPage() {
           {/* HERO DASHBOARD SCREENSHOT SHOWCASE */}
           {/* ========================================================================= */}
           <div className="relative w-full max-w-5xl mt-8 pt-2">
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-zinc-950/80 shadow-2xl shadow-pink-500/10 backdrop-blur-xl group">
+            <div className="relative overflow-hidden rounded-lg sm:rounded-lg border border-white/10 bg-zinc-950/80 shadow-2xl shadow-pink-500/10 backdrop-blur-xl group">
               {/* macOS-style Window Frame Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md">
                 <div className="flex items-center gap-2">
@@ -430,7 +423,7 @@ export default function LandingPage() {
                   fill
                   sizes="(max-width: 1200px) 100vw, 1200px"
                   priority
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.01]"
+                  className="object-cover object-top"
                 />
                 {/* Subtle Ambient Bottom Fade */}
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#050507] via-[#050507]/60 to-transparent pointer-events-none" />
@@ -438,7 +431,7 @@ export default function LandingPage() {
             </div>
 
             {/* Floating Card 1: AI Caption Generator */}
-            <div className="absolute -left-2 sm:-left-6 top-1/4 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/90 border border-pink-500/30 shadow-2xl shadow-pink-500/20 backdrop-blur-xl">
+            <div className="absolute -left-2 sm:-left-6 top-1/4 hidden md:flex items-center gap-3 p-3 rounded-lg bg-zinc-900/90 border border-pink-500/30 shadow-2xl shadow-pink-500/20 backdrop-blur-xl">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-md">
                 <Sparkles className="w-5 h-5" />
               </div>
@@ -449,7 +442,7 @@ export default function LandingPage() {
             </div>
 
             {/* Floating Card 2: Meta Graph API 100% Verified */}
-            <div className="absolute -right-2 sm:-right-6 bottom-1/4 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 backdrop-blur-xl">
+            <div className="absolute -right-2 sm:-right-6 bottom-1/4 hidden md:flex items-center gap-3 p-3 rounded-lg bg-zinc-900/90 border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 backdrop-blur-xl">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md">
                 <ShieldCheck className="w-5 h-5" />
               </div>
@@ -478,12 +471,12 @@ export default function LandingPage() {
           </div>
 
           {/* Preview Tab Controls */}
-          <div className="flex items-center justify-center gap-2 p-1.5 bg-zinc-900/80 border border-zinc-800 rounded-2xl max-w-md mx-auto">
+          <div className="flex items-center justify-center gap-2 p-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg max-w-md mx-auto">
             <button
               onClick={() => setActiveTab("carousel")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "carousel"
-                  ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md"
+                  ? "bg-zinc-800 text-white border-b-2 border-pink-500"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -495,7 +488,7 @@ export default function LandingPage() {
               onClick={() => setActiveTab("insights")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "insights"
-                  ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md"
+                  ? "bg-zinc-800 text-white border-b-2 border-pink-500"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -507,7 +500,7 @@ export default function LandingPage() {
               onClick={() => setActiveTab("cdn")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "cdn"
-                  ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md"
+                  ? "bg-zinc-800 text-white border-b-2 border-pink-500"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -517,7 +510,7 @@ export default function LandingPage() {
           </div>
 
           {/* Interactive Preview Canvas */}
-          <div className="rounded-3xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/70 via-zinc-950/90 to-black p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
+          <div className="rounded-lg border border-zinc-800/90 bg-gradient-to-b from-zinc-900/70 via-zinc-950/90 to-black p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
             {activeTab === "carousel" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                 {/* Left: Studio Editor Controls */}
@@ -550,7 +543,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* AI Generated Caption Box */}
-                  <div className="p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2">
+                  <div className="p-3.5 rounded-lg bg-zinc-950/80 border border-zinc-800 space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-white flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -580,7 +573,7 @@ export default function LandingPage() {
 
                 {/* Right: Phone Mockup */}
                 <div className="lg:col-span-5 flex justify-center">
-                  <div className="w-[280px] sm:w-[300px] rounded-[38px] border-4 border-zinc-800 bg-black p-3 shadow-2xl relative overflow-hidden">
+                  <div className="w-[280px] sm:w-[300px] rounded-2xl border-4 border-zinc-800 bg-black p-3 shadow-2xl relative overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-900 text-xs">
                       <div className="flex items-center gap-2">
@@ -595,7 +588,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Image Area */}
-                    <div className="aspect-square rounded-2xl bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 my-2 relative overflow-hidden flex items-center justify-center border border-zinc-800">
+                    <div className="aspect-square rounded-lg bg-gradient-to-tr from-zinc-900 via-zinc-800 to-zinc-900 my-2 relative overflow-hidden flex items-center justify-center border border-zinc-800">
                       <div className="text-center p-4 space-y-1">
                         <Instagram className="w-8 h-8 text-pink-400 mx-auto opacity-80" />
                         <p className="text-[11px] font-bold text-white">Carousel Slide 1 of 5</p>
@@ -676,7 +669,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Breakdown Progress Bars */}
-                <div className="p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800 space-y-3">
+                <div className="p-4 rounded-lg bg-zinc-950/70 border border-zinc-800 space-y-3">
                   <span className="text-xs font-semibold text-white">Discovery Traffic Source:</span>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between text-zinc-400 text-[11px]">
@@ -684,7 +677,7 @@ export default function LandingPage() {
                       <span className="font-mono text-white font-bold">98.4%</span>
                     </div>
                     <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-emerald-400 to-blue-500 h-full w-[98.4%]" />
+                      <div className="bg-emerald-500 h-full w-[98.4%]" />
                     </div>
                   </div>
                 </div>
@@ -707,12 +700,12 @@ export default function LandingPage() {
                 </div>
 
                 {/* Directory Display */}
-                <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2">
+                <div className="p-4 rounded-lg bg-zinc-950/80 border border-zinc-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-zinc-300">Your Isolated Cloud Directory:</span>
                     <Badge variant="success" className="text-[9px]">Private & Segregated</Badge>
                   </div>
-                  <code className="block p-2.5 rounded-xl bg-zinc-900 border border-zinc-700/80 font-mono text-xs text-emerald-300">
+                  <code className="block p-2.5 rounded-md bg-zinc-950 border border-zinc-700 font-mono text-xs text-emerald-300">
                     viralokit/users/ig_creatorname/
                   </code>
                   <p className="text-[11px] text-zinc-400">
@@ -721,13 +714,13 @@ export default function LandingPage() {
                 </div>
 
                 {/* 25 GB Quota Gauge */}
-                <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2">
+                <div className="p-4 rounded-lg bg-zinc-950/80 border border-zinc-800 space-y-2">
                   <div className="flex justify-between text-xs font-semibold text-white">
                     <span>25 GB Free Tier Quota Usage</span>
                     <span className="font-mono text-blue-400">0.28% used</span>
                   </div>
                   <div className="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-500 to-emerald-400 h-full w-[2%]" />
+                    <div className="bg-blue-500 h-full w-[2%]" />
                   </div>
                   <div className="flex justify-between text-[11px] text-zinc-400">
                     <span>0.07 credits used</span>
@@ -748,7 +741,7 @@ export default function LandingPage() {
               Core Capabilities
             </Badge>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-headline">
-              What Can ViraloKit Do for Your Instagram Strategy?
+              What ViraloKit Does
             </h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
               No fragile automation, no cookie scraping. Built exclusively on official Meta Graph API v23.0 infrastructure.
@@ -770,8 +763,8 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-left">
             {/* Bento Card 1: Official Meta API */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-pink-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-pink-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
                 <Instagram className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">How does Meta Graph API v23.0 publishing work?</h3>
@@ -786,8 +779,8 @@ export default function LandingPage() {
             </div>
 
             {/* Bento Card 2: Deep Insights */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-emerald-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-emerald-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">What verified Meta insights can I track?</h3>
@@ -803,8 +796,8 @@ export default function LandingPage() {
             </div>
 
             {/* Bento Card 3: Multimodal AI */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-amber-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-amber-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">How does AI caption generation work?</h3>
@@ -820,8 +813,8 @@ export default function LandingPage() {
             </div>
 
             {/* Bento Card 4: 25 GB Cloudinary Storage */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-blue-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-blue-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                 <FolderLock className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">How does isolated 25 GB Cloudinary storage work?</h3>
@@ -837,8 +830,8 @@ export default function LandingPage() {
             </div>
 
             {/* Bento Card 5: High-Res Carousels */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-purple-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-purple-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                 <Layers className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">How many carousel slides can I publish?</h3>
@@ -854,8 +847,8 @@ export default function LandingPage() {
             </div>
 
             {/* Bento Card 6: Enterprise Security */}
-            <div className="p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 hover:border-indigo-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+            <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 hover:border-indigo-500/40 transition-all duration-300 space-y-3 group cursor-pointer">
+              <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-base text-white">Is my data secure with ViraloKit?</h3>
@@ -872,7 +865,7 @@ export default function LandingPage() {
           </div>
 
           {/* Comparison / Decision Support Table */}
-          <div className="mt-12 p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80">
+          <div className="mt-12 p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80">
             <h3 className="text-xl font-bold text-white mb-4 text-center">ViraloKit vs. Automation Tools vs. Native Instagram</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -960,7 +953,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
+            <div className="p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
               <span className="text-4xl font-extrabold text-pink-500/20 font-headline absolute top-4 right-6">01</span>
               <div className="w-10 h-10 rounded-xl bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400 font-bold text-sm">
                 1
@@ -976,7 +969,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            <div className="p-6 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
+            <div className="p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
               <span className="text-4xl font-extrabold text-purple-500/20 font-headline absolute top-4 right-6">02</span>
               <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-sm">
                 2
@@ -993,7 +986,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            <div className="p-6 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
+            <div className="p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/80 space-y-3 relative overflow-hidden">
               <span className="text-4xl font-extrabold text-emerald-500/20 font-headline absolute top-4 right-6">03</span>
               <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
                 3
@@ -1012,7 +1005,7 @@ export default function LandingPage() {
           </div>
 
           {/* Step-by-step checklist */}
-          <div className="mt-8 p-6 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 max-w-2xl mx-auto">
+          <div className="mt-8 p-6 rounded-lg bg-zinc-900/40 border border-zinc-800/80 max-w-2xl mx-auto">
             <h3 className="text-lg font-bold text-white mb-4 text-center flex items-center justify-center gap-2">
               <CheckSquare className="w-5 h-5 text-emerald-400" />
               Quick-Start Checklist
@@ -1049,7 +1042,7 @@ export default function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden transition-all"
+                  className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden transition-all"
                   itemScope
                   itemType="https://schema.org/Question"
                 >
@@ -1087,7 +1080,7 @@ export default function LandingPage() {
         {/* FINAL CLIMAX CTA */}
         {/* ========================================================================= */}
         <section className="px-4 sm:px-6 py-20 max-w-5xl mx-auto text-center">
-          <div className="p-8 sm:p-14 rounded-3xl bg-gradient-to-tr from-zinc-950 via-zinc-900 to-black border border-pink-500/30 relative overflow-hidden shadow-2xl space-y-6">
+          <div className="p-8 sm:p-14 rounded-lg bg-gradient-to-tr from-zinc-950 via-zinc-900 to-black border border-pink-500/30 relative overflow-hidden shadow-2xl space-y-6">
             <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-transparent pointer-events-none" />
 
             <Badge variant="outline" className="text-xs border-pink-500/40 text-pink-300">
