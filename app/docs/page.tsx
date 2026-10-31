@@ -154,7 +154,7 @@ export default function DocsPage() {
 
             <CardContent className="p-4 md:p-6">
               {docLoading ? (
-                <div className="py-12 text-center text-slate-500 text-xs">
+                <div className="py-12 text-center text-zinc-500 text-xs">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-pink-400" />
                   Loading guide contents...
                 </div>
@@ -171,7 +171,7 @@ export default function DocsPage() {
           {/* Search & Category Filter */}
           <div className="space-y-3">
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
               <Input
                 placeholder="Search all 70 Meta official guides (e.g. webhooks, carousel, comments, hashtags, limits)..."
                 value={search}
@@ -199,7 +199,7 @@ export default function DocsPage() {
 
           {/* Docs Grid */}
           {loading ? (
-            <div className="py-12 text-center text-slate-500 text-xs">
+            <div className="py-12 text-center text-zinc-500 text-xs">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-pink-400" />
               Indexing official Meta guides...
             </div>
@@ -225,12 +225,12 @@ export default function DocsPage() {
                           <Badge variant="outline" className="border-zinc-800 text-[10px] text-zinc-400 px-1.5 py-0">
                             {doc.category}
                           </Badge>
-                          <span className="text-[10px] text-slate-500">{(doc.size / 1024).toFixed(1)} KB</span>
+                          <span className="text-[10px] text-zinc-500">{(doc.size / 1024).toFixed(1)} KB</span>
                         </div>
                       </div>
                     </div>
 
-                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-pink-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-pink-400 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </CardContent>
                 </Card>
               ))}

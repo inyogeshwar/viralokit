@@ -258,7 +258,7 @@ export default function DiscoveryPage() {
           {bizResult && (
             <div className="space-y-6">
               {/* Profile Card */}
-              <Card className="bg-gradient-to-br from-slate-900/80 to-slate-900/30 border-zinc-800 overflow-hidden">
+              <Card className="bg-gradient-to-br from-zinc-900 to-zinc-900 border-zinc-800 overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
                     {bizResult.profile_picture_url ? (
@@ -268,7 +268,7 @@ export default function DiscoveryPage() {
                         className="w-20 h-20 rounded-full border-2 border-pink-500/60 object-cover shadow-lg"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-zinc-400">
+                      <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">
                         <Users className="w-8 h-8" />
                       </div>
                     )}
@@ -277,7 +277,7 @@ export default function DiscoveryPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <h2 className="text-xl font-bold text-white">@{bizResult.username}</h2>
                         {bizResult.name && (
-                          <Badge variant="secondary" className="bg-slate-800 text-zinc-300 w-fit mx-auto sm:mx-0">
+                          <Badge variant="secondary" className="bg-zinc-800 text-zinc-300 w-fit mx-auto sm:mx-0">
                             {bizResult.name}
                           </Badge>
                         )}
@@ -533,7 +533,7 @@ export default function DiscoveryPage() {
                 variant="outline"
                 onClick={handleCheckQuota}
                 disabled={quotaLoading}
-                className="border-zinc-700 text-zinc-300 hover:bg-slate-800"
+                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${quotaLoading ? "animate-spin" : ""}`} />
                 Refresh
@@ -712,7 +712,7 @@ export default function DiscoveryPage() {
                     setErrorSubcode(item.s);
                     handleResolveError();
                   }}
-                  className="text-[11px] py-1 px-2.5 rounded-lg bg-slate-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+                  className="text-[11px] py-1 px-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
                 >
                   {item.label}
                 </button>

@@ -305,10 +305,10 @@ export default function AutomationsPage() {
           </div>
 
           {/* Webhook Status Card */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-white/[0.08] relative overflow-hidden shadow-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+          <div className="p-4 sm:p-5 rounded-lg bg-zinc-900 border border-zinc-800 relative overflow-hidden shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 shrink-0">
+                <div className="w-8 h-8 rounded-md bg-pink-500/10 flex items-center justify-center text-pink-400 shrink-0">
                   <Radio className="w-4 h-4 animate-pulse" />
                 </div>
                 <div>
@@ -326,7 +326,7 @@ export default function AutomationsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-              <div className="bg-zinc-900/60 p-2.5 rounded-xl border border-white/[0.04] flex items-center justify-between">
+              <div className="bg-zinc-900/60 p-2.5 rounded-md border border-white/[0.04] flex items-center justify-between">
                 <div className="min-w-0 pr-2">
                   <span className="text-[10px] text-zinc-500 block uppercase tracking-wider font-semibold">Callback URL</span>
                   <span className="text-xs font-mono text-zinc-300 truncate block">{webhookUrl}</span>
@@ -339,7 +339,7 @@ export default function AutomationsPage() {
                 </button>
               </div>
 
-              <div className="bg-zinc-900/60 p-2.5 rounded-xl border border-white/[0.04] flex items-center justify-between">
+              <div className="bg-zinc-900/60 p-2.5 rounded-md border border-white/[0.04] flex items-center justify-between">
                 <div className="min-w-0 pr-2">
                   <span className="text-[10px] text-zinc-500 block uppercase tracking-wider font-semibold">Verify Token</span>
                   <span className="text-xs font-mono text-zinc-300 truncate block">{verifyToken}</span>
@@ -355,10 +355,10 @@ export default function AutomationsPage() {
           </div>
 
           {/* Studio Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2">
+          <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
             <button
               onClick={() => setActiveTab("wishlink")}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold transition-all ${
                 activeTab === "wishlink"
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -370,7 +370,7 @@ export default function AutomationsPage() {
 
             <button
               onClick={() => setActiveTab("global")}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold transition-all ${
                 activeTab === "global"
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -382,7 +382,7 @@ export default function AutomationsPage() {
 
             <button
               onClick={() => setActiveTab("runner")}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold transition-all ${
                 activeTab === "runner"
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-500/20"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -396,8 +396,8 @@ export default function AutomationsPage() {
           {/* TAB 1: WISHLINK & POST-SPECIFIC DM STUDIO */}
           {activeTab === "wishlink" && (
             <div className="space-y-6">
-              <form onSubmit={handleSaveWishlinkAutomation} className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-5 shadow-2xl">
-                <div className="border-b border-white/[0.06] pb-3 flex items-center justify-between">
+              <form onSubmit={handleSaveWishlinkAutomation} className="p-5 sm:p-6 rounded-lg bg-zinc-900 border border-zinc-800 space-y-5 shadow-2xl">
+                <div className="border-b border-zinc-800 pb-3 flex items-center justify-between">
                   <div>
                     <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                       <ShoppingBag className="w-4 h-4 text-pink-400" />
@@ -408,7 +408,7 @@ export default function AutomationsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-md border border-zinc-800">
                     <button
                       type="button"
                       onClick={() => setWishlinkMode("specific")}
@@ -451,16 +451,16 @@ export default function AutomationsPage() {
                     </label>
 
                     {selectedPost ? (
-                      <div className="p-3 bg-pink-500/10 border border-pink-500/30 rounded-2xl flex items-center justify-between gap-3">
+                      <div className="p-3 bg-pink-500/10 border border-pink-500/30 rounded-lg flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                           {selectedPost.thumbnail_url || selectedPost.media_url ? (
                             <img
                               src={selectedPost.thumbnail_url || selectedPost.media_url}
                               alt="Post"
-                              className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/[0.1]"
+                              className="w-12 h-12 rounded-md object-cover shrink-0 border border-zinc-800"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
                               <ImageIcon className="w-5 h-5 text-zinc-500" />
                             </div>
                           )}
@@ -478,7 +478,7 @@ export default function AutomationsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setSelectedPost(null)}
-                          className="text-[10px] border-white/[0.1] text-zinc-400 hover:text-white"
+                          className="text-[10px] border-zinc-800 text-zinc-400 hover:text-white"
                         >
                           Change
                         </Button>
@@ -499,7 +499,7 @@ export default function AutomationsPage() {
                               key={post.id}
                               type="button"
                               onClick={() => setSelectedPost(post)}
-                              className="text-left p-2 rounded-xl bg-zinc-900/80 border border-white/[0.06] hover:border-pink-500/50 hover:bg-zinc-800/80 transition-all group flex flex-col justify-between"
+                              className="text-left p-2 rounded-md bg-zinc-900/80 border border-zinc-800 hover:border-pink-500/50 hover:bg-zinc-800/80 transition-all group flex flex-col justify-between"
                             >
                               <div className="w-full aspect-square rounded-lg bg-zinc-800 overflow-hidden mb-1.5 relative">
                                 {post.thumbnail_url || post.media_url ? (
@@ -540,7 +540,7 @@ export default function AutomationsPage() {
                       value={wishlinkKeyword}
                       onChange={(e) => setWishlinkKeyword(e.target.value.toUpperCase())}
                       placeholder="e.g. LINK, BUY, SHOP, 1, OUTFIT"
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono font-bold"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono font-bold"
                       required
                     />
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
@@ -550,7 +550,7 @@ export default function AutomationsPage() {
                           key={k}
                           type="button"
                           onClick={() => setWishlinkKeyword(k)}
-                          className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.06]"
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
                         >
                           {k}
                         </button>
@@ -565,7 +565,7 @@ export default function AutomationsPage() {
                       value={wishlinkProductUrl}
                       onChange={(e) => setWishlinkProductUrl(e.target.value)}
                       placeholder="https://wishlink.com/in.yogeshwar/... or store link"
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono"
                       required
                     />
                     <span className="text-[10px] text-zinc-500 block">
@@ -583,10 +583,10 @@ export default function AutomationsPage() {
                         key={tmpl.id}
                         type="button"
                         onClick={() => handleTemplateSelect(tmpl)}
-                        className={`text-left p-2.5 rounded-xl border text-xs transition-all ${
+                        className={`text-left p-2.5 rounded-md border text-xs transition-all ${
                           selectedTemplateId === tmpl.id
                             ? "bg-pink-500/10 border-pink-500 text-white font-medium shadow-sm shadow-pink-500/10"
-                            : "bg-zinc-900/60 border-white/[0.06] text-zinc-400 hover:text-white"
+                            : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
                         }`}
                       >
                         <span className="block font-bold text-white mb-1">{tmpl.name}</span>
@@ -599,14 +599,14 @@ export default function AutomationsPage() {
                     rows={3}
                     value={wishlinkMessageTemplate}
                     onChange={(e) => setWishlinkMessageTemplate(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl p-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-md p-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500"
                     placeholder="Custom DM text (use {username} and {link} as placeholders)..."
                   />
                 </div>
 
                 {/* Settings & Switches */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-md border border-zinc-800">
                     <input
                       type="checkbox"
                       id="wishlinkFollow"
@@ -628,7 +628,7 @@ export default function AutomationsPage() {
                       type="text"
                       value={wishlinkPublicReply}
                       onChange={(e) => setWishlinkPublicReply(e.target.value)}
-                      className="w-full bg-zinc-900 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-white"
                     />
                   </div>
                 </div>
@@ -637,7 +637,7 @@ export default function AutomationsPage() {
                   <Button
                     type="submit"
                     disabled={isSavingWishlink}
-                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-pink-500/20"
+                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-md shadow-lg shadow-pink-500/20"
                   >
                     {isSavingWishlink ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
@@ -654,8 +654,8 @@ export default function AutomationsPage() {
           {/* TAB 2: GLOBAL COMMENT FUNNELS (ALL POSTS) */}
           {activeTab === "global" && (
             <div className="space-y-6">
-              <form onSubmit={handleSaveGlobalFunnel} className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
-                <div className="border-b border-white/[0.06] pb-3">
+              <form onSubmit={handleSaveGlobalFunnel} className="p-5 sm:p-6 rounded-lg bg-zinc-900 border border-zinc-800 space-y-4 shadow-2xl">
+                <div className="border-b border-zinc-800 pb-3">
                   <h2 className="text-base font-bold text-white flex items-center gap-2">
                     <Globe className="w-4 h-4 text-purple-400" />
                     Global Comment Funnel (Across All Posts)
@@ -673,7 +673,7 @@ export default function AutomationsPage() {
                       value={globalKeyword}
                       onChange={(e) => setGlobalKeyword(e.target.value.toUpperCase())}
                       placeholder="e.g. GUIDE, FREE, TUTORIAL"
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white font-mono font-bold"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3.5 py-2 text-xs text-white font-mono font-bold"
                       required
                     />
                   </div>
@@ -684,7 +684,7 @@ export default function AutomationsPage() {
                       type="text"
                       value={globalPublicReply}
                       onChange={(e) => setGlobalPublicReply(e.target.value)}
-                      className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3.5 py-2 text-xs text-white"
                       required
                     />
                   </div>
@@ -696,7 +696,7 @@ export default function AutomationsPage() {
                     rows={3}
                     value={globalUnlockedMsg}
                     onChange={(e) => setGlobalUnlockedMsg(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/[0.1] rounded-xl p-3 text-xs text-white"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-md p-3 text-xs text-white"
                     placeholder="Content sent when follower status is confirmed..."
                     required
                   />
@@ -706,7 +706,7 @@ export default function AutomationsPage() {
                   <Button
                     type="submit"
                     disabled={isSavingGlobal}
-                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-pink-500/20"
+                    className="primary-gradient-bg text-white text-xs px-6 py-2.5 rounded-md shadow-lg shadow-pink-500/20"
                   >
                     {isSavingGlobal ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
                     Save Global Rule
@@ -718,7 +718,7 @@ export default function AutomationsPage() {
 
           {/* TAB 3: TEST RUNNER (ON-DEMAND SCAN) */}
           {activeTab === "runner" && (
-            <div className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
+            <div className="p-5 sm:p-6 rounded-lg bg-zinc-900 border border-zinc-800 space-y-4 shadow-2xl">
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Play className="w-4 h-4 text-emerald-400" />
@@ -735,12 +735,12 @@ export default function AutomationsPage() {
                   value={targetMediaId}
                   onChange={(e) => setTargetMediaId(e.target.value)}
                   placeholder="Enter 'latest' or specific Instagram Media ID"
-                  className="flex-1 bg-zinc-900 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white font-mono"
+                  className="flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3.5 py-2 text-xs text-white font-mono"
                 />
                 <Button
                   onClick={handleRunManual}
                   disabled={isRunningManual}
-                  className="primary-gradient-bg text-white text-xs px-4 py-2 rounded-xl shrink-0"
+                  className="primary-gradient-bg text-white text-xs px-4 py-2 rounded-md shrink-0"
                 >
                   {isRunningManual ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Play className="w-4 h-4 mr-1" />}
                   Scan & Execute
@@ -751,11 +751,11 @@ export default function AutomationsPage() {
                 <div className="space-y-2 pt-2">
                   <h4 className="text-xs font-semibold text-zinc-300">Scan Execution Output:</h4>
                   {runLogs.length === 0 ? (
-                    <div className="p-4 bg-zinc-900/50 rounded-xl text-center text-xs text-zinc-500 border border-white/[0.04]">
+                    <div className="p-4 bg-zinc-900/50 rounded-md text-center text-xs text-zinc-500 border border-white/[0.04]">
                       No new matching comments found on this post.
                     </div>
                   ) : (
-                    <div className="divide-y divide-white/[0.04] bg-zinc-900/60 rounded-xl border border-white/[0.06] overflow-hidden">
+                    <div className="divide-y divide-white/[0.04] bg-zinc-900/60 rounded-md border border-zinc-800 overflow-hidden">
                       {runLogs.map((log, idx) => (
                         <div key={idx} className="p-3 text-xs flex items-center justify-between gap-2">
                           <div>
@@ -775,8 +775,8 @@ export default function AutomationsPage() {
           )}
 
           {/* ACTIVE RULES LIST */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#0C0C0C] border border-white/[0.08] space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+          <div className="p-5 sm:p-6 rounded-lg bg-zinc-900 border border-zinc-800 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                   <Layers className="w-4 h-4 text-pink-400" />
@@ -791,7 +791,7 @@ export default function AutomationsPage() {
                 size="sm"
                 onClick={() => refetchFunnels()}
                 disabled={isFunnelsLoading}
-                className="text-xs border-white/[0.08]"
+                className="text-xs border-zinc-800"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isFunnelsLoading ? "animate-spin" : ""}`} />
               </Button>
@@ -813,7 +813,7 @@ export default function AutomationsPage() {
                   return (
                     <div
                       key={funnel.id}
-                      className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/[0.06] flex flex-col justify-between space-y-2.5"
+                      className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800 flex flex-col justify-between space-y-2.5"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
@@ -843,7 +843,7 @@ export default function AutomationsPage() {
                       </div>
 
                       {funnel.target_media_caption && (
-                        <div className="text-[11px] text-zinc-400 bg-zinc-950/50 p-2 rounded-xl border border-white/[0.04]">
+                        <div className="text-[11px] text-zinc-400 bg-zinc-950/50 p-2 rounded-md border border-white/[0.04]">
                           <span className="text-[10px] text-zinc-500 block">Specific Post:</span>
                           <span className="line-clamp-1 font-medium text-white">{funnel.target_media_caption}</span>
                           {funnel.target_media_id && (
@@ -854,7 +854,7 @@ export default function AutomationsPage() {
                         </div>
                       )}
 
-                      <div className="text-[11px] text-zinc-300 line-clamp-2 bg-zinc-950/40 p-2 rounded-xl">
+                      <div className="text-[11px] text-zinc-300 line-clamp-2 bg-zinc-950/40 p-2 rounded-md">
                         <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">DM Content:</span>
                         {funnel.unlocked_content_text}
                       </div>

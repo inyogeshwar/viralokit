@@ -192,7 +192,7 @@ export default function SettingsPage() {
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-8">
-          <div className="border-b border-white/[0.08] pb-6">
+          <div className="border-b border-zinc-800 pb-6">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full">
                 Creator Settings
@@ -208,10 +208,10 @@ export default function SettingsPage() {
           </div>
 
           {/* BYOK: Google Gemini API Key Card */}
-          <div className="bg-[#0C0C0C] border border-pink-500/20 rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl relative overflow-hidden">
+          <div className="bg-zinc-900 border border-pink-500/20 rounded-lg p-6 sm:p-7 space-y-5 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800">
               <div className="space-y-1">
                 <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
                   <Key className="w-5 h-5 text-pink-400" />
@@ -230,7 +230,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-2xl bg-pink-500/5 border border-pink-500/20 text-zinc-300 space-y-1.5">
+              <div className="p-3.5 rounded-lg bg-pink-500/5 border border-pink-500/20 text-zinc-300 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-pink-300 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                       setKeyTestedStatus("idle");
                     }}
                     placeholder="AIzaSy..."
-                    className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-3.5 pr-11 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono transition-colors"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3.5 pr-11 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-pink-500 font-mono transition-colors"
                   />
                   <button
                     type="button"
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                     variant="outline"
                     onClick={handleTestKey}
                     disabled={isTestingKey || !geminiApiKey.trim()}
-                    className="text-xs h-9 px-3.5 rounded-xl border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 cursor-pointer gap-1.5"
+                    className="text-xs h-9 px-3.5 rounded-md border-zinc-800 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 cursor-pointer gap-1.5"
                   >
                     {isTestingKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5 text-pink-400" />}
                     <span>{isTestingKey ? "Testing..." : "Test Key"}</span>
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                   size="sm"
                   onClick={handleSaveGeminiKey}
                   disabled={!geminiApiKey.trim()}
-                  className="text-xs h-9 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold cursor-pointer"
+                  className="text-xs h-9 px-4 rounded-md bg-pink-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold cursor-pointer"
                 >
                   Save Key
                 </Button>
@@ -338,8 +338,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Instagram Account Integration */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-5 shadow-xl">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
               <div className="space-y-1">
                 <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
                   <Instagram className="w-5 h-5 text-pink-400" />
@@ -361,7 +361,7 @@ export default function SettingsPage() {
             />
 
             {capabilities?.connected ? (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-black/60 rounded-2xl border border-white/[0.08]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-zinc-950 rounded-lg border border-zinc-800">
                 <div className="text-xs">
                   <p className="text-zinc-200 font-bold font-headline">Connection Actions</p>
                   <p className="text-[11px] text-zinc-400 mt-0.5">Extend your 60-day token or disconnect your account.</p>
@@ -372,7 +372,7 @@ export default function SettingsPage() {
                     size="sm"
                     onClick={handleRefreshToken}
                     disabled={isRefreshingToken}
-                    className="h-9 px-4 rounded-xl text-xs gap-2 border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 cursor-pointer"
+                    className="h-9 px-4 rounded-md text-xs gap-2 border-zinc-800 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 cursor-pointer"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingToken ? "animate-spin text-pink-400" : ""}`} />
                     <span>{isRefreshingToken ? "Extending..." : "Extend Token"}</span>
@@ -381,21 +381,21 @@ export default function SettingsPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleDisconnect}
-                    className="h-9 px-4 rounded-xl text-xs gap-2 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 cursor-pointer"
+                    className="h-9 px-4 rounded-md text-xs gap-2 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 cursor-pointer"
                   >
                     Disconnect
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-black/60 rounded-2xl border border-white/[0.08]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-zinc-950 rounded-lg border border-zinc-800">
                 <div className="text-xs">
                   <p className="text-zinc-200 font-bold font-headline">Connect Instagram Professional Account</p>
                   <p className="text-[11px] text-zinc-400 mt-0.5">Securely authenticate with Meta to enable publishing and analytics.</p>
                 </div>
                 <Button
                   onClick={handleConnect}
-                  className="h-9 px-4 rounded-xl text-xs gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer font-bold"
+                  className="h-9 px-4 rounded-md text-xs gap-2 bg-pink-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer font-bold"
                 >
                   <Instagram className="w-4 h-4" />
                   Connect Account
@@ -405,8 +405,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Creator Theme & Gemini Model Preferences */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-5 shadow-xl">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
               <div>
                 <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
                   <Palette className="w-5 h-5 text-purple-400" />
@@ -427,7 +427,7 @@ export default function SettingsPage() {
                   value={creatorTheme}
                   onChange={(e) => setCreatorTheme(e.target.value)}
                   placeholder="e.g. Aesthetic DPs, Matching PFPs, Vector Art, Wallpapers"
-                  className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-3.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-pink-500 font-sans"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-pink-500 font-sans"
                 />
                 <p className="text-[11px] text-zinc-500">
                   When you generate captions in Studio, Google Gemini will tailor hooks and hashtags to this exact niche.
@@ -440,7 +440,7 @@ export default function SettingsPage() {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-black/60 border border-white/[0.1] rounded-2xl p-3.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
                 >
                   {modelsData?.freeTextModels?.map((m: any) => (
                     <option key={m.id} value={m.id} className="bg-zinc-950">
@@ -457,7 +457,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button size="sm" onClick={handleSavePreferences} className="text-xs h-9 px-5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold cursor-pointer">
+                <Button size="sm" onClick={handleSavePreferences} className="text-xs h-9 px-5 rounded-md bg-pink-500 hover:bg-pink-600 text-white font-bold cursor-pointer">
                   Save All Preferences
                 </Button>
               </div>
@@ -465,8 +465,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Current User Session Profile */}
-          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-4 shadow-xl">
-            <div className="pb-3 border-b border-white/[0.08]">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-4 shadow-xl">
+            <div className="pb-3 border-b border-zinc-800">
               <h3 className="text-base font-bold flex items-center gap-2 text-white font-headline">
                 <User className="w-5 h-5 text-blue-400" />
                 <span>Account Profile</span>
@@ -476,7 +476,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between text-xs">
               {authData?.user ? (
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center font-extrabold text-sm text-pink-400 font-headline">
+                  <div className="w-11 h-11 rounded-lg bg-pink-500/20 border border-pink-500/30 flex items-center justify-center font-extrabold text-sm text-pink-400 font-headline">
                     {authData.user.name?.charAt(0).toUpperCase() || "C"}
                   </div>
                   <div>
@@ -493,14 +493,14 @@ export default function SettingsPage() {
 
               {authData?.user ? (
                 <a href="/api/auth/logout">
-                  <Button variant="outline" size="sm" className="text-xs h-9 px-3.5 rounded-xl gap-2 border-white/[0.1] text-zinc-300 hover:text-white cursor-pointer">
+                  <Button variant="outline" size="sm" className="text-xs h-9 px-3.5 rounded-md gap-2 border-zinc-800 text-zinc-300 hover:text-white cursor-pointer">
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Sign Out</span>
                   </Button>
                 </a>
               ) : (
                 <a href="/login">
-                  <Button size="sm" className="text-xs h-9 px-4 rounded-xl gap-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium cursor-pointer">
+                  <Button size="sm" className="text-xs h-9 px-4 rounded-md gap-2 bg-pink-600 text-white font-medium cursor-pointer">
                     <User className="w-3.5 h-3.5" />
                     <span>Sign In</span>
                   </Button>

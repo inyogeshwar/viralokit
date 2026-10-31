@@ -48,7 +48,7 @@ export function MobileNav() {
       {/* Bottom tab bar */}
       <nav
         aria-label="Primary navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 safe-area-pb"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-zinc-950 border-t border-zinc-800 pb-safe"
       >
         <div className="flex items-stretch justify-around h-14">
           {primaryItems.map((item) => {

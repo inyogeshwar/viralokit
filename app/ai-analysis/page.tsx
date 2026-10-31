@@ -154,7 +154,7 @@ export default function AiAnalysisPage() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
           {/* Header Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 bg-pink-500/10 border border-pink-500/25 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
@@ -173,7 +173,7 @@ export default function AiAnalysisPage() {
 
             <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               {/* Language Selector */}
-              <div className="flex items-center gap-1.5 bg-black/70 border border-white/[0.12] rounded-xl px-3 py-1.5 text-xs text-zinc-200">
+              <div className="flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-200">
                 <Languages className="w-3.5 h-3.5 text-pink-400" />
                 <select
                   value={selectedLanguage}
@@ -189,13 +189,13 @@ export default function AiAnalysisPage() {
 
               {/* User Key Status Badge */}
               {userGeminiKey ? (
-                <span className="text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5 rounded-xl font-medium">
+                <span className="text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5 rounded-md font-medium">
                   Custom Key Active
                 </span>
               ) : (
                 <a
                   href="/settings"
-                  className="text-[10px] text-pink-400 hover:text-pink-300 bg-pink-500/10 border border-pink-500/25 px-2.5 py-1.5 rounded-xl font-medium hover:underline"
+                  className="text-[10px] text-pink-400 hover:text-pink-300 bg-pink-500/10 border border-pink-500/25 px-2.5 py-1.5 rounded-md font-medium hover:underline"
                   title="Add your 100% Free Gemini API key in Settings"
                 >
                   + Add Free Key in Settings
@@ -206,7 +206,7 @@ export default function AiAnalysisPage() {
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="bg-black/70 border border-white/[0.12] rounded-xl px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-pink-500 cursor-pointer"
               >
                 {modelsData?.freeTextModels?.map((m: any) => (
                   <option key={m.id} value={m.id} className="bg-zinc-950">
@@ -224,7 +224,7 @@ export default function AiAnalysisPage() {
               <Button
                 onClick={handleRunAudit}
                 disabled={isAuditing}
-                className="text-xs gap-2 h-9 px-4 rounded-xl font-bold bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:to-indigo-700 text-white shadow-lg shadow-pink-500/20 cursor-pointer"
+                className="text-xs gap-2 h-9 px-4 rounded-md font-bold bg-pink-600 hover:bg-pink-700 text-white cursor-pointer"
               >
                 {isAuditing ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -237,7 +237,7 @@ export default function AiAnalysisPage() {
           </div>
 
           {/* Optional Bio Testing Bar */}
-          <div className="bg-[#0c0c0c] border border-white/[0.08] rounded-2xl p-3 sm:p-4 text-xs space-y-3">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 text-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-zinc-300 font-medium">
                 <FileText className="w-3.5 h-3.5 text-purple-400" />
@@ -258,7 +258,7 @@ export default function AiAnalysisPage() {
                   onChange={(e) => setCustomBio(e.target.value)}
                   placeholder="Paste or write your bio draft here to audit custom copy against the 12-part rubric..."
                   rows={3}
-                  className="w-full bg-black/60 border border-white/[0.1] rounded-xl p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-pink-500 resize-none font-sans"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-md p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-pink-500 resize-none font-sans"
                 />
                 <div className="flex items-center justify-between text-[11px] text-zinc-500">
                   <span>Leave blank to automatically analyze your live Instagram bio.</span>
@@ -272,14 +272,14 @@ export default function AiAnalysisPage() {
           {auditResult ? (
             <div className="space-y-8 animate-in fade-in duration-300">
               {/* Scorecard Hero Banner */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-[#121019] via-[#0C0C0C] to-[#0A0A0A] border border-white/[0.1] rounded-3xl p-6 sm:p-8 shadow-2xl">
+              <div className="relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-8 shadow-2xl">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   {/* Score & Grade */}
                   <div className="flex items-center gap-5">
-                    <div className="relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-black/80 border border-white/[0.15] shadow-inner">
+                    <div className="relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-lg bg-zinc-950 border border-zinc-800 shadow-inner">
                       <div className="text-center">
                         <div className="text-3xl sm:text-4xl font-black font-headline tracking-tight text-white">
                           {auditResult.overallScore}
@@ -319,14 +319,14 @@ export default function AiAnalysisPage() {
 
                   {/* Account Snapshot Pill */}
                   {accountData?.username && (
-                    <div className="flex items-center gap-3 bg-black/60 border border-white/[0.1] rounded-2xl p-3 shrink-0">
+                    <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-800 rounded-lg p-3 shrink-0">
                       {accountData.profilePictureUrl ? (
                         <Image
                           src={accountData.profilePictureUrl}
                           alt={accountData.username}
                           width={40}
                           height={40}
-                          className="w-10 h-10 rounded-full object-cover border border-white/[0.15]"
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-800"
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold text-sm">
@@ -358,8 +358,8 @@ export default function AiAnalysisPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Critical Fixes */}
-                  <div className="bg-[#0C0C0C] border border-red-500/20 rounded-3xl p-5 space-y-4 shadow-xl">
-                    <div className="flex items-center gap-2 pb-2 border-b border-white/[0.08]">
+                  <div className="bg-zinc-900 border border-red-500/20 rounded-lg p-5 space-y-4 shadow-xl">
+                    <div className="flex items-center gap-2 pb-2 border-b border-zinc-800">
                       <AlertCircle className="w-4 h-4 text-red-400" />
                       <h4 className="text-xs font-bold text-red-300 uppercase tracking-wider">
                         🚨 Critical Fixes (Do Today)
@@ -367,7 +367,7 @@ export default function AiAnalysisPage() {
                     </div>
                     <div className="space-y-3.5">
                       {auditResult.criticalFixes.map((fix, idx) => (
-                        <div key={idx} className="space-y-1.5 p-3 rounded-2xl bg-black/60 border border-white/[0.06]">
+                        <div key={idx} className="space-y-1.5 p-3 rounded-lg bg-zinc-950 border border-zinc-800">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-white">{fix.title}</span>
                             <Badge variant="secondary" className="text-[9px] bg-red-500/10 text-red-300 border-red-500/20">
@@ -387,8 +387,8 @@ export default function AiAnalysisPage() {
                   {/* High Leverage Tweaks & Wins */}
                   <div className="space-y-4">
                     {/* Tweaks */}
-                    <div className="bg-[#0C0C0C] border border-amber-500/20 rounded-3xl p-5 space-y-3 shadow-xl">
-                      <div className="flex items-center gap-2 pb-2 border-b border-white/[0.08]">
+                    <div className="bg-zinc-900 border border-amber-500/20 rounded-lg p-5 space-y-3 shadow-xl">
+                      <div className="flex items-center gap-2 pb-2 border-b border-zinc-800">
                         <AlertTriangle className="w-4 h-4 text-amber-400" />
                         <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
                           ⚠️ High-Leverage Tweaks
@@ -396,7 +396,7 @@ export default function AiAnalysisPage() {
                       </div>
                       <div className="space-y-3">
                         {auditResult.highLeverageTweaks.map((tweak, idx) => (
-                          <div key={idx} className="space-y-1 p-2.5 rounded-2xl bg-black/60 border border-white/[0.06]">
+                          <div key={idx} className="space-y-1 p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
                             <div className="text-xs font-bold text-zinc-200">{tweak.title}</div>
                             <p className="text-[11px] text-zinc-400">{tweak.action}</p>
                             <div className="text-[10px] text-blue-400 pt-0.5">{tweak.impact}</div>
@@ -406,8 +406,8 @@ export default function AiAnalysisPage() {
                     </div>
 
                     {/* Winning Traits */}
-                    <div className="bg-[#0C0C0C] border border-emerald-500/20 rounded-3xl p-5 space-y-2.5 shadow-xl">
-                      <div className="flex items-center gap-2 pb-1.5 border-b border-white/[0.08]">
+                    <div className="bg-zinc-900 border border-emerald-500/20 rounded-lg p-5 space-y-2.5 shadow-xl">
+                      <div className="flex items-center gap-2 pb-1.5 border-b border-zinc-800">
                         <CheckCircle className="w-4 h-4 text-emerald-400" />
                         <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider">
                           ✅ What&apos;s Crushing It (Double Down)
@@ -427,8 +427,8 @@ export default function AiAnalysisPage() {
               </div>
 
               {/* BIO TEARDOWN & READY-TO-PASTE MAKEOVER */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-5 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-pink-400" />
                     <h3 className="text-base font-bold text-white font-headline">
@@ -448,14 +448,14 @@ export default function AiAnalysisPage() {
                     </h4>
                     <div className="space-y-2">
                       {auditResult.bioTeardown.currentIssues.map((issue, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 text-xs text-zinc-300 bg-black/40 p-2.5 rounded-xl border border-white/[0.05]">
+                        <div key={idx} className="flex items-start gap-2.5 text-xs text-zinc-300 bg-black/40 p-2.5 rounded-md border border-white/[0.05]">
                           <AlertCircle className="w-3.5 h-3.5 text-pink-400 mt-0.5 shrink-0" />
                           <span>{issue}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-black/60 border border-white/[0.08] space-y-2">
+                    <div className="p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-zinc-400 uppercase">Search-Optimized Name Field</span>
                         <Button
@@ -491,30 +491,30 @@ export default function AiAnalysisPage() {
                             "bio"
                           )
                         }
-                        className="h-7 px-3 text-xs bg-pink-500 hover:bg-pink-600 text-white rounded-xl cursor-pointer"
+                        className="h-7 px-3 text-xs bg-pink-500 hover:bg-pink-600 text-white rounded-md cursor-pointer"
                       >
                         {copiedBio ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
                         <span>{copiedBio ? "Copied to Clipboard!" : "Copy Full Bio"}</span>
                       </Button>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-black/80 border border-pink-500/30 space-y-3 font-sans shadow-lg">
+                    <div className="p-4 rounded-lg bg-zinc-950 border border-pink-500/30 space-y-3 font-sans shadow-lg">
                       <div className="space-y-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-zinc-950 border border-white/[0.08] space-y-1">
+                        <div className="p-2.5 rounded-md bg-zinc-950 border border-zinc-800 space-y-1">
                           <span className="text-[10px] font-bold text-pink-400 uppercase">Line 1 • Audience & Value Prop</span>
                           <div className="text-zinc-200 font-medium">
                             {auditResult.bioTeardown.suggestedBioLines[0]}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-zinc-950 border border-white/[0.08] space-y-1">
+                        <div className="p-2.5 rounded-md bg-zinc-950 border border-zinc-800 space-y-1">
                           <span className="text-[10px] font-bold text-purple-400 uppercase">Line 2 • Credibility / Proof Anchor</span>
                           <div className="text-zinc-200 font-medium">
                             {auditResult.bioTeardown.suggestedBioLines[1]}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-zinc-950 border border-white/[0.08] space-y-1">
+                        <div className="p-2.5 rounded-md bg-zinc-950 border border-zinc-800 space-y-1">
                           <span className="text-[10px] font-bold text-emerald-400 uppercase">Line 3 • Directive Action & Link CTA</span>
                           <div className="text-zinc-200 font-medium">
                             {auditResult.bioTeardown.suggestedBioLines[2]}
@@ -522,7 +522,7 @@ export default function AiAnalysisPage() {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px]">
+                      <div className="pt-2 border-t border-zinc-800 flex items-center justify-between text-[11px]">
                         <span className="text-zinc-400">External Link Button Text:</span>
                         <span className="font-bold text-white bg-white/[0.08] px-2 py-0.5 rounded-md">
                           {auditResult.bioTeardown.suggestedLinkCta}
@@ -534,8 +534,8 @@ export default function AiAnalysisPage() {
               </div>
 
               {/* OUTLIER MULTIPLIER TEARDOWN */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-5 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-orange-400" />
                     <h3 className="text-base font-bold text-white font-headline">
@@ -556,7 +556,7 @@ export default function AiAnalysisPage() {
                   {auditResult.outlierAnalysis.outliersFound.map((outlier, idx) => (
                     <div
                       key={idx}
-                      className="bg-black/60 border border-white/[0.08] rounded-2xl p-4 flex flex-col justify-between space-y-3"
+                      className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 flex flex-col justify-between space-y-3"
                     >
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -574,7 +574,7 @@ export default function AiAnalysisPage() {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-white/[0.06] space-y-1.5 text-xs">
+                      <div className="pt-2 border-t border-zinc-800 space-y-1.5 text-xs">
                         <div>
                           <span className="text-[10px] font-bold text-zinc-400 uppercase">Why It Outperformed:</span>
                           <p className="text-zinc-300 text-[11px] leading-relaxed">{outlier.whyItWorked}</p>
@@ -590,8 +590,8 @@ export default function AiAnalysisPage() {
               </div>
 
               {/* 12-PART COMPLETE AUDIT RUBRIC */}
-              <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl p-6 sm:p-7 space-y-5 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 sm:p-7 space-y-5 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="w-4 h-4 text-blue-400" />
                     <h3 className="text-base font-bold text-white font-headline">
@@ -608,7 +608,7 @@ export default function AiAnalysisPage() {
                         className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                           activeCategory === cat
                             ? "bg-white text-black border-white font-bold"
-                            : "bg-black/40 text-zinc-400 border-white/[0.08] hover:text-white"
+                            : "bg-black/40 text-zinc-400 border-zinc-800 hover:text-white"
                         }`}
                       >
                         {cat}
@@ -621,7 +621,7 @@ export default function AiAnalysisPage() {
                   {filteredRubric?.map((item: RubricItem) => (
                     <div
                       key={item.id}
-                      className="bg-black/60 border border-white/[0.08] rounded-2xl p-4 space-y-2.5 hover:border-white/[0.18] transition-colors"
+                      className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-2.5 hover:border-zinc-800 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
@@ -651,7 +651,7 @@ export default function AiAnalysisPage() {
 
                       <p className="text-xs text-zinc-300 leading-relaxed">{item.finding}</p>
 
-                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-white/[0.06] text-xs space-y-0.5">
+                      <div className="p-2.5 rounded-md bg-zinc-950 border border-zinc-800 text-xs space-y-0.5">
                         <span className="text-[10px] font-bold uppercase text-purple-400">Actionable Fix:</span>
                         <div className="text-zinc-200 text-[11px] leading-relaxed">{item.fix}</div>
                       </div>
@@ -676,7 +676,7 @@ export default function AiAnalysisPage() {
                   {auditResult.recommendedPosts.map((post, idx) => (
                     <div
                       key={idx}
-                      className="bg-[#0C0C0C] border border-white/[0.08] rounded-3xl flex flex-col justify-between p-6 space-y-4 shadow-xl hover:border-purple-500/40 transition-colors"
+                      className="bg-zinc-900 border border-zinc-800 rounded-lg flex flex-col justify-between p-6 space-y-4 shadow-xl hover:border-purple-500/40 transition-colors"
                     >
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -695,7 +695,7 @@ export default function AiAnalysisPage() {
                         </div>
 
                         {/* Hook line preview under 125 chars */}
-                        <div className="p-3 rounded-xl bg-black/80 border border-white/[0.08] text-xs text-pink-300 italic">
+                        <div className="p-3 rounded-md bg-zinc-950 border border-zinc-800 text-xs text-pink-300 italic">
                           &ldquo;{post.hookLine}&rdquo;
                         </div>
 
@@ -722,7 +722,7 @@ export default function AiAnalysisPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="w-full text-xs gap-2 rounded-xl border-white/[0.1] hover:bg-white/[0.08] cursor-pointer mt-2"
+                          className="w-full text-xs gap-2 rounded-md border-zinc-800 hover:bg-white/[0.08] cursor-pointer mt-2"
                         >
                           <span>Build in Studio</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -735,8 +735,8 @@ export default function AiAnalysisPage() {
             </div>
           ) : (
             /* Empty State */
-            <div className="bg-[#0C0C0C] border border-dashed border-white/[0.1] rounded-3xl p-12 text-center space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 text-pink-400 flex items-center justify-center mx-auto shadow-lg shadow-pink-500/10">
+            <div className="bg-zinc-900 border border-dashed border-zinc-800 rounded-lg p-12 text-center space-y-4">
+              <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 text-pink-400 flex items-center justify-center mx-auto shadow-lg shadow-pink-500/10">
                 <ShieldCheck className="w-7 h-7" />
               </div>
               <div className="space-y-1.5">
@@ -751,7 +751,7 @@ export default function AiAnalysisPage() {
                 onClick={handleRunAudit}
                 disabled={isAuditing}
                 size="sm"
-                className="text-xs gap-2 h-9 px-5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer font-bold shadow-lg shadow-pink-500/20"
+                className="text-xs gap-2 h-9 px-5 rounded-md bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white cursor-pointer font-bold shadow-lg shadow-pink-500/20"
               >
                 {isAuditing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Start 12-Part Audit</span>
