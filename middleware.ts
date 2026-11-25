@@ -89,12 +89,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/ai");
 
   if (isApiProtected && !user) {
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json(
-        { error: "Authentication required", code: "UNAUTHORIZED" },
-        { status: 401 }
-      );
-    }
+    return NextResponse.json(
+      { error: "Authentication required", code: "UNAUTHORIZED" },
+      { status: 401 }
+    );
   }
 
   if (isPageProtected && !user) {

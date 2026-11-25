@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const effectiveApiKey = bodyApiKey?.trim() || headerApiKey;
 
     // Security: SSRF validation for external image URLs
-    if (!isSafePublicUrl(imageUrl)) {
+    if (!(await isSafePublicUrl(imageUrl))) {
       return NextResponse.json(
         { error: "Invalid or restricted image URL. Only public HTTPS URLs are permitted." },
         { status: 400 }

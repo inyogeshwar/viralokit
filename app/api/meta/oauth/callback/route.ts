@@ -26,9 +26,17 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieState = request.cookies.get("oauth_state")?.value;
-  if (!state || state !== cookieState) {
+  const [nonce, stateUserId] = (state || "").split(":");
+  if (!nonce || stateUserId !== user.id || state !== cookieState) {
     return NextResponse.redirect(`${config.app.url}/settings?error=Invalid+state+parameter`);
   }
+
+  // State is single-use: clear it immediately after validation.
+  const redirectWithClearedState = (target: string) => {
+    const res = NextResponse.redirect(target);
+    res.cookies.set("oauth_state", "", { httpOnly: true, path: "/", maxAge: 0 });
+    return res;
+  };
 
   try {
     const instagramAppId = config.instagram?.appId || config.meta.appId;
@@ -100,8 +108,8 @@ export async function GET(request: NextRequest) {
 
       if (!tokenRes.ok || tokenData.error) {
         throw new Error(
-          igTokenData.error_message ||
-            igTokenData.error?.message ||
+          igTokenData?.error_message ||
+            igTokenData?.error?.message ||
             tokenData.error?.message ||
             "Failed to exchange authorization code."
         );
@@ -138,7 +146,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!igAccount) {
-      return NextResponse.redirect(`${config.app.url}/settings?error=No+connected+Instagram+Professional+account+found`);
+      return redirectWithClearedState(`${config.app.url}/settings?error=No+connected+Instagram+Professional+account+found`);
     }
 
     // 4. Save to Database
@@ -189,6 +197,6 @@ export async function GET(request: NextRequest) {
 
   } catch (err: any) {
     console.error("Meta OAuth Callback Error:", err);
-    return NextResponse.redirect(`${config.app.url}/settings?error=${encodeURIComponent(err?.message || "Failed to connect account")}`);
+    return redirectWithClearedState(`${config.app.url}/settings?error=${encodeURIComponent(err?.message || "Failed to connect account")}`);
   }
 }

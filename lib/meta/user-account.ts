@@ -16,11 +16,14 @@ export type UserInstagramCredentials = UserMetaCredentials;
 
 /**
  * Retrieves and decrypts the connected Meta/Instagram/Threads account credentials
- * for a given user. Supports database storage with graceful environment fallback.
+ * for a given user. Environment fallback is opt-in for trusted server contexts only;
+ * user-facing routes must pass a real userId and never share a global token.
  */
 export async function getUserInstagramCredentials(
-  userId?: string
+  userId?: string,
+  options?: { allowEnvironmentFallback?: boolean }
 ): Promise<UserMetaCredentials | null> {
+  const allowEnv = options?.allowEnvironmentFallback === true;
   try {
     if (userId) {
       const supabase = await createClient();
@@ -46,8 +49,8 @@ export async function getUserInstagramCredentials(
       }
     }
 
-    // Fallback: Check environment configuration
-    if (config.meta.defaultUserId && config.meta.defaultAccessToken) {
+    // Fallback: environment credentials are never shared across users implicitly.
+    if (allowEnv && config.meta.defaultUserId && config.meta.defaultAccessToken) {
       return {
         instagramUserId: config.meta.defaultUserId,
         accessToken: config.meta.defaultAccessToken,
@@ -63,8 +66,8 @@ export async function getUserInstagramCredentials(
   } catch (err) {
     console.error("Failed to retrieve user Meta credentials:", err);
 
-    // Fallback even on DB error if env vars are present
-    if (config.meta.defaultUserId && config.meta.defaultAccessToken) {
+    // Fallback even on DB error only for explicitly trusted server contexts.
+    if (allowEnv && config.meta.defaultUserId && config.meta.defaultAccessToken) {
       return {
         instagramUserId: config.meta.defaultUserId,
         accessToken: config.meta.defaultAccessToken,

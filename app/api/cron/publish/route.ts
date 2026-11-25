@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("authorization");
     if (
-      process.env.CRON_SECRET &&
+      !process.env.CRON_SECRET ||
       authHeader !== `Bearer ${process.env.CRON_SECRET}`
     ) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -54,7 +54,8 @@ export async function GET(request: Request) {
         await supabase
           .from("posts")
           .update({ status: "processing" })
-          .eq("id", post.id);
+          .eq("id", post.id)
+          .eq("user_id", post.user_id);
 
         const credentials = await getUserInstagramCredentials(post.user_id);
         if (!credentials) {
@@ -89,7 +90,8 @@ export async function GET(request: Request) {
             permalink: result.permalink || null,
             published_at: result.publishedAt ? new Date(result.publishedAt).toISOString() : new Date().toISOString(),
           })
-          .eq("id", post.id);
+          .eq("id", post.id)
+          .eq("user_id", post.user_id);
 
         results.push({ id: post.id, status: "success" });
       } catch (err: any) {

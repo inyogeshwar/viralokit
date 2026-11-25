@@ -20,8 +20,10 @@ export async function GET(request: Request) {
     );
   }
 
-  // Generate state to prevent CSRF
-  const state = crypto.randomBytes(16).toString("hex");
+  // Bind the CSRF state to the authenticated user so a state from another
+  // browser session cannot be replayed to attach an account to a different user.
+  const nonce = crypto.randomBytes(16).toString("hex");
+  const state = `${nonce}:${user.id}`;
 
   const instagramAppId = config.instagram?.appId || config.meta.appId;
   const redirectUri = `${config.app.url}/api/meta/oauth/callback`;

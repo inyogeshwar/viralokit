@@ -16,9 +16,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Resolve user's isolated Cloudinary directory (e.g. viralokit/users/ig_creatorname)
-    const urlObj = new URL(request.url);
-    const customUsername = urlObj.searchParams.get("username") || urlObj.searchParams.get("igUserId");
-    const userFolderInfo = await getUserCloudinaryFolder(user, customUsername);
+    const userFolderInfo = await getUserCloudinaryFolder(user);
 
     const contentType = request.headers.get("content-type") || "";
 
@@ -30,7 +28,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing image URL in request body." }, { status: 400 });
       }
 
-      if (!isSafePublicUrl(url)) {
+      if (!(await isSafePublicUrl(url))) {
         return NextResponse.json(
           { error: "Invalid or restricted image URL. Only public HTTPS image URLs are permitted." },
           { status: 400 }

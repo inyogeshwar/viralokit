@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     // Security Problem #3 & #8: SSRF validation for all image URLs
     for (const url of imageUrls) {
-      if (!isSafePublicUrl(url)) {
+      if (!(await isSafePublicUrl(url))) {
         return NextResponse.json(
           { error: "One or more image URLs are invalid or restricted. Only public HTTPS URLs are permitted." },
           { status: 400 }
