@@ -3,11 +3,20 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserInstagramCredentials } from "@/lib/meta/user-account";
 import { runCommentGrowthFunnel } from "@/lib/meta/funnel";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
     let funnels: any[] = [];
 
     try {
@@ -15,6 +24,7 @@ export async function GET() {
       const { data } = await supabase
         .from("growth_funnels")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (data && data.length > 0) funnels = data;
     } catch (err) {
@@ -51,14 +61,20 @@ export async function GET() {
 
     return NextResponse.json({ funnels });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: sanitizeErrorMessage(err, "Failed to process growth funnel action.") }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
     if (!credentials || !credentials.pageAccessToken || !credentials.pageId) {
       return NextResponse.json(
@@ -148,9 +164,7 @@ export async function POST(request: Request) {
           is_active: true,
         };
 
-        if (user?.id) {
-          insertData.user_id = user.id;
-        }
+        insertData.user_id = user.id;
 
         const { data, error } = await supabase
           .from("growth_funnels")
@@ -196,7 +210,11 @@ export async function POST(request: Request) {
 
       try {
         const supabase = await createClient();
-        await supabase.from("growth_funnels").delete().eq("id", ruleId);
+        await supabase
+          .from("growth_funnels")
+          .delete()
+          .eq("id", ruleId)
+          .eq("user_id", user.id);
       } catch (err: any) {
         console.warn("Failed to delete rule from DB:", err.message);
       }
@@ -208,7 +226,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("[Growth Funnel API Error]:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to process growth funnel action." },
+      { error: sanitizeErrorMessage(err, "Failed to process growth funnel action.") },
       { status: 500 }
     );
   }

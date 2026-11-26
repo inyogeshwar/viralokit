@@ -1,5 +1,4 @@
 import { CurrentUser } from "@/lib/auth/current-user";
-import { config, getMetaGraphUrl } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 
 export interface UserFolderInfo {
@@ -7,41 +6,6 @@ export interface UserFolderInfo {
   prefix: string;
   userIdentifier: string;
   isIgUsername: boolean;
-}
-
-// In-memory cache for resolved server-side Instagram username
-let cachedDefaultIgUsername: string | null = null;
-let cachedDefaultIgFetchTime = 0;
-
-/**
- * Resolves the Instagram username for the server-configured account.
- * Caches the result in-memory for 1 hour to prevent redundant Meta API calls.
- */
-async function getDefaultIgUsername(): Promise<string | null> {
-  const now = Date.now();
-  if (cachedDefaultIgUsername && now - cachedDefaultIgFetchTime < 60 * 60 * 1000) {
-    return cachedDefaultIgUsername;
-  }
-
-  const userId = config.meta.defaultUserId;
-  const accessToken = config.meta.defaultAccessToken;
-  if (!userId || !accessToken) return null;
-
-  try {
-    const target = accessToken.startsWith("IG") ? "me" : userId;
-    const profileUrl = `${getMetaGraphUrl(target, accessToken)}?fields=id,username&access_token=${encodeURIComponent(accessToken)}`;
-    const res = await fetch(profileUrl);
-    const data = await res.json();
-    if (res.ok && data?.username) {
-      cachedDefaultIgUsername = String(data.username).trim();
-      cachedDefaultIgFetchTime = now;
-      return cachedDefaultIgUsername;
-    }
-  } catch (err) {
-    console.warn("Failed to fetch Instagram username for Cloudinary folder:", err);
-  }
-
-  return null;
 }
 
 function sanitizeForPath(input: string): string {
@@ -62,23 +26,11 @@ function sanitizeForPath(input: string): string {
  * Example: "viralokit/users/ig_creatorname"
  */
 export async function getUserCloudinaryFolder(
-  user: CurrentUser,
-  customUsername?: string | null
+  user: CurrentUser
 ): Promise<UserFolderInfo> {
-  // 1. Explicitly passed Instagram username (e.g. from client request)
-  if (customUsername && typeof customUsername === "string" && customUsername.trim().length > 0) {
-    const cleanUser = sanitizeForPath(customUsername);
-    if (cleanUser.length > 0) {
-      return {
-        folder: `viralokit/users/ig_${cleanUser}`,
-        prefix: `viralokit/users/ig_${cleanUser}/`,
-        userIdentifier: cleanUser,
-        isIgUsername: true,
-      };
-    }
-  }
-
-  // 2. Query Supabase PostgreSQL database for connected account username
+  // Folder is always derived from the authenticated user's own account or identity.
+  // Caller-supplied usernames must never select another user's storage folder.
+  // Query Supabase PostgreSQL database for connected account username
   try {
     const supabase = await createClient();
     const { data: account } = await supabase
@@ -102,21 +54,7 @@ export async function getUserCloudinaryFolder(
     // Database query fallback
   }
 
-  // 3. Resolve default Instagram account's username from Meta Graph API
-  const defaultIgUser = await getDefaultIgUsername();
-  if (defaultIgUser) {
-    const cleanUser = sanitizeForPath(defaultIgUser);
-    if (cleanUser.length > 0) {
-      return {
-        folder: `viralokit/users/ig_${cleanUser}`,
-        prefix: `viralokit/users/ig_${cleanUser}/`,
-        userIdentifier: cleanUser,
-        isIgUsername: true,
-      };
-    }
-  }
-
-  // 4. Fallback: User email prefix or friendly name (no numeric IDs)
+  // Fallback: User email prefix or friendly name (no numeric IDs, never global IG account)
   let fallbackName = user.email ? user.email.split("@")[0] : user.name || "creator";
   const cleanFallback = sanitizeForPath(fallbackName);
 

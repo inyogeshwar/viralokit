@@ -44,10 +44,37 @@ export function sanitizePromptInput(input: unknown, maxLength = 1000): string {
 }
 
 /**
+ * Returns true for private, loopback, link-local, metadata or unspecified addresses.
+ * Shared by literal IPs and DNS results so hostnames resolving internally are rejected.
+ */
+function isForbiddenAddress(address: string): boolean {
+  const ip = address.toLowerCase().replace(/^\[|\]$/g, "");
+
+  if (ip === "::1" || ip === "::" || ip.startsWith("fc") || ip.startsWith("fd") || ip.startsWith("fe80")) {
+    return true;
+  }
+
+  const parts = ip.split(".");
+  if (parts.length !== 4 || parts.some((p) => !/^\d+$/.test(p))) return false;
+
+  const [o1, o2] = parts.map(Number);
+  return (
+    o1 === 0 ||
+    o1 === 127 ||
+    o1 === 10 ||
+    (o1 === 172 && o2 >= 16 && o2 <= 31) ||
+    (o1 === 192 && o2 === 168) ||
+    (o1 === 169 && o2 === 254) ||
+    o1 >= 224
+  );
+}
+
+/**
  * Validate that an external URL is safe for server-side fetching (SSRF protection).
  * Rejects private networks, loopbacks, link-local addresses, and cloud metadata APIs.
+ * Resolves DNS names and validates every returned address to limit rebinding risk.
  */
-export function isSafePublicUrl(urlString: string): boolean {
+export async function isSafePublicUrl(urlString: string): Promise<boolean> {
   try {
     const parsed = new URL(urlString);
 
@@ -69,26 +96,13 @@ export function isSafePublicUrl(urlString: string): boolean {
       return false;
     }
 
-    // 3. Reject IPv4 loopback, private subnets, link-local, and cloud metadata
-    // RFC 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
-    // Loopback: 127.0.0.0/8
-    // Link-local: 169.254.0.0/16 (includes 169.254.169.254 AWS/GCP metadata)
-    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-    const match = hostname.match(ipv4Regex);
-    if (match) {
-      const o1 = parseInt(match[1], 10);
-      const o2 = parseInt(match[2], 10);
+    // 3. Literal IP addresses
+    if (isForbiddenAddress(hostname)) return false;
 
-      if (o1 === 127) return false; // Loopback
-      if (o1 === 10) return false; // 10.0.0.0/8
-      if (o1 === 172 && o2 >= 16 && o2 <= 31) return false; // 172.16.0.0/12
-      if (o1 === 192 && o2 === 168) return false; // 192.168.0.0/16
-      if (o1 === 169 && o2 === 254) return false; // 169.254.0.0/16 (Metadata)
-      if (o1 === 0) return false; // 0.0.0.0
-    }
-
-    // 4. Reject IPv6 loopbacks and local scopes
-    if (hostname.includes(":") || hostname === "[::1]") {
+    // 4. Resolve DNS names and reject if any answer is internal.
+    const { lookup } = await import("node:dns/promises");
+    const addresses = await lookup(hostname, { all: true });
+    if (!addresses.length || addresses.some((a) => isForbiddenAddress(a.address))) {
       return false;
     }
 

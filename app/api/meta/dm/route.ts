@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserInstagramCredentials } from "@/lib/meta/user-account";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 import {
   sendInstagramDM,
   reactToMessage,
@@ -11,7 +12,13 @@ import {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
     if (!credentials || !credentials.pageAccessToken || !credentials.pageId) {
       return NextResponse.json(
@@ -110,6 +117,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (err: any) {
     console.error("[DM API Error]:", err);
-    return NextResponse.json({ error: err.message || "Failed to process DM request." }, { status: 500 });
+    return NextResponse.json({ error: sanitizeErrorMessage(err, "Failed to process DM request.") }, { status: 500 });
   }
 }

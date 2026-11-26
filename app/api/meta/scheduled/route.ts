@@ -26,7 +26,8 @@ async function executePublishPost(
   await supabase
     .from("posts")
     .update({ status: "processing" })
-    .eq("id", post.id);
+    .eq("id", post.id)
+    .eq("user_id", post.user_id);
 
   try {
     let result;
@@ -76,7 +77,8 @@ async function executePublishPost(
         permalink: result.permalink || null,
         published_at: new Date().toISOString(),
       })
-      .eq("id", post.id);
+      .eq("id", post.id)
+      .eq("user_id", post.user_id);
 
     return result;
   } catch (err: any) {
@@ -84,7 +86,8 @@ async function executePublishPost(
     await supabase
       .from("posts")
       .update({ status: "failed" })
-      .eq("id", post.id);
+      .eq("id", post.id)
+      .eq("user_id", post.user_id);
     throw err;
   }
 }
@@ -209,8 +212,19 @@ export async function DELETE(request: Request) {
     }
 
     const supabase = await createClient();
-    // Delete associated media records first
-    await supabase.from("post_media").delete().eq("post_id", postId);
+    // Verify ownership before deleting; media rows are deleted only for an owned post.
+    const { data: ownedPost } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("id", postId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!ownedPost) {
+      return NextResponse.json({ error: "Post not found." }, { status: 404 });
+    }
+
+    await supabase.from("post_media").delete().eq("post_id", ownedPost.id);
 
     // Delete scheduled post
     const { error } = await supabase

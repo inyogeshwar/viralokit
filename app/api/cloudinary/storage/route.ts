@@ -15,9 +15,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const urlObj = new URL(request.url);
-    const customUsername = urlObj.searchParams.get("username") || urlObj.searchParams.get("igUserId");
-    const userFolderInfo = await getUserCloudinaryFolder(user, customUsername);
+    const userFolderInfo = await getUserCloudinaryFolder(user);
 
     const stats = await getUserStorageStats(userFolderInfo.folder, userFolderInfo.prefix);
 

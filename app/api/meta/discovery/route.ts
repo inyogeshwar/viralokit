@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 import { getUserInstagramCredentials } from "@/lib/meta/user-account";
 import {
   discoverBusinessProfile,
@@ -14,7 +16,6 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const action = searchParams.get("action");
-    const userId = searchParams.get("userId") || undefined;
 
     if (action === "error_resolver") {
       const code = searchParams.get("code") || "";
@@ -23,7 +24,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(info);
     }
 
-    const credentials = await getUserInstagramCredentials(userId);
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    const credentials = await getUserInstagramCredentials(user.id);
     if (!credentials) {
       return NextResponse.json(
         { error: "No connected Instagram account or environment credentials found." },
@@ -76,16 +85,27 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: sanitizeErrorMessage(error, "Discovery request failed.") },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, commentId, moderateAction, userId } = body;
+    const { action, commentId, moderateAction } = body;
 
-    const credentials = await getUserInstagramCredentials(userId);
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required.", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    const credentials = await getUserInstagramCredentials(user.id);
     if (!credentials) {
       return NextResponse.json(
         { error: "No connected Instagram account found." },
@@ -106,6 +126,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: sanitizeErrorMessage(error, "Discovery request failed.") },
+      { status: 500 }
+    );
   }
 }

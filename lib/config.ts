@@ -31,7 +31,7 @@ export const config = {
     apiBase: "https://graph.threads.net/v1.0",
   },
   webhook: {
-    verifyToken: clean(process.env.META_WEBHOOK_VERIFY_TOKEN) || "viralokit_verify_token",
+    verifyToken: clean(process.env.META_WEBHOOK_VERIFY_TOKEN),
   },
   instagram: {
     appId: clean(process.env.INSTAGRAM_APP_ID),

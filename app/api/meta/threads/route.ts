@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserInstagramCredentials } from "@/lib/meta/user-account";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 import {
   getThreadsProfile,
   publishThreadsPost,
@@ -14,10 +15,16 @@ import { config } from "@/lib/config";
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
-    const threadsToken = credentials?.threadsAccessToken || config.threads.accessToken;
-    const threadsUserId = credentials?.threadsUserId || config.threads.userId || "me";
+    const threadsToken = credentials?.threadsAccessToken;
+    const threadsUserId = credentials?.threadsUserId || "me";
 
     if (!threadsToken) {
       return NextResponse.json(
@@ -58,7 +65,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     console.error("[Threads API Error]:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to fetch Threads data." },
+      { error: sanitizeErrorMessage(err, "Failed to fetch Threads data.") },
       { status: 500 }
     );
   }
@@ -67,26 +74,32 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
-    const threadsToken = credentials?.threadsAccessToken || config.threads.accessToken;
-    const threadsUserId = credentials?.threadsUserId || config.threads.userId || "me";
+    const threadsToken = credentials?.threadsAccessToken;
+    const threadsUserId = credentials?.threadsUserId || "me";
 
     const body = await request.json();
     const { action = "publish" } = body;
 
     if (action === "exchange_token") {
-      const { shortLivedToken, clientSecret = config.threads.appSecret } = body;
-      if (!shortLivedToken || !clientSecret) {
+      const { shortLivedToken } = body;
+      if (!shortLivedToken) {
         return NextResponse.json(
-          { error: "shortLivedToken and clientSecret are required." },
+          { error: "shortLivedToken is required." },
           { status: 400 }
         );
       }
 
       const res = await exchangeThreadsToken({
         shortLivedToken,
-        clientSecret,
+        clientSecret: config.threads.appSecret || "",
       });
 
       return NextResponse.json(res);
@@ -140,7 +153,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("[Threads Publish Error]:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to publish to Threads." },
+      { error: sanitizeErrorMessage(err, "Failed to publish to Threads.") },
       { status: 500 }
     );
   }

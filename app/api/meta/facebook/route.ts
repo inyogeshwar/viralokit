@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserInstagramCredentials } from "@/lib/meta/user-account";
+import { sanitizeErrorMessage } from "@/lib/security/sanitize";
 import {
   getFacebookPageProfile,
   publishFacebookPost,
@@ -11,7 +12,13 @@ import {
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
     if (!credentials || !credentials.pageAccessToken || !credentials.pageId) {
       return NextResponse.json(
@@ -42,7 +49,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     console.error("[Facebook API Error]:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to fetch Facebook data." },
+      { error: sanitizeErrorMessage(err, "Failed to fetch Facebook data.") },
       { status: 500 }
     );
   }
@@ -51,7 +58,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    const credentials = await getUserInstagramCredentials(user?.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+    const credentials = await getUserInstagramCredentials(user.id);
 
     if (!credentials || !credentials.pageAccessToken || !credentials.pageId) {
       return NextResponse.json(
@@ -99,7 +112,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("[Facebook Publish Error]:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to publish to Facebook." },
+      { error: sanitizeErrorMessage(err, "Failed to publish to Facebook.") },
       { status: 500 }
     );
   }
